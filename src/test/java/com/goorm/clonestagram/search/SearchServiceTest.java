@@ -12,6 +12,7 @@ import com.goorm.clonestagram.search.service.SearchService;
 import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -52,6 +53,7 @@ class SearchServiceTest {
      * 1. searchUserByKeyword() 정상 검색
      */
     @Test
+    @DisplayName("유저 검색 정상 동작")
     void 유저_검색_정상동작() {
         // given
         User user = User.builder()
@@ -78,6 +80,7 @@ class SearchServiceTest {
      * 3. searchFollowingByKeyword() 정상 동작
      */
     @Test
+    @DisplayName("팔로잉 검색 정상 동작")
     void 팔로잉_검색_정상동작() {
         // given
         User user = User.builder().id(1L).username("followed").build();
@@ -97,6 +100,7 @@ class SearchServiceTest {
      * 5. searchFollowerByKeyword() 정상 동작
      */
     @Test
+    @DisplayName("팔로워 검색 정상 동작")
     void 팔로워_검색_정상동작() {
         // given
         User user = User.builder().id(2L).username("follower").build();
@@ -115,6 +119,7 @@ class SearchServiceTest {
      * 7. searchHashTagByKeyword() 정상 동작
      */
     @Test
+    @DisplayName("해시태그 기반 피드 검색 정상 동작")
     void 해시태그로_피드검색_정상동작() {
         // given
         Posts post = Posts.builder().id(1L).content("내용").mediaName("image.jpg").build();
@@ -134,6 +139,7 @@ class SearchServiceTest {
      * 9. getHashtagSuggestions() 정상 동작
      */
     @Test
+    @DisplayName("해시태그 추천 검색 정상 동작")
     void 해시태그_추천_정상동작() {
         // given
         HashTags tag = new HashTags();
@@ -157,6 +163,7 @@ class SearchServiceTest {
      * 11. 유저 검색 - 빈 키워드 필터링 정상 동작
      */
     @Test
+    @DisplayName("유저 검색 시 공백 필터링 정상 동작")
     void 유저검색시_빈_키워드_필터링() {
         // given
         String keyword = " test   ";
@@ -174,6 +181,7 @@ class SearchServiceTest {
      * 12. 팔로잉 검색 - 없는 결과 반환
      */
     @Test
+    @DisplayName("팔로잉 검색 결과 없음 처리")
     void 팔로잉검색_결과없음() {
         // given
         when(followRepository.findFollowingByKeyword(eq(1L), eq("none"), eq(pageable)))

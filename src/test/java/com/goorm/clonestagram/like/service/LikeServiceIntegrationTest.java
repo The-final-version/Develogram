@@ -6,6 +6,7 @@ import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.user.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,12 +36,13 @@ public class LikeServiceIntegrationTest {
     @Autowired
     private LikeRepository likeRepository;
 
+    @DisplayName("좋아요 토글 - 추가 및 취소 동작 검증")
     @Test
     public void testToggleLike() {
         // Given: 테스트용 사용자와 게시물 생성
         User user = new User();
         user.setUsername("testUser");
-        user.setEmail("test@example.com");
+        user.setEmail("testlike@example.com");
         user.setPassword("password");
         user.setDeleted(false);
         user = userRepository.save(user);
@@ -70,6 +72,7 @@ public class LikeServiceIntegrationTest {
         assertEquals(0L, likeService.getLikeCount(post.getId()), "좋아요 개수가 0이어야 합니다.");
     }
 
+    @DisplayName("좋아요 개수 조회 - 다수 사용자 좋아요")
     @Test
     public void testGetLikeCount() {
         // Given: 테스트용 사용자와 게시물, 다중 좋아요 생성

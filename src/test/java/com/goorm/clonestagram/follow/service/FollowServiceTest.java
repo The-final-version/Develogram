@@ -6,6 +6,7 @@ import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -56,6 +57,7 @@ public class FollowServiceTest {
     }
 
     @Test
+    @DisplayName("팔로우 목록 조회: 사용자가 팔로우한 유저 목록이 정상 조회된다")
     public void testGetFollowingList() {
         // Mock user repository
         when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user1));
@@ -74,6 +76,7 @@ public class FollowServiceTest {
     }
 
     @Test
+    @DisplayName("팔로우 목록 조회: 사용자가 팔로우한 유저가 없는 경우 빈 리스트 반환")
     public void testGetFollowingListWithNoFollowings() {
         // Mock user repository
         when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user1));
@@ -88,6 +91,7 @@ public class FollowServiceTest {
     }
 
     @Test
+    @DisplayName("팔로워 목록 조회: 특정 사용자의 팔로워 목록이 정상 조회된다")
     public void testGetFollowerList() {
         // Mock user repository
         when(userRepository.findByIdAndDeletedIsFalse(2L)).thenReturn(Optional.of(user2));
@@ -106,6 +110,7 @@ public class FollowServiceTest {
     }
 
     @Test
+    @DisplayName("팔로워 목록 조회: 팔로워가 없는 경우 빈 리스트 반환")
     public void testGetFollowerListWithNoFollowers() {
         // Mock user repository
         when(userRepository.findByIdAndDeletedIsFalse(2L)).thenReturn(Optional.of(user2));
@@ -121,6 +126,7 @@ public class FollowServiceTest {
 
 
     @Test
+    @DisplayName("팔로우 토글: 팔로우 상태가 없을 경우 팔로우가 추가된다")
     public void testToggleFollow() {
         // Mock user repository
         when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user1));
@@ -144,4 +150,73 @@ public class FollowServiceTest {
         // Verify that followRepository delete is called
         verify(followRepository, times(1)).delete(follow);
     }
+    @Test
+    @DisplayName("팔로우 토글 예외: 사용자가 자기 자신을 팔로우하려 할 경우 예외 발생")
+    void toggleFollow_ShouldThrowException_WhenFollowSelf() {
+        // given
+        Long userId = 1L;
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                followService.toggleFollow(userId, userId)
+        );
+
+        assertEquals("자기 자신을 팔로우할 수 없습니다.", ex.getMessage());
+    }
+    @Test
+    @DisplayName("팔로우 토글 예외: 팔로우하는 사용자가 존재하지 않을 경우 예외 발생")
+    void toggleFollow_ShouldThrowException_WhenFromUserNotFound() {
+        // given
+        when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.empty());
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                followService.toggleFollow(1L, 2L)
+        );
+
+        assertEquals("팔로우하는 사용자를 찾을 수 없습니다.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("팔로우 토글 예외: 팔로우 받을 사용자가 존재하지 않을 경우 예외 발생")
+    void toggleFollow_ShouldThrowException_WhenToUserNotFound() {
+        // given
+        when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user1));
+        when(userRepository.findByIdAndDeletedIsFalse(2L)).thenReturn(Optional.empty());
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                followService.toggleFollow(1L, 2L)
+        );
+
+        assertEquals("팔로우 받을 사용자를 찾을 수 없습니다.", ex.getMessage());
+    }
+    @Test
+    @DisplayName("팔로우 목록 조회 예외: 사용자가 존재하지 않을 경우 예외 발생")
+    void getFollowingList_ShouldThrowException_WhenUserNotFound() {
+        // given
+        when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.empty());
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                followService.getFollowingList(1L)
+        );
+
+        assertEquals("사용자를 찾을 수 없습니다.", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("팔로워 목록 조회 예외: 사용자가 존재하지 않을 경우 예외 발생")
+    void getFollowerList_ShouldThrowException_WhenUserNotFound() {
+        // given
+        when(userRepository.findByIdAndDeletedIsFalse(2L)).thenReturn(Optional.empty());
+
+        // when & then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                followService.getFollowerList(2L)
+        );
+
+        assertEquals("사용자를 찾을 수 없습니다.", ex.getMessage());
+    }
+
 }

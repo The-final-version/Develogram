@@ -1,7 +1,7 @@
 package com.goorm.clonestagram.feed.service;
 
 import com.goorm.clonestagram.feed.domain.Feed;
-import com.goorm.clonestagram.feed.domain.Users;
+import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
@@ -46,7 +46,8 @@ class FeedServiceTest {
         int page = 0;
         int size = 10;
 
-        Users user = new Users(userId);
+        User user = new User();
+        user.setId(userId);
         User postOwner = User.builder()
                 .id(99L)
                 .username("postOwner")

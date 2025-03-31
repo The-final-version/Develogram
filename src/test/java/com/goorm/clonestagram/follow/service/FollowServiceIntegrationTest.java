@@ -4,6 +4,7 @@ import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.user.repository.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ public class FollowServiceIntegrationTest {
     private FollowRepository followRepository;
 
     @Test
+    @DisplayName("팔로우 통합 테스트: 실제 DB를 활용한 팔로우 토글 기능 검증")
+
     public void testToggleFollowIntegration() {
         // Given: 실제 DB에 유저 저장
         User user1 = new User();

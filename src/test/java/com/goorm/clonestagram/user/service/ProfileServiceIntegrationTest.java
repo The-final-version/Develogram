@@ -8,6 +8,7 @@ import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.service.ImageService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,6 +53,7 @@ public class ProfileServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("testGetUserProfile")
     public void testGetUserProfile() {
         // 테스트: 사용자 프로필 조회
         UserProfileDto userProfile = profileService.getUserProfile(testUser.getId());
@@ -63,6 +65,7 @@ public class ProfileServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("testUpdateUserProfile")
     public void testUpdateUserProfile() {
         // 테스트: 사용자 프로필 수정
         UserProfileUpdateDto updateDto = new UserProfileUpdateDto();
@@ -78,6 +81,7 @@ public class ProfileServiceIntegrationTest {
     }
 
     @Test
+    @DisplayName("testUpdateUserProfileWithImage")
     public void testUpdateUserProfileWithImage() {
         // 이미지 업로드가 포함된 프로필 업데이트 테스트
         UserProfileUpdateDto updateDto = new UserProfileUpdateDto();

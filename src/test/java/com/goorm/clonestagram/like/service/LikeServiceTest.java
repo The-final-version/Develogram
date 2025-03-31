@@ -7,6 +7,7 @@ import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -15,6 +16,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")  // <- 이게 있어야 test 환경으로 바뀜
@@ -50,6 +53,7 @@ public class LikeServiceTest {
         post.setContent("Test Post");
     }
 
+    @DisplayName("좋아요 토글 - 좋아요가 없을 때 추가")
     @Test
     public void testToggleLikeAddLike() {
         // Given: User and posts are available, and no existing like in the database.
@@ -65,6 +69,7 @@ public class LikeServiceTest {
         verify(likeRepository, times(0)).delete(any(Like.class));
     }
 
+    @DisplayName("좋아요 토글 - 기존 좋아요 있을 때 삭제")
     @Test
     public void testToggleLikeRemoveLike() {
         // Given: User and posts are available, and existing like is found in the database.
@@ -79,8 +84,42 @@ public class LikeServiceTest {
         // When: User toggles like
         likeService.toggleLike(1L, 1L);
 
-        // Then: The like should be deleted
         verify(likeRepository, times(0)).save(any(Like.class));
         verify(likeRepository, times(1)).delete(existingLike);
+    }
+
+    @DisplayName("좋아요 토글 - 사용자 존재하지 않을 경우 예외 발생")
+    @Test
+    void toggleLike_ShouldThrowException_WhenUserNotFound() {
+        when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                likeService.toggleLike(1L, 10L)
+        );
+
+        assertEquals("사용자를 찾을 수 없습니다.", ex.getMessage());
+    }
+
+    @DisplayName("좋아요 토글 - 게시물 존재하지 않을 경우 예외 발생")
+    @Test
+    void toggleLike_ShouldThrowException_WhenPostNotFound() {
+        when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user));
+        when(postRepository.findByIdAndDeletedIsFalse(10L)).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                likeService.toggleLike(1L, 10L)
+        );
+
+        assertEquals("게시물을 찾을 수 없습니다.", ex.getMessage());
+    }
+
+    @DisplayName("좋아요 개수 조회 - 정확한 수 반환")
+    @Test
+    void getLikeCount_ShouldReturnCorrectCount() {
+        when(likeRepository.countByPostsId(10L)).thenReturn(3L);
+
+        Long count = likeService.getLikeCount(10L);
+
+        assertEquals(3L, count);
     }
 }
