@@ -1,8 +1,8 @@
 package com.goorm.clonestagram.like.domain;
 
+import com.goorm.clonestagram.user.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
-import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.post.domain.Posts;
 
 import java.time.LocalDateTime;
@@ -22,11 +22,11 @@ public class Like {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
-    private Posts posts;
+    private Posts post;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -36,9 +36,11 @@ public class Like {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Like(User user, Posts posts) {
+    public Like(Users user, Posts post) {
         this.user = user;
-        this.posts = posts;
+        this.post = post;
         this.createdAt = LocalDateTime.now();
     }
+
+
 }

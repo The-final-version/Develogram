@@ -23,7 +23,7 @@ public class JoinDto {
     private String confirmPassword;
 
     @NotBlank(message = "이름을 입력해주세요.")
-    private String name;
+    private String username;
 
     // 비밀번호와 비밀번호 확인이 일치하는지 체크하는 커스텀 유효성 검사
     @AssertTrue(message = "비밀번호와 비밀번호 확인이 일치하지 않습니다.")

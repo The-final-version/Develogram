@@ -1,11 +1,17 @@
 package com.goorm.clonestagram.feed.service;
 
-import com.goorm.clonestagram.feed.domain.Feed;
+import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
+import com.goorm.clonestagram.follow.service.FollowService;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
+import com.goorm.clonestagram.post.dto.PostInfoDto;
+import com.goorm.clonestagram.post.dto.PostResDto;
+import com.goorm.clonestagram.post.service.PostService;
+import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.dto.UserProfileDto;
+import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -18,54 +24,85 @@ import java.util.List;
 public class FeedService {
 
     private final FeedRepository feedRepository;
+    private final FollowService followService;
+    private final UserService userService;
+    private final PostService postService;
     private final FollowRepository followRepository;
-    /**
-     * 특정 사용자의 피드를 페이징하여 조회합니다.
-     *
-     * @param userId 사용자 ID
-     * @param page   페이지 번호 (0부터 시작)
-     * @param size   페이지당 항목 수
-     * @return 페이징된 FeedResponseDto 리스트
-     */
+
+
     @Transactional
     public Page<FeedResponseDto> getUserFeed(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        Page<Feed> feeds = feedRepository.findByUserIdWithPostAndUser(userId, pageable);
+        Page<Feeds> feeds = feedRepository.findByUserIdWithPostAndUser(userId, pageable);
 
         return feeds.map(FeedResponseDto::from);
     }
 
-    /**
-     * 사용자가 피드에서 게시물을 확인한 경우 해당 Feed 데이터를 삭제합니다.
-     *
-     * @param userId   현재 사용자 ID
-     * @param postIds  확인한 게시물 ID 목록
-     */
+
+
+    public PostResDto getAllFeed(Pageable pageable) {
+        //1. DB에 저장된 모든 피드 조회
+        Page<Posts> myFeed = feedRepository.findAllByDeletedIsFalse(pageable);
+
+        //2. 모든 작업이 완료된 경우 반환
+        return PostResDto.builder()
+                .feed(myFeed.map(PostInfoDto::fromEntity))
+                .build();
+    }
+
+
+    public PostResDto getFollowFeed(Long userId, Pageable pageable) {
+        // 1. 유저 조회
+        Users users = userService.findByIdAndDeletedIsFalse(userId);
+
+        // 2. 팔로잉 ID 목록 조회
+        List<Long> followList = followService.findFollowingUserIdsByFollowerId(users.getId());
+
+        // 3. 팔로잉 유저가 없으면 빈 페이지 리턴
+        if (followList == null || followList.isEmpty()) {
+            return PostResDto.builder()
+                    .user(UserProfileDto.fromEntity(users))
+                    .feed(Page.empty(pageable)) // ✅ 빈 페이지로 리턴
+                    .build();
+        }
+
+        // 4. 해당 유저들의 게시글 조회
+        Page<Posts> postsLists = feedRepository.findAllByUserIdInAndDeletedIsFalse(followList, pageable);
+
+        // 5. 리턴
+        return PostResDto.builder()
+                .user(UserProfileDto.fromEntity(users))
+                .feed(postsLists.map(PostInfoDto::fromEntity))
+                .build();
+    }
+
+
     @Transactional
     public void removeSeenFeeds(Long userId, List<Long> postIds) {
         if (postIds == null || postIds.isEmpty()) return;
         feedRepository.deleteByUserIdAndPostIdIn(userId, postIds);
     }
 
-    /**
-     * (선택) 사용자 피드 전체 삭제 - 테스트용 또는 계정 삭제 시 사용
-     */
+
     @Transactional
     public void deleteAllByUser(Long userId) {
-        List<Feed> userFeeds = feedRepository.findByUserId(userId);
+        List<Feeds> userFeeds = feedRepository.findByUserId(userId);
         feedRepository.deleteAll(userFeeds);
     }
 
-    // 게시물이 업로드될 때: 팔로워들의 피드 생성
+
+    //A의 게시물이 업로드될 때: A 팔로워들의 피드 생성
     public void createFeedForFollowers(Posts post) {
-        List<Long> followerIds = followRepository.findFollowerIdsByToUserId(post.getUser().getId());
+        Long userId = post.getUser().getId();
+        List<Long> followerIds = followRepository.findFollowerIdsByFollowedId(userId);
+
         if (followerIds == null || followerIds.isEmpty()) {
-            return; // ✅ 팔로워 없으면 저장하지 않음
+            return;
         }
 
-        List<Feed> feeds = followerIds.stream()
-                .map(followerId -> new Feed(followerId, post.getId()))
+        List<Feeds> feeds = followerIds.stream()
+                .map(followerId -> new Feeds(followerId, post.getId()))
                 .toList();
 
         feedRepository.saveAll(feeds);

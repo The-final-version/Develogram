@@ -2,10 +2,12 @@ package com.goorm.clonestagram.follow.service;
 
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.dto.FollowDto;
+import com.goorm.clonestagram.follow.mapper.FollowMapper;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
-import com.goorm.clonestagram.user.domain.User;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,73 +20,60 @@ import java.util.stream.Collectors;
 public class FollowService {
 
     private final FollowRepository followRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Transactional
-    public void toggleFollow(Long fromUserId, Long toUserId) {
-        if (fromUserId.equals(toUserId)) {
+    public void toggleFollow(Long followerId, Long followedId) {
+
+        if (followerId.equals(followedId)) {
             throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
         }
 
-        User fromUser = userRepository.findByIdAndDeletedIsFalse(fromUserId)
-                .orElseThrow(() -> new IllegalArgumentException("팔로우하는 사용자를 찾을 수 없습니다."));
-        User toUser = userRepository.findByIdAndDeletedIsFalse(toUserId)
-                .orElseThrow(() -> new IllegalArgumentException("팔로우 받을 사용자를 찾을 수 없습니다."));
+        Users follower = userService.findByIdAndDeletedIsFalse(followerId);
+        Users followed = userService.findByIdAndDeletedIsFalse(followedId);
 
-        followRepository.findByFromUserAndToUser(fromUser, toUser)
+        followRepository.findByFollowerAndFollowed(follower, followed)
                 .ifPresentOrElse(follows -> {
-                    // 이미 팔로우 상태라면 언팔로우
                     followRepository.delete(follows);
                 }, () -> {
-                    // 팔로우 상태가 아니면 팔로우 처리
-                    Follows follows = new Follows(fromUser, toUser);
+                    Follows follows = new Follows(follower, followed);
                     followRepository.save(follows);
                 });
     }
 
+
+    @Transactional(readOnly = true)
     public List<FollowDto> getFollowingList(Long userId) {
-        User user = userRepository.findByIdAndDeletedIsFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        Users user = userService.findByIdAndDeletedIsFalse(userId);
+        List<Follows> followsList = followRepository.findFollowingsByFollower(user); // ✅ 수정
 
-        // followRepository에서 결과가 없다면 빈 리스트 반환
-        List<Follows> followsList = followRepository.findByFromUserAndDeletedIsFalse(user);
         if (followsList == null || followsList.isEmpty()) {
-            return Collections.emptyList();  // 빈 리스트 반환
+            return Collections.emptyList();
         }
 
         return followsList.stream()
-                .map(f -> new FollowDto(
-                        f.getId(),
-                        f.getFromUser().getId(),
-                        f.getToUser().getId(),
-                        f.getFromUser().getUsername(), // 팔로우 하는 유저 이름
-                        f.getToUser().getUsername(),   // 팔로우 받는 유저 이름
-                        f.getFromUser().getProfileimg(), // 팔로우 하는 유저 프로필 이미지
-                        f.getToUser().getProfileimg(),   // 팔로우 받는 유저 프로필 이미지
-                        f.getCreatedAt()))
+                .map(FollowMapper::toFollowingDto) // ✅ 수정
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<FollowDto> getFollowerList(Long userId) {
-        User user = userRepository.findByIdAndDeletedIsFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        Users user = userService.findByIdAndDeletedIsFalse(userId);
+        List<Follows> followsList = followRepository.findFollowersByFollowed(user);
 
-        // followRepository에서 결과가 없다면 빈 리스트 반환
-        List<Follows> followsList = followRepository.findByToUserAndDeletedIsFalse(user);
         if (followsList == null || followsList.isEmpty()) {
-            return Collections.emptyList();  // 빈 리스트 반환
+            return Collections.emptyList();
         }
 
         return followsList.stream()
-                .map(f -> new FollowDto(
-                        f.getId(),
-                        f.getFromUser().getId(),
-                        f.getToUser().getId(),
-                        f.getFromUser().getUsername(), // 팔로우 하는 유저 이름
-                        f.getToUser().getUsername(),   // 팔로우 받는 유저 이름
-                        f.getFromUser().getProfileimg(), // 팔로우 하는 유저 프로필 이미지
-                        f.getToUser().getProfileimg(),   // 팔로우 받는 유저 프로필 이미지
-                        f.getCreatedAt()))
+                .map(FollowMapper::toFollowerDto) // ✅ 수정
                 .collect(Collectors.toList());
     }
+
+
+
+    public List<Long> findFollowingUserIdsByFollowerId(Long userId){
+        return followRepository.findFollowingUserIdsByFollowerId(userId);
+    }
+
 }

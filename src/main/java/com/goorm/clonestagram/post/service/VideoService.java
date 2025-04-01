@@ -14,21 +14,15 @@ import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
 import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * 영상 업로드 요청을 처리하는 서비스
@@ -58,7 +52,7 @@ public class VideoService {
      */
     public VideoUploadResDto videoUpload(VideoUploadReqDto videoUploadReqDto, Long userId) {
 
-        User user = userRepository.findByIdAndDeletedIsFalse(userId)
+        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
 
         String fileUrl = videoUploadReqDto.getFile();
@@ -68,7 +62,7 @@ public class VideoService {
         }
 
         //4. unique 파일명과 videoUploadReqDto의 값들을 활용해 Entity 객체 생성 후 저장
-        Posts postEntity = videoUploadReqDto.toEntity(fileUrl, user);
+        Posts postEntity = videoUploadReqDto.toEntity(fileUrl, users);
         Posts post = postsRepository.save(postEntity);
 
         //5. Dto에 있는 HashTagList를 저장

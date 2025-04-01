@@ -2,7 +2,7 @@
 
 package com.goorm.clonestagram.user.controller;
 
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.dto.UserProfileDto;
 import com.goorm.clonestagram.user.service.UserService;
 import com.goorm.clonestagram.util.CustomUserDetails;
@@ -24,8 +24,8 @@ public class UserController {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userDetails.getUser();
-        return ResponseEntity.ok(UserProfileDto.fromEntity(user));
+        Users users = userDetails.getUser();
+        return ResponseEntity.ok(UserProfileDto.fromEntity(users));
     }
 
     @GetMapping("/id")

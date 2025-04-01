@@ -14,22 +14,17 @@ import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
 import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.feed.service.FeedService;
 import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * 이미지 업로드 요청을 처리하는 서비스
@@ -40,13 +35,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ImageService {
 
-    private final PostsRepository postsRepository;
-    private final UserRepository userRepository;
+    private final PostService postService;
     private final HashTagRepository hashTagRepository;
     private final PostHashTagRepository postHashTagRepository;
     private final SoftDeleteRepository softDeleteRepository;
     private final FeedService feedService;
-    private final FollowRepository followRepository; // 사용자의 팔로워를 조회하기 위함
+    private final UserService userService;
 
     /**
      * 이미지 업로드
@@ -60,8 +54,7 @@ public class ImageService {
      */
     public ImageUploadResDto imageUpload(ImageUploadReqDto imageUploadReqDto, Long userId) throws Exception {
 
-        User user = userRepository.findByIdAndDeletedIsFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+        Users users = userService.findByIdAndDeletedIsFalse(userId);
 
         String fileUrl = imageUploadReqDto.getFile();
 
@@ -70,8 +63,8 @@ public class ImageService {
         }
 
         // 1. Entity 생성 (Cloudinary URL 그대로 사용)
-        Posts postEntity = imageUploadReqDto.toEntity(fileUrl, user);
-        Posts post = postsRepository.save(postEntity);
+        Posts postEntity = imageUploadReqDto.toEntity(fileUrl, users);
+        Posts post = postService.save(postEntity);
 
         // 2. 피드 생성
         feedService.createFeedForFollowers(post);
@@ -107,8 +100,7 @@ public class ImageService {
         boolean updated = false;
 
         //1. 게시글 ID를 통해 게시글을 찾아 반환
-        Posts posts = postsRepository.findByIdAndDeletedIsFalse(postSeq)
-                .orElseThrow(() -> new IllegalArgumentException("게시물을 찾을 수 없습니다"));
+        Posts posts = postService.findByIdAndDeletedIsFalse(postSeq);
 
         if(!posts.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("권한이 없는 유저입니다");
@@ -153,7 +145,7 @@ public class ImageService {
         Posts updatedPost;
         if(updated){
             //5. 업데이트된 게시글을 DB에 저장
-            updatedPost = postsRepository.save(posts);
+            updatedPost = postService.save(posts);
         }else{
             updatedPost = posts;
         }
@@ -174,8 +166,7 @@ public class ImageService {
      */
     public void imageDelete(Long postSeq, Long userId) {
         //1. 식별자를 토대로 게시글 찾아 반환
-        Posts posts = postsRepository.findByIdAndDeletedIsFalse(postSeq)
-                .orElseThrow(() -> new IllegalArgumentException("해당 게시물이 없습니다"));
+        Posts posts = postService.findByIdAndDeletedIsFalse(postSeq);
 
         if(!posts.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("권한이 없는 유저입니다");

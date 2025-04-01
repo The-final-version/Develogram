@@ -1,9 +1,10 @@
 package com.goorm.clonestagram.post.domain;
 
+import ch.qos.logback.core.net.SMTPAppenderBase;
 import com.goorm.clonestagram.comment.domain.CommentEntity;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.like.domain.Like;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -41,7 +42,7 @@ public class Posts{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users user;
 
     /**
      * 게시물 내용
@@ -89,7 +90,7 @@ public class Posts{
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy = "posts", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Like> likes;
 
     @OneToMany(mappedBy = "posts", cascade = CascadeType.REMOVE)

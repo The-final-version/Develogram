@@ -1,7 +1,7 @@
 package com.goorm.clonestagram.user.dto;
 
 import com.goorm.clonestagram.post.dto.PostInfoDto;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,15 +28,15 @@ public class UserProfileDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static UserProfileDto fromEntity(User user) {
+    public static UserProfileDto fromEntity(Users users) {
         return UserProfileDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .profileimg(user.getProfileimg())
-                .bio(user.getBio())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
+                .id(users.getId())
+                .username(users.getUsername())
+                .email(users.getEmail())
+                .profileimg(users.getProfileimg())
+                .bio(users.getBio())
+                .createdAt(users.getCreatedAt())
+                .updatedAt(users.getUpdatedAt())
                 .build();
     }
 }

@@ -1,6 +1,5 @@
 package com.goorm.clonestagram.user.controller;
 
-import com.goorm.clonestagram.user.domain.User;
 import com.goorm.clonestagram.user.dto.UserProfileDto;
 import com.goorm.clonestagram.user.dto.UserProfileUpdateDto;
 import com.goorm.clonestagram.user.service.ProfileService;
