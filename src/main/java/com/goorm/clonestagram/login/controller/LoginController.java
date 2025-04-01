@@ -2,7 +2,10 @@ package com.goorm.clonestagram.login.controller;
 
 
 import com.goorm.clonestagram.login.dto.LoginForm;
+import com.goorm.clonestagram.login.dto.LoginResponseDto;
 import com.goorm.clonestagram.login.service.LoginService;
+import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -23,32 +26,29 @@ public class LoginController {
 
     private final AuthenticationManager authenticationManager;
 
-    // 로그인 처리 (REST API 방식)
+    private final UserRepository userRepository; // ✅ 유저 ID 조회용
+
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginForm loginForm, HttpServletRequest request) {
         String email = loginForm.getEmail();
         String password = loginForm.getPassword();
 
-        // 로그인 로직 처리
         if (loginService.login(email, password)) {
-            // 로그인 성공 시 성공 메시지 반환 (상태 코드 200 OK)
-            // ✅ 인증 객체 생성
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(email, password);
-
-            // ✅ AuthenticationManager로 실제 인증 처리
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
-            // ✅ SecurityContext에 인증 객체 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // ✅ 세션에 SecurityContext 저장 (이거 해야 @AuthenticationPrincipal이 작동함)
             HttpSession session = request.getSession(true);
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-            return new ResponseEntity<>("로그인 성공", HttpStatus.OK);
+            // ✅ 유저 ID 추출
+            User user = userRepository.findByEmail(email);
+            String userId = user.getId().toString();
+
+            // ✅ 응답 JSON 형태로 반환
+            return ResponseEntity.ok(new LoginResponseDto("로그인 성공", userId));
         } else {
-            // 로그인 실패 시 오류 메시지 반환 (상태 코드 401 Unauthorized)
             return new ResponseEntity<>("이메일 또는 비밀번호가 잘못되었습니다.", HttpStatus.UNAUTHORIZED);
         }
     }

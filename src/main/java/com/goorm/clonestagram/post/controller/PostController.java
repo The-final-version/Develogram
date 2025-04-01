@@ -22,7 +22,7 @@ public class PostController {
 
     private final PostService feedService;
     private final LikeService likeService;
-
+    private final PostService postService;
     /**
      * 본인 피드 조회
      * - 로그인 한 유저의 Id를 조회한 후 서비스 계층에 전달
@@ -31,16 +31,11 @@ public class PostController {
      * @param pageable 페이징 처리
      * @return 조회 성공시 서비스 호출한 유저 정보와 피드 리스트 반환
      */
-    @GetMapping("/feeds/me")
-    public ResponseEntity<PostResDto> myFeed(@AuthenticationPrincipal CustomUserDetails userDetail,
-                                             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
-
-    ){
-        Long userId = userDetail.getId();
-
-        return ResponseEntity.ok(feedService.getMyFeed(userId,pageable));
+    @GetMapping("/feeds/user")
+    public ResponseEntity<PostResDto> userFeed(@RequestParam("userId") Long userId,
+                                               @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(feedService.getMyFeed(userId, pageable));
     }
-
     /**
      * 모든 피드 조회
      * - 모든 피드 조회 요청을 서비스 계층에 전달
@@ -85,5 +80,12 @@ public class PostController {
         Long userId = userDetail.getId();
         likeService.toggleLike(userId, postId);  // 서비스 레이어에서 토글 처리
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/posts/{postId}/liked")
+    public ResponseEntity<Boolean> checkIfLiked(@PathVariable Long postId,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        boolean liked = postService.isPostLikedByLoginUser(postId, userDetails.getId());
+        return ResponseEntity.ok(liked);
     }
 }

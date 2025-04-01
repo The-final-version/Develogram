@@ -1,5 +1,6 @@
 package com.goorm.clonestagram.post.service;
 
+import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
@@ -26,6 +27,7 @@ public class PostService {
 
     private final UserRepository userRepository;
     private final PostsRepository postsRepository;
+    private final LikeRepository likeRepository;
     /**
      * 본인 게시물 조회
      * 유저 id를 활용해 유저 정보 조회
@@ -91,5 +93,9 @@ public class PostService {
                 .user(UserProfileDto.fromEntity(user))
                 .feed(postsLists.map(PostInfoDto::fromEntity))
                 .build();
+    }
+
+    public boolean isPostLikedByLoginUser(Long postId, Long userId) {
+        return likeRepository.existsByUserIdAndPostsId(userId, postId);
     }
 }

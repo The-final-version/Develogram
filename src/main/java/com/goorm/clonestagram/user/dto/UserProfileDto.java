@@ -22,22 +22,21 @@ public class UserProfileDto {
     private String username;
     private String email;
     private String bio;
+    private int followerCount;
+    private int followingCount;
     private String profileimg;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private int followerCount;
-    private int followingCount;
-
-    private List<PostInfoDto> posts;
-
-
     public static UserProfileDto fromEntity(User user) {
         return UserProfileDto.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .bio(user.getBio())
                 .profileimg(user.getProfileimg())
+                .bio(user.getBio())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
                 .build();
     }
 }

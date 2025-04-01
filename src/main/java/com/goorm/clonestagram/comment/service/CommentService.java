@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -39,7 +40,6 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-
     @Transactional
     public CommentEntity createCommentWithRollback(CommentRequest commentRequest) {
         User user = userRepository.findByIdAndDeletedIsFalse(commentRequest.getUserId())
@@ -54,36 +54,25 @@ public class CommentService {
                 .build());
     }
 
-
     @Transactional(readOnly = true)
     public CommentEntity getCommentById(Long id) {
         return commentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다: " + id));
     }
 
-
     @Transactional(readOnly = true)
     public List<CommentEntity> getCommentsByPostId(Long postId) {
-        // postId가 실제 존재하는지 확인
-        if (!postsRepository.existsByIdAndDeletedIsFalse(postId)) {
-            throw new IllegalArgumentException("존재하지 않는 게시글 ID입니다: " + postId);
-        }
-
         List<CommentEntity> comments = commentRepository.findByPostsId(postId);
 
+//        // ❌ 현재 이렇게 되어 있을 가능성 있음
+//        if (comments.isEmpty()) {
+//            throw new IllegalArgumentException("해당 게시글(" + postId + ")에는 댓글이 없습니다.");
+//        }
 
-
-        // 댓글이 없는 경우 예외 발생
-        if (comments.isEmpty()) {
-            throw new IllegalArgumentException("해당 게시글(" + postId + ")에는 댓글이 없습니다.");
-        }
-
-        return comments;
+        // ✅ 아래처럼 수정
+        return comments; // 비어있더라도 그대로 리턴
     }
 
-    /**
-     * ✅ 댓글 삭제 (댓글 작성자 또는 게시글 작성자만 가능)
-     */
     @Transactional
     public void removeComment(Long commentId, Long requesterId) {
         // 1️⃣ 댓글 존재 여부 확인

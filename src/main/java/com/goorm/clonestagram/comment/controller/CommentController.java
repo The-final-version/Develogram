@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,9 +38,9 @@ public class CommentController {
 
     @GetMapping("/post/{postId}")
     public List<CommentResponse> getCommentsByPostId(@PathVariable Long postId) {
-        List<CommentEntity> entities = commentService.getCommentsByPostId(postId);
+        List<CommentEntity> entities = Optional.ofNullable(commentService.getCommentsByPostId(postId))
+                .orElse(Collections.emptyList());
 
-        // ✅ List<CommentEntity> → List<CommentResponse> 변환
         return entities.stream()
                 .map(entity -> CommentResponse.builder()
                         .id(entity.getId())
@@ -49,8 +51,6 @@ public class CommentController {
                         .build())
                 .collect(Collectors.toList());
     }
-
-
 
     @PostMapping
     public CommentResponse create(@RequestBody CommentRequest request) throws Exception{

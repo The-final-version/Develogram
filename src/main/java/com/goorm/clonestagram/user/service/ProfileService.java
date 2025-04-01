@@ -74,9 +74,6 @@ public class ProfileService {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .bio(user.getBio())
-                .followerCount(followerCount)
-                .followingCount(followingCount)
-                .posts(postList)
                 .build();
     }
 
@@ -93,16 +90,16 @@ public class ProfileService {
         // 사용자 정보를 DB에서 조회, 존재하지 않으면 예외 발생
         User user = userRepository.findByIdAndDeletedIsFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // 사용자명 업데이트
-        if (userProfileUpdateDto.getUsername() != null && !userProfileUpdateDto.getUsername().isEmpty()) {
-            user.setUsername(userProfileUpdateDto.getUsername());
-        }
-
-        // 이메일 업데이트
-        if (userProfileUpdateDto.getEmail() != null && !userProfileUpdateDto.getEmail().isEmpty()) {
-            user.setEmail(userProfileUpdateDto.getEmail());
-        }
+//
+//        // 사용자명 업데이트
+//        if (userProfileUpdateDto.getUsername() != null && !userProfileUpdateDto.getUsername().isEmpty()) {
+//            user.setUsername(userProfileUpdateDto.getUsername());
+//        }
+//
+//        // 이메일 업데이트
+//        if (userProfileUpdateDto.getEmail() != null && !userProfileUpdateDto.getEmail().isEmpty()) {
+//            user.setEmail(userProfileUpdateDto.getEmail());
+//        }
 
         /*
         // 비밀번호 업데이트 (추후 기능 추가 예정)

@@ -1,6 +1,8 @@
 package com.goorm.clonestagram.user.dto;
 
+import com.goorm.clonestagram.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,9 +17,9 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserProfileUpdateDto {
-    private String username; // 사용자 이름
-    private String email; // 이메일
+    private Long id;
     private String bio; // 자기소개
     private String profileImage; // 프로필 이미지
-    private String password; // 비밀번호
+
+
 }

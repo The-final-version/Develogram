@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/follow")
 public class FollowController {
 
     private final FollowService followService;
@@ -42,7 +42,7 @@ public class FollowController {
      * @param toUserId 팔로우 대상 사용자 ID
      * @return 팔로우 상태 변경 성공 메시지
      */
-    @PostMapping("/{fromUserId}/profile/follow/{toUserId}")
+    @PostMapping("/{fromUserId}/profile/{toUserId}")
     public ResponseEntity<String> toggleFollow(@PathVariable Long fromUserId, @PathVariable Long toUserId) {
         // 팔로우 상태를 확인하고 토글 처리
         followService.toggleFollow(fromUserId, toUserId);
