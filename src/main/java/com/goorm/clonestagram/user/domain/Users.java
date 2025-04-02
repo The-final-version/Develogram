@@ -1,7 +1,6 @@
 package com.goorm.clonestagram.user.domain;
 
 
-import com.goorm.clonestagram.common.base.BaseTimeEntity;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.like.domain.Like;
@@ -29,7 +28,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User{ // BaseTimeEntity를 상속받아 create, update 관리
+public class Users { // BaseTimeEntity를 상속받아 create, update 관리
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,11 +71,15 @@ public class User{ // BaseTimeEntity를 상속받아 create, update 관리
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Posts> posts;
 
-    @OneToMany(mappedBy = "toUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Follows> following;
 
-    @OneToMany(mappedBy = "fromUser", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Follows> followers;
+
+    public Users(Long id) {
+        this.id = id;
+    }
 
 //    @Version  // 낙관적 락 적용
 //    private Integer version ;

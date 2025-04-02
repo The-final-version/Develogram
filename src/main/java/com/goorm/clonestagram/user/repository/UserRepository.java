@@ -1,6 +1,6 @@
 package com.goorm.clonestagram.user.repository;
 
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,8 +17,9 @@ import java.util.Optional;
  * - JpaRepository를 상속하여 기본적인 CRUD 연산을 제공
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
+public interface UserRepository extends JpaRepository<Users, Long> {
+
+    Optional<Users> findByUsername(String username);
 
     @Query(value = """
     SELECT * FROM users
@@ -29,20 +30,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     WHERE MATCH(username) AGAINST(:keyword IN BOOLEAN MODE)
       AND deleted = false
 """, nativeQuery = true)
-    Page<User> searchUserByFullText(@Param("keyword") String keyword, Pageable pageable);
+    Page<Users> searchUserByFullText(@Param("keyword") String keyword, Pageable pageable);
 
     //Todo 팔로우 엔티티 추가시 활성화
-    @Query("SELECT f.toUser.id FROM Follows f WHERE f.fromUser.id = :userId")
-    List<Long> findFollowingUserIdsByFromUserId(@Param("userId") Long userId);
+    @Query("SELECT f.followed.id FROM Follows f WHERE f.follower.id = :userId")
+    List<Long> findFollowingUserIdsByFollowerId(@Param("userId") Long userId);
 
-    Optional<User> findByIdAndDeletedIsFalse(Long id);
+    Optional<Users> findByIdAndDeletedIsFalse(Long id);
     boolean existsByIdAndDeletedIsFalse(Long id);
 
 
     boolean existsByEmail(String email);
 
 
-    User findByEmail(String email);
+    Users findByEmail(String email);
 
-    List<User> findByUsernameContainingIgnoreCase(String keyword);
+    List<Users> findByUsernameContainingIgnoreCase(String keyword);
 }

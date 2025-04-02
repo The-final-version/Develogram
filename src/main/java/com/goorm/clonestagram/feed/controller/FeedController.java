@@ -2,10 +2,14 @@ package com.goorm.clonestagram.feed.controller;
 
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.service.FeedService;
+import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/feed")
+@RequestMapping("/feeds")
 public class FeedController {
 
     private final FeedService feedService;
@@ -31,6 +35,24 @@ public class FeedController {
     ) {
         Page<FeedResponseDto> feedPage = feedService.getUserFeed(userDetails.getId(), page, size);
         return ResponseEntity.ok(feedPage);
+    }
+
+
+    @GetMapping("/all")
+    public ResponseEntity<PostResDto> allFeed(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ){
+
+        return ResponseEntity.ok(feedService.getAllFeed(pageable));
+    }
+
+    @GetMapping("/follow")
+    public ResponseEntity<PostResDto> followFeed(@AuthenticationPrincipal CustomUserDetails userDetail,
+                                                 @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+    ){
+        Long userId = userDetail.getId();
+
+        return ResponseEntity.ok(feedService.getFollowFeed(userId, pageable));
     }
 
     /**

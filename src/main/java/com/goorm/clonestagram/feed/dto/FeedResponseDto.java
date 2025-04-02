@@ -1,5 +1,5 @@
 package com.goorm.clonestagram.feed.dto;
-import com.goorm.clonestagram.feed.domain.Feed;
+import com.goorm.clonestagram.feed.domain.Feeds;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -27,7 +27,7 @@ public class FeedResponseDto {
         this.createdAt = createdAt;
     }
 
-    public static FeedResponseDto from(Feed feed) {
+    public static FeedResponseDto from(Feeds feed) {
         return FeedResponseDto.builder()
                 .feedId(feed.getId())
                 .postId(feed.getPost().getId())

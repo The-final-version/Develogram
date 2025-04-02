@@ -28,7 +28,7 @@ public class CommentController {
         if(entity == null){ return CommentResponse.builder().build(); }
         return CommentResponse.builder()
                 .id(entity.getId())
-                .userId(entity.getUser().getId())
+                .userId(entity.getUsers().getId())
                 .postId(entity.getPosts().getId())
                 .content(entity.getContent())
                 .createdAt(entity.getCreatedAt())
@@ -44,7 +44,7 @@ public class CommentController {
         return entities.stream()
                 .map(entity -> CommentResponse.builder()
                         .id(entity.getId())
-                        .userId(entity.getUser().getId())
+                        .userId(entity.getUsers().getId())
                         .postId(entity.getPosts().getId())
                         .content(entity.getContent())
                         .createdAt(entity.getCreatedAt())
@@ -58,7 +58,7 @@ public class CommentController {
 
         return CommentResponse.builder()
                 .id(entity.getId())
-                .userId(entity.getUser().getId())
+                .userId(entity.getUsers().getId())
                 .postId(entity.getPosts().getId())
                 .content(entity.getContent())
                 .content(entity.getContent())

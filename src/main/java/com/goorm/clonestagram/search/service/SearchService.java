@@ -10,7 +10,7 @@ import com.goorm.clonestagram.search.dto.HashtagSuggestionDto;
 import com.goorm.clonestagram.search.dto.SearchPostResDto;
 import com.goorm.clonestagram.search.dto.SearchUserResDto;
 import com.goorm.clonestagram.search.dto.UserSuggestionDto;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.dto.UserProfileDto;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import jakarta.validation.constraints.NotBlank;
@@ -47,7 +47,7 @@ public class SearchService {
                 .map(s -> "+" + s + "*")
                 .collect(Collectors.joining(" "));
         //1. 유저의 이름으로 관련된 데이터 모두 반환, Like 사용
-        Page<User> users = userRepository.searchUserByFullText(keyword, pageable);
+        Page<Users> users = userRepository.searchUserByFullText(keyword, pageable);
 
         //2. 반환을 위해 users를 UserProfileDto형태로 변환
         Page<UserProfileDto> userProfileDtos = users.map(user -> UserProfileDto.builder()
@@ -77,7 +77,7 @@ public class SearchService {
      */
     public SearchUserResDto searchFollowingByKeyword(Long userId, @NotBlank String keyword, Pageable pageable) {
         //1. 유저의 팔로우 중에 keyword와 관련된 이름을 가지고 있는 데이터 모두 반환, Like 사용
-        Page<User> follows = followRepository.findFollowingByKeyword(userId, keyword, pageable);
+        Page<Users> follows = followRepository.findFollowingByKeyword(userId, keyword, pageable);
 
         //2. 반환을 위해 users를 UserProfileDto형태로 변환
         Page<UserProfileDto> userProfileDtos = follows.map(user -> UserProfileDto.builder()
@@ -107,7 +107,7 @@ public class SearchService {
      */
     public SearchUserResDto searchFollowerByKeyword(Long userId, @NotBlank String keyword, Pageable pageable) {
         //1. 유저의 팔로워 중에 keyword와 관련된 이름을 가지고 있는 데이터 모두 반환, Like 사용
-        Page<User> follows = followRepository.findFollowerByKeyword(userId, keyword, pageable);
+        Page<Users> follows = followRepository.findFollowerByKeyword(userId, keyword, pageable);
 
         //2. 반환을 위해 users를 UserProfileDto형태로 변환
         Page<UserProfileDto> userProfileDtos = follows.map(user -> UserProfileDto.builder()
@@ -164,7 +164,7 @@ public class SearchService {
     }
 
     public List<UserSuggestionDto> findUsersByKeyword(String keyword) {
-        List<User> users = userRepository.findByUsernameContainingIgnoreCase(keyword);
+        List<Users> users = userRepository.findByUsernameContainingIgnoreCase(keyword);
         return users.stream()
                 .map(user -> new UserSuggestionDto(user.getId(), user.getUsername(), user.getProfileimg()))
                 .collect(Collectors.toList());

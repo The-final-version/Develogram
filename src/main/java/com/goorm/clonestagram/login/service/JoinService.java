@@ -2,7 +2,7 @@ package com.goorm.clonestagram.login.service;
 
 import com.goorm.clonestagram.login.dto.JoinDto;
 import com.goorm.clonestagram.login.dto.JoinDto;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.dto.UserProfileDto;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,13 +48,13 @@ public class JoinService {
         }
 
         // 이름과 닉네임 유효성 체크 (비어 있으면 예외 발생)
-        if (joinDto.getName() == null || joinDto.getName().isEmpty()) {
+        if (joinDto.getUsername() == null || joinDto.getUsername().isEmpty()) {
             throw new IllegalStateException("이름을 입력해주세요.");
         }
 
         // 새로운 사용자 정보 저장
-        User user = new User();
-        user.setUsername(joinDto.getName());// 이름 추가
+        Users user = new Users();
+        user.setUsername(joinDto.getUsername());// 이름 추가
         user.setPassword(bCryptPasswordEncoder.encode(joinDto.getPassword()));
         user.setEmail(joinDto.getEmail());
 

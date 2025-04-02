@@ -1,6 +1,6 @@
 package com.goorm.clonestagram.post.service;
 
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ public class ProfileServiceTest {
     @Test
     public void updateUserProfile_Success() {
         // Given
-        User user = User.builder()
+        Users users = Users.builder()
                 .username("testuser")  // 필수 필드 추가
                 .password("password123")  // 필수 필드 추가
                 .email("testuser@example.com")  // 필수 필드 추가
@@ -35,62 +35,62 @@ public class ProfileServiceTest {
                 .build();
 
         // When
-        User savedUser = userRepository.save(user);
+        Users savedUsers = userRepository.save(users);
 
         // Then
-        assertNotNull(savedUser.getId());
-        assertEquals("testuser", savedUser.getUsername());
-        assertEquals("testuser@example.com", savedUser.getEmail());
-        assertEquals("http://example.com/profile.jpg", savedUser.getProfileimg());
-        assertEquals("안녕하세요. 테스트 사용자입니다.", savedUser.getBio());
+        assertNotNull(savedUsers.getId());
+        assertEquals("testuser", savedUsers.getUsername());
+        assertEquals("testuser@example.com", savedUsers.getEmail());
+        assertEquals("http://example.com/profile.jpg", savedUsers.getProfileimg());
+        assertEquals("안녕하세요. 테스트 사용자입니다.", savedUsers.getBio());
     }
 
     @Test
     public void getUserProfile_Success() {
         // Given
-        User user = User.builder()
+        Users users = Users.builder()
                 .username("testuser2")
                 .password("password456")
                 .email("testuser2@example.com")
                 .profileimg("http://example.com/profile2.jpg")
                 .bio("두 번째 사용자입니다.")
                 .build();
-        userRepository.save(user);
+        userRepository.save(users);
 
         // When
-        User foundUser = userRepository.findByIdAndDeletedIsFalse(user.getId()).orElse(null);
+        Users foundUsers = userRepository.findByIdAndDeletedIsFalse(users.getId()).orElse(null);
 
         // Then
-        assertNotNull(foundUser);
-        assertEquals("testuser2", foundUser.getUsername());
-        assertEquals("testuser2@example.com", foundUser.getEmail());
-        assertEquals("http://example.com/profile2.jpg", foundUser.getProfileimg());
-        assertEquals("두 번째 사용자입니다.", foundUser.getBio());
+        assertNotNull(foundUsers);
+        assertEquals("testuser2", foundUsers.getUsername());
+        assertEquals("testuser2@example.com", foundUsers.getEmail());
+        assertEquals("http://example.com/profile2.jpg", foundUsers.getProfileimg());
+        assertEquals("두 번째 사용자입니다.", foundUsers.getBio());
     }
 
     @Test
     public void updateProfileImage_Success() {
         // Given
-        User user = User.builder()
+        Users users = Users.builder()
                 .username("testuser3")
                 .password("password789")
                 .email("testuser3@example.com")
                 .profileimg("http://example.com/profile3.jpg")
                 .bio("세 번째 사용자입니다.")
                 .build();
-        User savedUser = userRepository.save(user);
+        Users savedUsers = userRepository.save(users);
 
         // When
-        savedUser.setUsername("testuser4");
-        savedUser.setEmail("testuser4@example.com");
-        savedUser.setBio("update!");
-        savedUser.setProfileimg("http://example.com/newprofile3.jpg");
-        User updatedUser = userRepository.save(savedUser);
+        savedUsers.setUsername("testuser4");
+        savedUsers.setEmail("testuser4@example.com");
+        savedUsers.setBio("update!");
+        savedUsers.setProfileimg("http://example.com/newprofile3.jpg");
+        Users updatedUsers = userRepository.save(savedUsers);
 
         // Then
-        assertEquals("http://example.com/newprofile3.jpg", updatedUser.getProfileimg());
-        assertEquals("update!", updatedUser.getBio());
-        assertEquals("testuser4", updatedUser.getUsername());
-        assertEquals("testuser4@example.com", updatedUser.getEmail());
+        assertEquals("http://example.com/newprofile3.jpg", updatedUsers.getProfileimg());
+        assertEquals("update!", updatedUsers.getBio());
+        assertEquals("testuser4", updatedUsers.getUsername());
+        assertEquals("testuser4@example.com", updatedUsers.getEmail());
     }
 }

@@ -8,14 +8,12 @@ import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.service.ImageService;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
-import com.goorm.clonestagram.user.domain.User;
-import com.goorm.clonestagram.post.dto.upload.ImageUploadReqDto;
-import com.goorm.clonestagram.post.dto.upload.ImageUploadResDto;
+import com.goorm.clonestagram.post.service.PostService;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.dto.UserProfileDto;
 import com.goorm.clonestagram.user.dto.UserProfileUpdateDto;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +35,7 @@ public class ProfileService {
     private final ImageService imageService;      // 이미지 업로드를 처리하는 서비스
     private final PostsRepository postsRepository;
     private final SoftDeleteRepository softDeleteRepository;
+    private final PostService postService;
 
 
     /*
@@ -57,7 +56,7 @@ public class ProfileService {
         int followingCount = followRepository.getFollowingCount(userId);
 
 
-        User user = userRepository.findByIdAndDeletedIsFalse(userId)
+        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         List<PostInfoDto> postList = postsRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(0, 10))
@@ -67,13 +66,13 @@ public class ProfileService {
 
         // 조회된 사용자 정보를 DTO로 변환하여 반환
         return UserProfileDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .profileimg(user.getProfileimg())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .bio(user.getBio())
+                .id(users.getId())
+                .username(users.getUsername())
+                .email(users.getEmail())
+                .profileimg(users.getProfileimg())
+                .createdAt(users.getCreatedAt())
+                .updatedAt(users.getUpdatedAt())
+                .bio(users.getBio())
                 .build();
     }
 
@@ -88,7 +87,7 @@ public class ProfileService {
     @Transactional // 트랜잭션을 관리하여 데이터 무결성을 보장
     public UserProfileDto updateUserProfile(Long userId, UserProfileUpdateDto userProfileUpdateDto) {
         // 사용자 정보를 DB에서 조회, 존재하지 않으면 예외 발생
-        User user = userRepository.findByIdAndDeletedIsFalse(userId)
+        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 //
 //        // 사용자명 업데이트
@@ -110,7 +109,7 @@ public class ProfileService {
 
         // 자기소개(bio) 업데이트
         if (userProfileUpdateDto.getBio() != null && !userProfileUpdateDto.getBio().isEmpty()) {
-            user.setBio(userProfileUpdateDto.getBio());
+            users.setBio(userProfileUpdateDto.getBio());
         }
 
         // 프로필 이미지 업데이트
@@ -119,7 +118,7 @@ public class ProfileService {
 
             try {
                 // 프로필 이미지 URL로 업데이트
-                user.setProfileimg(userProfileUpdateDto.getProfileImage());
+                users.setProfileimg(userProfileUpdateDto.getProfileImage());
             } catch (Exception e) {
                 // 예외 처리: 예외 메시지 로그 출력, 사용자에게 에러 메시지 전달 등
                 e.printStackTrace();
@@ -128,23 +127,23 @@ public class ProfileService {
         }
 
         // 변경된 사용자 정보 저장 후 반환
-        User updatedUser = userRepository.save(user);
+        Users updatedUsers = userRepository.save(users);
 
         return UserProfileDto.builder()
-                .username(updatedUser.getUsername())
-                .email(updatedUser.getEmail())
-                .profileimg(updatedUser.getProfileimg())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .bio(updatedUser.getBio())
+                .username(updatedUsers.getUsername())
+                .email(updatedUsers.getEmail())
+                .profileimg(updatedUsers.getProfileimg())
+                .createdAt(users.getCreatedAt())
+                .updatedAt(users.getUpdatedAt())
+                .bio(updatedUsers.getBio())
                 .build();
     }
 
     public void deleteUserProfile(Long userId) {
-        User user = userRepository.findByIdAndDeletedIsFalse(userId)
+        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<Posts> posts = postsRepository.findAllByUserIdAndDeletedIsFalse(userId);
+        List<Posts> posts = postService.findAllByUserIdAndDeletedIsFalse(userId);
         for (Posts post : posts) {
             post.setDeleted(true);
             post.setDeletedAt(LocalDateTime.now());
@@ -153,9 +152,9 @@ public class ProfileService {
         // 3. 변경된 게시글들을 DB에 저장
         postsRepository.saveAll(posts);
 
-        user.setDeleted(true);
-        user.setDeletedAt(LocalDateTime.now());
-        softDeleteRepository.save(new SoftDelete(null, EntityType.USER, user.getId(), user.getDeletedAt()));
+        users.setDeleted(true);
+        users.setDeletedAt(LocalDateTime.now());
+        softDeleteRepository.save(new SoftDelete(null, EntityType.USER, users.getId(), users.getDeletedAt()));
     }
 }
 

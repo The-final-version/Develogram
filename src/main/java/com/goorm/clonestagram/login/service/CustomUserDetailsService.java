@@ -1,7 +1,7 @@
 package com.goorm.clonestagram.login.service;
 
 
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,13 +20,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email);
+        Users users = userRepository.findByEmail(email);
 
-        if (user == null) {
+        if (users == null) {
             throw new UsernameNotFoundException("이메일을 찾을 수 없습니다.");
         }
 
-        return new CustomUserDetails(user); // ✅ 반드시 이걸로
+        return new CustomUserDetails(users); // ✅ 반드시 이걸로
     }
 }
 

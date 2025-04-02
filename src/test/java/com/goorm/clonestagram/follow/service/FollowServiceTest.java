@@ -61,7 +61,7 @@ public class FollowServiceTest {
         when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user1));
 
         // Mock followRepository to return a list of follows
-        when(followRepository.findByFromUserAndDeletedIsFalse(user1)).thenReturn(Collections.singletonList(follow));
+        when(followRepository.findByFollowedAndDeletedIsFalse(user1)).thenReturn(Collections.singletonList(follow));
 
         List<FollowDto> followingList = followService.getFollowingList(1L);
 

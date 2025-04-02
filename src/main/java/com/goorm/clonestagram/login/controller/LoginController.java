@@ -4,12 +4,11 @@ package com.goorm.clonestagram.login.controller;
 import com.goorm.clonestagram.login.dto.LoginForm;
 import com.goorm.clonestagram.login.dto.LoginResponseDto;
 import com.goorm.clonestagram.login.service.LoginService;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,8 +42,8 @@ public class LoginController {
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
             // ✅ 유저 ID 추출
-            User user = userRepository.findByEmail(email);
-            String userId = user.getId().toString();
+            Users users = userRepository.findByEmail(email);
+            String userId = users.getId().toString();
 
             // ✅ 응답 JSON 형태로 반환
             return ResponseEntity.ok(new LoginResponseDto("로그인 성공", userId));

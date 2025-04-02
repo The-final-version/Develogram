@@ -6,7 +6,7 @@ import com.goorm.clonestagram.comment.repository.CommentRepository;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class CommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        User mockUser = User.builder()
+        Users mockUsers = Users.builder()
                 .id(5L)
                 .username("mockuser")
                 .password("mockpassword")
@@ -58,7 +58,7 @@ class CommentServiceTest {
 
         mockPost = Posts.builder()
                 .id(200L)
-                .user(mockUser)
+                .users(mockUsers)
                 .content("Test Post")
                 .mediaName("test.jpg")
                 .contentType(ContentType.IMAGE)
@@ -66,7 +66,7 @@ class CommentServiceTest {
 
         mockPost2 = Posts.builder()
                 .id(100L)
-                .user(mockUser)
+                .users(mockUsers)
                 .content("Test Post")
                 .mediaName("test.jpg")
                 .contentType(ContentType.IMAGE)
@@ -74,7 +74,7 @@ class CommentServiceTest {
 
         mockComment = CommentEntity.builder()
                 .id(1L)
-                .user(mockUser)
+                .users(mockUsers)
                 .posts(mockPost)
                 .content("Test Comment")
                 .build();
@@ -83,13 +83,13 @@ class CommentServiceTest {
                 CommentEntity.builder()
                         .id(1L)
                         .posts(mockPost2)
-                        .user(mockUser)
+                        .users(mockUsers)
                         .content("첫 번째 댓글")
                         .build(),
                 CommentEntity.builder()
                         .id(2L)
                         .posts(mockPost2)
-                        .user(mockUser)
+                        .users(mockUsers)
                         .content("두 번째 댓글")
                         .build()
         );
@@ -105,7 +105,7 @@ class CommentServiceTest {
     void createComment_ShouldSaveComment() {
         // Given: commentRepository.save()가 실행될 때 mockComment를 반환하도록 설정
         when(commentRepository.save(any(CommentEntity.class))).thenReturn(mockComment);
-        when(userRepository.findByIdAndDeletedIsFalse(5L)).thenReturn(Optional.of(mockComment.getUser()));
+        when(userRepository.findByIdAndDeletedIsFalse(5L)).thenReturn(Optional.of(mockComment.getUsers()));
         when(postRepository.findByIdAndDeletedIsFalse(100L)).thenReturn(Optional.of(mockComment.getPosts()));
 
         CommentRequest commentRequest = new CommentRequest(5L, 100L, "Test Comment");

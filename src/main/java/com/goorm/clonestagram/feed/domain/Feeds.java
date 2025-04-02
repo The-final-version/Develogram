@@ -1,6 +1,7 @@
 package com.goorm.clonestagram.feed.domain;
 
 import com.goorm.clonestagram.post.domain.Posts;
+import com.goorm.clonestagram.user.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -13,9 +14,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Feed {
+public class Feeds {
 
-    public Feed(Long userId, Long postId) {
+    public Feeds(Long userId, Long postId) {
         this.user = new Users(userId); // 단순 참조용 프록시 객체
         this.post = new Posts(postId); // 단순 참조용 프록시 객체
         this.createdAt = LocalDateTime.now();
@@ -44,4 +45,6 @@ public class Feed {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+//    private boolean deleted;
 }
