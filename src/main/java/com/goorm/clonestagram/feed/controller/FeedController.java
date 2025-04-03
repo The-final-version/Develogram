@@ -1,8 +1,8 @@
 package com.goorm.clonestagram.feed.controller;
 
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
+import com.goorm.clonestagram.feed.dto.SeenRequest;
 import com.goorm.clonestagram.feed.service.FeedService;
-import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/feeds")
@@ -23,42 +21,37 @@ public class FeedController {
 
     private final FeedService feedService;
 
-    /**
-     * ✅ 로그인한 사용자의 피드 조회 (페이징)
-     * 예: GET /api/feed?page=0&size=20
-     */
+    // ✅ 로그인한 사용자의 피드 조회
     @GetMapping
     public ResponseEntity<Page<FeedResponseDto>> getMyFeed(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<FeedResponseDto> feedPage = feedService.getUserFeed(userDetails.getId(), pageable);
-        return ResponseEntity.ok(feedPage);
+        return ResponseEntity.ok(feedService.getUserFeed(userDetails.getId(), pageable));
     }
 
 
+    // ✅ 전체 피드 조회
     @GetMapping("/all")
-    public ResponseEntity<Page<FeedResponseDto>> allFeed(
+    public ResponseEntity<Page<FeedResponseDto>> getAllFeed(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ){
-        Page<FeedResponseDto> feedPage = feedService.getAllFeed(pageable);
-        return ResponseEntity.ok(feedPage);
+    ) {
+        return ResponseEntity.ok(feedService.getAllFeed(pageable));
     }
 
+
+    // ✅ 팔로우 피드 조회
     @GetMapping("/follow")
-    public  ResponseEntity<Page<FeedResponseDto>> followFeed(@AuthenticationPrincipal CustomUserDetails userDetail,
-                                                 @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
-    ){
-        Long userId = userDetail.getId();
-
-        return ResponseEntity.ok(feedService.getFollowFeed(userId, pageable));
+    public ResponseEntity<Page<FeedResponseDto>> getFollowFeed(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(feedService.getFollowFeed(userDetails.getId(), pageable));
     }
 
-    /**
-     * ✅ 사용자가 본 게시물 삭제
-     * 예: DELETE /api/feed/seen
-     * body: { "postIds": [1, 2, 3] }
-     */
+
+    // ✅ 확인한 피드 삭제
     @DeleteMapping("/seen")
     public ResponseEntity<Void> removeSeenFeeds(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -68,17 +61,12 @@ public class FeedController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Request DTO
-    public static class SeenRequest {
-        private List<Long> postIds;
 
-        public List<Long> getPostIds() {
-            return postIds;
-        }
-
-        public void setPostIds(List<Long> postIds) {
-            this.postIds = postIds;
-        }
+    @DeleteMapping("/all")
+    public ResponseEntity<Void> deleteAllFeedsByUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        feedService.deleteAllByUser(userDetails.getId());
+        return ResponseEntity.noContent().build();
     }
 }
-
