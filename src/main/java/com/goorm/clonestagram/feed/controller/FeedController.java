@@ -30,24 +30,23 @@ public class FeedController {
     @GetMapping
     public ResponseEntity<Page<FeedResponseDto>> getMyFeed(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        Page<FeedResponseDto> feedPage = feedService.getUserFeed(userDetails.getId(), page, size);
+        Page<FeedResponseDto> feedPage = feedService.getUserFeed(userDetails.getId(), pageable);
         return ResponseEntity.ok(feedPage);
     }
 
 
     @GetMapping("/all")
-    public ResponseEntity<PostResDto> allFeed(
+    public ResponseEntity<Page<FeedResponseDto>> allFeed(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ){
-
-        return ResponseEntity.ok(feedService.getAllFeed(pageable));
+        Page<FeedResponseDto> feedPage = feedService.getAllFeed(pageable);
+        return ResponseEntity.ok(feedPage);
     }
 
     @GetMapping("/follow")
-    public ResponseEntity<PostResDto> followFeed(@AuthenticationPrincipal CustomUserDetails userDetail,
+    public  ResponseEntity<Page<FeedResponseDto>> followFeed(@AuthenticationPrincipal CustomUserDetails userDetail,
                                                  @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
     ){
         Long userId = userDetail.getId();

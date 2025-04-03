@@ -18,20 +18,23 @@ public interface FeedRepository extends JpaRepository<Feeds, Long> {
     /**
      * 유저의 피드를 게시물 + 작성자(user)까지 함께 페치 조인하여 조회 (페이징 지원)
      */
-    @Query("SELECT f FROM Feeds f " +
-            "JOIN FETCH f.post p " +
-            "JOIN FETCH p.user u " +
-            "WHERE f.user.id = :userId " +
-            "ORDER BY f.createdAt DESC")
+    @Query(
+            value = "SELECT f FROM Feeds f " +
+                    "JOIN FETCH f.post p " +
+                    "JOIN FETCH p.user u " +
+                    "WHERE f.user.id = :userId AND p.deleted = false " +
+                    "ORDER BY f.createdAt DESC",
+            countQuery = "SELECT COUNT(f) FROM Feeds f WHERE f.user.id = :userId"
+    )
     Page<Feeds> findByUserIdWithPostAndUser(@Param("userId") Long userId, Pageable pageable);
 
 
-    @Query("SELECT f FROM Posts f WHERE f.deletedAt IS NULL")
-    Page<Posts> findAllByDeletedIsFalse(Pageable pageable);
+    @Query("SELECT f FROM Feeds f WHERE f.post.deleted = false")
+    Page<Feeds> findAllByDeletedIsFalse(Pageable pageable);
 
 
-    @Query("SELECT f FROM Posts f WHERE f.user.id IN :followIds AND f.deletedAt IS NULL")
-    Page<Posts> findAllByUserIdInAndDeletedIsFalse(@Param("followIds") List<Long> followIds, Pageable pageable);
+    @Query("SELECT f FROM Feeds f WHERE f.user.id IN :followIds AND f.post.deleted = false")
+    Page<Feeds> findAllByUserIdInAndDeletedIsFalse(@Param("followIds") List<Long> followIds, Pageable pageable);
 
 
     void deleteByUserIdAndPostIdIn(Long userId, List<Long> postIds);
@@ -41,4 +44,5 @@ public interface FeedRepository extends JpaRepository<Feeds, Long> {
     List<Feeds> findByUserId(Long userId);
 
     void deleteByPostId(Long postId);
+
 }

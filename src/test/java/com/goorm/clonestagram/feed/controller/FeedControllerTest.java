@@ -1,7 +1,8 @@
 package com.goorm.clonestagram.feed.controller;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.service.FeedService;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +43,7 @@ class FeedControllerTest {
     @Test
     void 피드_조회_성공() {
         // given
-        User user = new User();
+        Users user = new Users();
         user.setId(1L);
         user.setUsername("test_user");
         user.setPassword("password");
@@ -62,11 +65,11 @@ class FeedControllerTest {
 
         Page<FeedResponseDto> mockPage = new PageImpl<>(feedList);
 
-        when(feedService.getUserFeed(eq(1L), anyInt(), anyInt()))
+        Pageable pageable = PageRequest.of(0, 10);
+        when(feedService.getUserFeed(eq(1L), eq(pageable)))
                 .thenReturn(mockPage);
-
         // when
-        ResponseEntity<Page<FeedResponseDto>> response = feedController.getMyFeed(mockUser, 0, 10);
+        ResponseEntity<Page<FeedResponseDto>> response = feedController.getMyFeed(mockUser, pageable);
 
         // then
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
