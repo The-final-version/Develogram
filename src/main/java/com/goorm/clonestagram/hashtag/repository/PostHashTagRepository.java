@@ -12,13 +12,13 @@ import org.springframework.data.repository.query.Param;
 public interface PostHashTagRepository extends JpaRepository<PostHashTags, Long> {
 
     @Query("""
-    SELECT p FROM PostHashTags ph
-    JOIN ph.posts p
-    JOIN ph.hashTags h
-    WHERE h.tagContent LIKE %:keyword%
-    AND p.deleted = false
-    ORDER BY p.createdAt DESC
-""")
+            SELECT p FROM PostHashTags ph
+            JOIN ph.posts p
+            JOIN ph.hashTags h
+            WHERE h.tagContent LIKE %:keyword%
+            AND p.deleted = false
+            ORDER BY p.createdAt DESC
+        """)
     Page<Posts> findPostsByHashtagKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     void deleteAllByPostsId(Long id);
