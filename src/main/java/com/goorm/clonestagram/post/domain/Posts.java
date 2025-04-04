@@ -1,12 +1,13 @@
 package com.goorm.clonestagram.post.domain;
 
-import ch.qos.logback.core.net.SMTPAppenderBase;
-import com.goorm.clonestagram.comment.domain.CommentEntity;
+import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.user.domain.Users;
+
 import jakarta.persistence.*;
 import lombok.*;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -25,82 +26,82 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "posts")
-public class Posts{
+public class Posts {
 
-    public Posts(Long id) {
-        this.id = id;
-    }
+	public Posts(Long id) {
+		this.id = id;
+	}
 
-    /**
-     * 게시물 Primary Key
-     * - 자동 증가 (IDENTITY 전략)
-     */
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	/**
+	 * 게시물 Primary Key
+	 * - 자동 증가 (IDENTITY 전략)
+	 */
+	@Id
+	@Column(name = "id", nullable = false)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private Users user;
 
-    /**
-     * 게시물 내용
-     * - 이미지에 대한 설명 또는 글 내용
-     */
-    @Column(name = "content")
-    private String content;
+	/**
+	 * 게시물 내용
+	 * - 이미지에 대한 설명 또는 글 내용
+	 */
+	@Column(name = "content")
+	private String content;
 
-    /**
-     * 미디어 파일명
-     * - unique한 파일명이기에 select시 사용 가능
-     */
-    @Column(name = "media_url", nullable = false)
-    private String mediaName;
+	/**
+	 * 미디어 파일명
+	 * - unique한 파일명이기에 select시 사용 가능
+	 */
+	@Column(name = "media_url", nullable = false)
+	private String mediaName;
 
-    /**
-     * 콘텐츠 타입
-     * - 이미지, 동영상 타입 구분
-     * - Enum으로 관리
-     */
-    @Column(name = "contents_type")
-    @Enumerated(EnumType.STRING)
-    private ContentType contentType;
+	/**
+	 * 콘텐츠 타입
+	 * - 이미지, 동영상 타입 구분
+	 * - Enum으로 관리
+	 */
+	@Column(name = "contents_type")
+	@Enumerated(EnumType.STRING)
+	private ContentType contentType;
 
-    /**
-     * 게시물 생성 시간
-     * - imageUploadReqDto.toEntity()에서 셋팅
-     */
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+	/**
+	 * 게시물 생성 시간
+	 * - imageUploadReqDto.toEntity()에서 셋팅
+	 */
+	@CreationTimestamp
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt;
 
-    /**
-     * 게시물 수정 시간
-     * - 게시물이 업데이트 될 때 변경됨
-     * - 처음 생성 시 null 가능
-     */
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+	/**
+	 * 게시물 수정 시간
+	 * - 게시물이 업데이트 될 때 변경됨
+	 * - 처음 생성 시 null 가능
+	 */
+	@UpdateTimestamp
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
-    @Column(name = "deleted")
-    private Boolean deleted = false;
+	@Column(name = "deleted")
+	private Boolean deleted = false;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+	@Column(name = "deleted_at")
+	private LocalDateTime deletedAt;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
-    private List<Like> likes;
+	@OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+	private List<Like> likes;
 
-    @OneToMany(mappedBy = "posts", cascade = CascadeType.REMOVE)
-    private List<CommentEntity> comments;
+	@OneToMany(mappedBy = "posts", cascade = CascadeType.REMOVE)
+	private List<Comments> comments;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.deleted == null) {
-            this.deleted = false;
-        }
-    }
+	@PrePersist
+	protected void onCreate() {
+		if (this.deleted == null) {
+			this.deleted = false;
+		}
+	}
 
 }

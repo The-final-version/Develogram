@@ -1,6 +1,6 @@
 package com.goorm.clonestagram.comment.service;
 
-import com.goorm.clonestagram.comment.domain.CommentEntity;
+import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
 import com.goorm.clonestagram.comment.mapper.CommentMapper;
 import com.goorm.clonestagram.exception.CommentNotFoundException;
@@ -31,7 +31,7 @@ public class CommentService {
 	private final PostService postService;
 
 	@Transactional
-	public CommentEntity createComment(CommentEntity comment) {
+	public Comments createComment(Comments comment) {
 		if (!userService.existsByIdAndDeletedIsFalse(comment.getUsers().getId())) {
 			throw new UserNotFoundException(comment.getUsers().getId());
 		}
@@ -43,7 +43,7 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentEntity createCommentWithRollback(CommentRequest commentRequest) {
+	public Comments createCommentWithRollback(CommentRequest commentRequest) {
 		Users users = userService.findByIdAndDeletedIsFalse(commentRequest.getUserId());
 		Posts posts = postService.findByIdAndDeletedIsFalse(commentRequest.getPostId());
 
@@ -51,14 +51,14 @@ public class CommentService {
 	}
 
 	@Transactional(readOnly = true)
-	public CommentEntity getCommentById(Long id) {
+	public Comments getCommentById(Long id) {
 		return commentRepository.findById(id)
 			.orElseThrow(() -> new CommentNotFoundException(id));
 	}
 
 	@Transactional(readOnly = true)
-	public List<CommentEntity> getCommentsByPostId(Long postId) {
-		List<CommentEntity> comments = commentRepository.findByPosts_Id(postId);
+	public List<Comments> getCommentsByPostId(Long postId) {
+		List<Comments> comments = commentRepository.findByPosts_Id(postId);
 
 		if (comments.isEmpty()) {
 			log.info("📭 해당 포스트에 댓글이 없습니다. postId: {}", postId);
@@ -69,7 +69,7 @@ public class CommentService {
 
 	@Transactional
 	public void removeComment(Long commentId, Long requesterId) {
-		CommentEntity comment = commentRepository.findById(commentId)
+		Comments comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new CommentNotFoundException(commentId));
 
 		Long postId = comment.getPosts().getId();
