@@ -76,4 +76,8 @@ public class FollowService {
         return followRepository.findFollowingUserIdsByFollowerId(userId);
     }
 
+    public List<Long> findFollowerIdsByFollowedId(Long followedUserId) {
+        return followRepository.findFollowerIdsByFollowedId(followedUserId);
+    }
+
 }
