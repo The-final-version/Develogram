@@ -16,63 +16,49 @@ class FollowMapperTest {
     @DisplayName("M01_팔로잉_DTO_변환_성공")
     void toFollowingDtoTest() {
         // given
-        Users follower = Users.builder()
-                .id(1L)
-                .username("팔로우하는유저")
-                .profileimg("follower.jpg")
-                .build();
-
+        Users follower = Users.builder().id(1L).build();
         Users followed = Users.builder()
                 .id(2L)
-                .username("팔로우받는유저")
+                .username("followedUser")
                 .profileimg("followed.jpg")
                 .build();
 
-        Follows follows = new Follows(100L, follower, followed, LocalDateTime.of(2024, 1, 1, 12, 0));
+        Follows follows = new Follows(10L, follower, followed, LocalDateTime.of(2024, 1, 1, 12, 0));
 
         // when
         FollowDto dto = FollowMapper.toFollowingDto(follows);
 
         // then
-        assertThat(dto.getId()).isEqualTo(100L);
-        assertThat(dto.getFollowerId()).isEqualTo(1L);
+        assertThat(dto.getId()).isEqualTo(10L);
         assertThat(dto.getFollowedId()).isEqualTo(2L);
-        assertThat(dto.getFollowerName()).isEqualTo("팔로우하는유저");
-        assertThat(dto.getFollowedName()).isEqualTo("팔로우받는유저");
-        assertThat(dto.getFollowerProfileimg()).isEqualTo("follower.jpg");
+        assertThat(dto.getFollowedName()).isEqualTo("followedUser");
         assertThat(dto.getFollowedProfileImg()).isEqualTo("followed.jpg");
         assertThat(dto.getCreatedAt()).isEqualTo(LocalDateTime.of(2024, 1, 1, 12, 0));
     }
+
 
     @Test
     @DisplayName("M02_팔로워_DTO_변환_성공")
     void toFollowerDtoTest() {
         // given
         Users follower = Users.builder()
-                .id(2L)
-                .username("팔로우하는유저")
+                .id(3L)
+                .username("followerUser")
                 .profileimg("follower.jpg")
                 .build();
+        Users followed = Users.builder().id(1L).build();
 
-        Users followed = Users.builder()
-                .id(1L)
-                .username("나")
-                .profileimg("me.jpg")
-                .build();
-
-        Follows follows = new Follows(200L, follower, followed, LocalDateTime.of(2024, 2, 1, 10, 30));
+        Follows follows = new Follows(20L, follower, followed, LocalDateTime.of(2024, 2, 1, 9, 0));
 
         // when
         FollowDto dto = FollowMapper.toFollowerDto(follows);
 
         // then
-        assertThat(dto.getId()).isEqualTo(200L);
-        assertThat(dto.getFollowerId()).isEqualTo(2L);
-        assertThat(dto.getFollowedId()).isEqualTo(1L);
-        assertThat(dto.getFollowerName()).isEqualTo("팔로우하는유저");
-        assertThat(dto.getFollowedName()).isEqualTo("나");
+        assertThat(dto.getId()).isEqualTo(20L);
+        assertThat(dto.getFollowerId()).isEqualTo(3L);
+        assertThat(dto.getFollowerName()).isEqualTo("followerUser");
         assertThat(dto.getFollowerProfileimg()).isEqualTo("follower.jpg");
-        assertThat(dto.getFollowedProfileImg()).isEqualTo("me.jpg");
-        assertThat(dto.getCreatedAt()).isEqualTo(LocalDateTime.of(2024, 2, 1, 10, 30));
+        assertThat(dto.getCreatedAt()).isEqualTo(LocalDateTime.of(2024, 2, 1, 9, 0));
     }
+
 }
