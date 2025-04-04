@@ -58,7 +58,7 @@ class CommentServiceTest {
 
         mockPost = Posts.builder()
                 .id(200L)
-                .users(mockUsers)
+                .user(mockUsers)
                 .content("Test Post")
                 .mediaName("test.jpg")
                 .contentType(ContentType.IMAGE)
@@ -66,7 +66,7 @@ class CommentServiceTest {
 
         mockPost2 = Posts.builder()
                 .id(100L)
-                .users(mockUsers)
+                .user(mockUsers)
                 .content("Test Post")
                 .mediaName("test.jpg")
                 .contentType(ContentType.IMAGE)

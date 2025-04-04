@@ -181,7 +181,7 @@ public class VideoService {
         postHashTagRepository.deleteAllByPostsId(posts.getId());
 
         // 피드 삭제 로직 추가
-        feedService.deleteFeedByPostId(postSeq);
+        feedService.deleteFeedsByPostId(postSeq);
 
     }
 }
