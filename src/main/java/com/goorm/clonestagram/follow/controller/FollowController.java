@@ -3,6 +3,7 @@ package com.goorm.clonestagram.follow.controller;
 import com.goorm.clonestagram.follow.dto.FollowDto;
 import com.goorm.clonestagram.follow.service.FollowService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,10 @@ public class FollowController {
 
     private final FollowService followService;
 
-    @PostMapping("/{follower}/profile/{followed}")
+    @PostMapping(
+            value = "/{follower}/profile/{followed}",
+            produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"
+    )
     public ResponseEntity<String> toggleFollow(@PathVariable Long follower, @PathVariable Long followed) {
         // 팔로우 상태를 확인하고 토글 처리
         followService.toggleFollow(follower, followed);

@@ -66,7 +66,7 @@ class FollowServiceTest {
         Follows follow = new Follows(user, other);
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowingsByFollower(user)).willReturn(List.of(follow));
+        given(followRepository.findFollowedAllByFollower(user)).willReturn(List.of(follow));
 
         List<FollowDto> result = followService.getFollowingList(userId);
 
@@ -84,7 +84,7 @@ class FollowServiceTest {
         Follows follow = new Follows(follower, user);
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowersByFollowed(user)).willReturn(List.of(follow));
+        given(followRepository.findFollowerAllByFollowed(user)).willReturn(List.of(follow));
 
         List<FollowDto> result = followService.getFollowerList(userId);
 
@@ -98,7 +98,7 @@ class FollowServiceTest {
         Long userId = 1L;
         List<Long> followingIds = List.of(2L, 3L);
 
-        given(followRepository.findFollowingUserIdsByFollowerId(userId)).willReturn(followingIds);
+        given(followRepository.findFollowedIdsByFollowerId(userId)).willReturn(followingIds);
 
         List<Long> result = followService.findFollowingUserIdsByFollowerId(userId);
 
@@ -146,7 +146,7 @@ class FollowServiceTest {
     @Test
     void F09_팔로잉_ID_목록_조회_빈리스트_반환() {
         Long userId = 1L;
-        given(followRepository.findFollowingUserIdsByFollowerId(userId)).willReturn(List.of());
+        given(followRepository.findFollowedIdsByFollowerId(userId)).willReturn(List.of());
 
         List<Long> result = followService.findFollowingUserIdsByFollowerId(userId);
 
@@ -161,7 +161,7 @@ class FollowServiceTest {
         Users user = Users.builder().id(userId).build();
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowingsByFollower(user)).willReturn(List.of());
+        given(followRepository.findFollowedAllByFollower(user)).willReturn(List.of());
 
         // when
         List<FollowDto> result = followService.getFollowingList(userId);
@@ -178,7 +178,7 @@ class FollowServiceTest {
         Users user = Users.builder().id(userId).build();
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowersByFollowed(user)).willReturn(List.of());
+        given(followRepository.findFollowerAllByFollowed(user)).willReturn(List.of());
 
         // when
         List<FollowDto> result = followService.getFollowerList(userId);

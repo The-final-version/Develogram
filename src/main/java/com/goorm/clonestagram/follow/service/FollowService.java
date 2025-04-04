@@ -42,7 +42,7 @@ public class FollowService {
     @Transactional(readOnly = true)
     public List<FollowDto> getFollowingList(Long userId) {
         Users user = userService.findByIdAndDeletedIsFalse(userId);
-        return followRepository.findFollowingsByFollower(user).stream()
+        return followRepository.findFollowedAllByFollower(user).stream()
                 .map(FollowMapper::toFollowingDto)
                 .collect(Collectors.toList());
     }
@@ -51,14 +51,14 @@ public class FollowService {
     @Transactional(readOnly = true)
     public List<FollowDto> getFollowerList(Long userId) {
         Users user = userService.findByIdAndDeletedIsFalse(userId);
-        return followRepository.findFollowersByFollowed(user).stream()
+        return followRepository.findFollowerAllByFollowed(user).stream()
                 .map(FollowMapper::toFollowerDto)
                 .collect(Collectors.toList());
     }
 
 
     public List<Long> findFollowingUserIdsByFollowerId(Long userId){
-        return followRepository.findFollowingUserIdsByFollowerId(userId);
+        return followRepository.findFollowedIdsByFollowerId(userId);
     }
 
 
