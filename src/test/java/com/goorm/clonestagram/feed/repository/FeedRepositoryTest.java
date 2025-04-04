@@ -29,15 +29,16 @@ class FeedRepositoryTest {
     @DisplayName("유저 ID로 피드를 페이징 조회한다")
     void findByUserIdWithPostAndUser() {
         // given
-        Users user = TestEntityFactory.createUser("testuser"); // ID 제거
-        Posts post = TestEntityFactory.createPost(user, "Hello"); // ID 제거
+        Users user = TestEntityFactory.createUser("testuser");
+        Posts post = TestEntityFactory.createPost(user, "Hello");
 
         em.persist(user);
         em.persist(post);
 
-        Feeds feed = TestEntityFactory.createFeed(user, post); // ID 제거
+        Feeds feed = TestEntityFactory.createFeed(user, post);
         em.persist(feed);
         em.flush();
+        em.clear();
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -49,19 +50,19 @@ class FeedRepositoryTest {
         assertThat(page.getContent().get(0).getPost().getContent()).isEqualTo("Hello");
     }
 
-
     @Test
     @DisplayName("삭제되지 않은 모든 피드를 조회한다")
     void findAllByDeletedIsFalse() {
         // given
-        Users user = TestEntityFactory.createUser("testuser"); // ID 제거
-        Posts post = TestEntityFactory.createPost(user, "Hello"); // ID 제거
+        Users user = TestEntityFactory.createUser("testuser");
+        Posts post = TestEntityFactory.createPost(user, "Hello");
         Feeds feed = TestEntityFactory.createFeed(user, post);
 
         em.persist(user);
         em.persist(post);
         em.persist(feed);
         em.flush();
+        em.clear();
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -76,10 +77,10 @@ class FeedRepositoryTest {
     @DisplayName("팔로우 유저들의 피드를 조회한다")
     void findAllByUserIdInAndDeletedIsFalse() {
         // given
-        Users user1 = TestEntityFactory.createUser( "user1");
+        Users user1 = TestEntityFactory.createUser("user1");
         Users user2 = TestEntityFactory.createUser("user2");
 
-        Posts post1 = TestEntityFactory.createPost( user1, "hello");
+        Posts post1 = TestEntityFactory.createPost(user1, "hello");
         Posts post2 = TestEntityFactory.createPost(user2, "world");
 
         Feeds feed1 = TestEntityFactory.createFeed(user1, post1);
@@ -92,11 +93,13 @@ class FeedRepositoryTest {
         em.persist(feed1);
         em.persist(feed2);
         em.flush();
+        em.clear();
 
         Pageable pageable = PageRequest.of(0, 10);
+        List<Long> userIds = List.of(user1.getId(), user2.getId());
 
         // when
-        var result = feedRepository.findAllByUserIdInAndDeletedIsFalse(List.of(1L, 2L), pageable);
+        var result = feedRepository.findAllByUserIdInAndDeletedIsFalse(userIds, pageable);
 
         // then
         assertThat(result.getContent()).hasSize(2);
@@ -106,7 +109,7 @@ class FeedRepositoryTest {
     @DisplayName("유저 ID와 postIds로 피드를 삭제한다")
     void deleteByUserIdAndPostIdIn() {
         // given
-        Users user = TestEntityFactory.createUser( "user1");
+        Users user = TestEntityFactory.createUser("user1");
         Posts p1 = TestEntityFactory.createPost(user, "A");
         Posts p2 = TestEntityFactory.createPost(user, "B");
 
@@ -119,10 +122,12 @@ class FeedRepositoryTest {
         em.persist(f1);
         em.persist(f2);
         em.flush();
+        em.clear();
 
         // when
         feedRepository.deleteByUserIdAndPostIdIn(user.getId(), List.of(p1.getId(), p2.getId()));
         em.flush();
+        em.clear();
 
         // then
         List<Feeds> result = feedRepository.findByUserId(user.getId());
