@@ -2,23 +2,26 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'com.goorm'
 version = '0.0.1-SNAPSHOT'
 
-tasks.withType(JavaCompile).configureEach {
-    options.release = 21
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
 }
 
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {
@@ -58,12 +61,81 @@ dependencies {
     testImplementation 'com.h2database:h2'
 }
 
-tasks.named('test') {
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 
     testLogging {
         events "passed", "failed", "skipped"
-        showStandardStreams = true
         exceptionFormat = 'full'
+        showStandardStreams = true
     }
 }
+
+jacocoTestCoverageVerification {
+    dependsOn test
+
+    classDirectories.setFrom(
+            files(
+                    fileTree("$buildDir/classes/java/main") {
+                        include 'com/goorm/clonestagram/feed/**'
+                        include 'com/goorm/clonestagram/follow/**'
+                        exclude '**/dto/**'
+                        exclude '**/config/**'
+                        exclude '**/mapper/**'
+                    }
+            )
+    )
+
+    violationRules {
+        rule {
+            element = 'CLASS'
+            includes = ['com.goorm.clonestagram..*']
+
+            limit {
+                counter = 'METHOD'
+                value = 'COVEREDRATIO'
+                minimum = 0.75
+            }
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.70
+            }
+        }
+    }
+}
+
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        xml.required = true
+        csv.required = false
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+
+    classDirectories.setFrom(
+            files(
+                    fileTree("$buildDir/classes/java/main") {
+                        include 'com/goorm/clonestagram/feed/**'
+                        include 'com/goorm/clonestagram/follow/**'
+                        exclude '**/mapper/**'
+                        exclude '**/dto/**'
+                        exclude '**/mapper/**'
+                    }
+            )
+    )
+}
+
+check.dependsOn jacocoTestCoverageVerification

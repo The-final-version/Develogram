@@ -403,4 +403,130 @@ class FeedServiceTest {
         verify(feedRepository, never()).deleteAll(any());
     }
 
+
+    @Test
+    void F21_팔로우_피드_조회_리스트_null_or_empty_처리() {
+        // given
+        Long userId = 1L;
+        Users user = MockEntityFactory.mockUser(userId, "user");
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(null);
+
+        // when
+        Page<FeedResponseDto> result = feedService.getFollowFeed(userId, pageable);
+
+        // then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(userService).findByIdAndDeletedIsFalse(userId);
+        verify(followService).findFollowingUserIdsByFollowerId(userId);
+        verify(feedRepository, never()).findAllByUserIdInAndDeletedIsFalse(any(), any());
+    }
+
+    @Test
+    void F22_전체_피드_조회_중_예기치_못한_예외() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(feedRepository.findAllByDeletedIsFalse(pageable))
+                .thenThrow(new RuntimeException("예상 못한 오류"));
+
+        // when & then
+        assertThrows(FeedFetchFailedException.class, () -> {
+            feedService.getAllFeed(pageable);
+        });
+
+        verify(feedRepository).findAllByDeletedIsFalse(pageable);
+    }
+
+    @Test
+    void F23_팔로우_피드_DB_예외_발생시_커버() {
+        // given
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        Users user = MockEntityFactory.mockUser(userId, "user");
+
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(List.of(2L, 3L));
+        when(feedRepository.findAllByUserIdInAndDeletedIsFalse(any(), any()))
+                .thenThrow(new RecoverableDataAccessException("DB 오류"));
+
+        // when & then
+        assertThrows(FeedFetchFailedException.class, () -> {
+            feedService.getFollowFeed(userId, pageable);
+        });
+
+        verify(feedRepository).findAllByUserIdInAndDeletedIsFalse(any(), any());
+    }
+
+    @Test
+    void F24_removeSeenFeeds_userId_null_예외_발생() {
+        // given
+        List<Long> postIds = List.of(100L);
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> {
+            feedService.removeSeenFeeds(null, postIds);
+        });
+
+    }
+
+    @Test
+    void F25_deleteAllByUser_userId_null_예외_발생() {
+        // given
+        List<Long> postIds = List.of(100L);
+
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> {
+            feedService.deleteAllByUser(null);
+        });
+    }
+
+    @Test
+    void F23_팔로우목록_없을때_빈피드_반환() {
+        // given
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        Users user = MockEntityFactory.mockUser(userId, "user");
+
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(Collections.emptyList());
+
+        // when
+        Page<FeedResponseDto> result = feedService.getFollowFeed(userId, pageable);
+
+        // then
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements()); // ✅ 빈 피드 반환 확인
+        verify(feedRepository, never()).findAllByUserIdInAndDeletedIsFalse(any(), any());
+    }
+
+    @Test
+    void F24_removeSeenFeeds_postIds_null() {
+        // given
+        Long userId = 1L;
+
+        // when
+        feedService.removeSeenFeeds(userId, null);
+
+        // then
+        verify(feedRepository, never()).deleteByUserIdAndPostIdIn(any(), any());
+    }
+
+    @Test
+    void F25_removeSeenFeeds_postIds_empty() {
+        // given
+        Long userId = 1L;
+        List<Long> postIds = Collections.emptyList();
+
+        // when
+        feedService.removeSeenFeeds(userId, postIds);
+
+        // then
+        verify(feedRepository, never()).deleteByUserIdAndPostIdIn(any(), any());
+    }
+
 }
