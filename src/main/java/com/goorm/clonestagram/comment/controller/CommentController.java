@@ -57,7 +57,7 @@ public class CommentController {
 
 	@PostMapping
 	public CommentResponse create(@RequestBody CommentRequest request) throws Exception {
-		Comments entity = commentService.createCommentWithRollback(request);
+		Comments entity = commentService.createComment(request);
 
 		return CommentResponse.builder()
 			.id(entity.getId())
