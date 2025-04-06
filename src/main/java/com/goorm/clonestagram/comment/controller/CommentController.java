@@ -26,9 +26,9 @@ public class CommentController {
 	public CommentResponse getCommentById(@PathVariable Long id) {
 		Comments entity = commentService.getCommentById(id);
 
-		if (entity == null) {
-			return CommentResponse.builder().build();
-		}
+		// if (entity == null) {
+		// 	return CommentResponse.builder().build();
+		// }
 		return CommentResponse.builder()
 			.id(entity.getId())
 			.userId(entity.getUsers().getId())
