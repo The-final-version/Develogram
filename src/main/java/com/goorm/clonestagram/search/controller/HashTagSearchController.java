@@ -16,19 +16,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping
+@RequestMapping("tags")
 @RequiredArgsConstructor
 public class HashTagSearchController {
 
     private final HashTagSearchService hashTagSearchService;
 
-    @GetMapping("/tag")
+    @GetMapping("")
     public ResponseEntity<SearchPostResDto> searchHashTag(@RequestParam @NotBlank String keyword,
                                                           @PageableDefault(size = 20, sort = "posts.createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(hashTagSearchService.searchHashTagByKeyword(keyword, pageable));
     }
 
-    @GetMapping("/tag/suggestions")
+    @GetMapping("suggestions")
     public ResponseEntity<List<HashtagSuggestionDto>> suggestHashtags(
         @RequestParam("keyword") String keyword) {
         return ResponseEntity.ok(hashTagSearchService.getHashtagSuggestions(keyword));

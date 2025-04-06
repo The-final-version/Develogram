@@ -28,7 +28,7 @@ public class UserSearchController {
         return ResponseEntity.ok(userSearchService.searchUserByKeyword(keyword, pageable));
     }
 
-    @GetMapping("/user/suggestions")
+    @GetMapping("/suggestions")
     public ResponseEntity<List<UserSuggestionDto>> suggestUsers(@RequestParam String keyword) {
         List<UserSuggestionDto> suggestions = userSearchService.findUsersByKeyword(keyword);
         return ResponseEntity.ok(suggestions);
