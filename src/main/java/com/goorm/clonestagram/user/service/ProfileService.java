@@ -52,8 +52,8 @@ public class ProfileService {
     public UserProfileDto getUserProfile(Long userId) {
         // 사용자 정보를 DB에서 조회, 존재하지 않으면 예외 발생
 
-        int followerCount = followRepository.getFollowerCount(userId);
-        int followingCount = followRepository.getFollowingCount(userId);
+        int followerCount = followRepository.getFollowerCountByFollowedId(userId);
+        int followingCount = followRepository.getFollowingCountByFollowerId(userId);
 
 
         Users users = userRepository.findByIdAndDeletedIsFalse(userId)

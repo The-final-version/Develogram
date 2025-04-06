@@ -1,12 +1,16 @@
 package com.goorm.clonestagram.common.exception;
 
+
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpStatus;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,12 +19,11 @@ import com.goorm.clonestagram.exception.CommentNotFoundException;
 
 /**
  * Global Exception Handler
- * - @RestControllerAdvice
- * - 모든 @RestController에서 발생하는 예외를 가로채서 공통적으로 처리
- * - 컨트롤러에 try-catch 문을 반복해서 작성하지 않고 여기서 한 번에 처리 가능
+ * - 모든 컨트롤러 예외를 전역적으로 처리
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
 
 	/**
 	 * IllegalArgumentException 처리 메서드
@@ -71,4 +74,34 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
 	}
 
+
+    /**
+     * IllegalArgumentException → 400 반환
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException e){
+        return ResponseEntity.badRequest().body(
+                ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+        );
+    }
+
+    /**
+     * RuntimeException → 500 반환
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponseDto> handleRuntimeException(RuntimeException e){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+        );
+    }
+
+    /**
+     * 유효성 검증 실패 → 400 반환
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException e) {
+        return ResponseEntity.badRequest().body(
+                ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+        );
+    }
 }

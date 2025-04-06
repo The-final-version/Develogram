@@ -4,7 +4,7 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ public class LikeServiceTest {
     @InjectMocks
     private LikeService likeService;
 
-    private User user;
+    private Users user;
     private Posts post;
 
     @BeforeEach
@@ -40,7 +40,7 @@ public class LikeServiceTest {
         MockitoAnnotations.openMocks(this);
 
         // Test user
-        user = new User();
+        user = new Users();
         user.setId(1L);
         user.setUsername("user1");
 
@@ -55,7 +55,7 @@ public class LikeServiceTest {
         // Given: User and posts are available, and no existing like in the database.
         when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(post));
-        when(likeRepository.findByUserIdAndPostsId(1L, 1L)).thenReturn(Optional.empty());  // No like exists
+        when(likeRepository.findByUser_IdAndPost_Id(1L, 1L)).thenReturn(Optional.empty());  // No like exists
 
         // When: User toggles like
         likeService.toggleLike(1L, 1L);
@@ -70,11 +70,11 @@ public class LikeServiceTest {
         // Given: User and posts are available, and existing like is found in the database.
         Like existingLike = new Like();
         existingLike.setUser(user);
-        existingLike.setPosts(post);
+        existingLike.setPost(post);
 
         when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(post));
-        when(likeRepository.findByUserIdAndPostsId(1L, 1L)).thenReturn(Optional.of(existingLike));  // Like already exists
+        when(likeRepository.findByUser_IdAndPost_Id(1L, 1L)).thenReturn(Optional.of(existingLike));  // Like already exists
 
         // When: User toggles like
         likeService.toggleLike(1L, 1L);

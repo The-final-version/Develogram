@@ -1,5 +1,7 @@
 package com.goorm.clonestagram.feed.service;
 
+import com.goorm.clonestagram.exception.FeedFetchFailedException;
+import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
@@ -11,8 +13,10 @@ import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.service.PostService;
 import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.dto.UserProfileDto;
+import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,90 +30,117 @@ public class FeedService {
     private final FeedRepository feedRepository;
     private final FollowService followService;
     private final UserService userService;
-    private final PostService postService;
     private final FollowRepository followRepository;
 
+    @Transactional(readOnly = true)
+    public Page<FeedResponseDto> getUserFeed(Long userId, Pageable pageable) {
+        Users user = userService.findByIdAndDeletedIsFalse(userId);
 
-    @Transactional
-    public Page<FeedResponseDto> getUserFeed(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-
-        Page<Feeds> feeds = feedRepository.findByUserIdWithPostAndUser(userId, pageable);
-
-        return feeds.map(FeedResponseDto::from);
-    }
-
-
-
-    public PostResDto getAllFeed(Pageable pageable) {
-        //1. DB에 저장된 모든 피드 조회
-        Page<Posts> myFeed = feedRepository.findAllByDeletedIsFalse(pageable);
-
-        //2. 모든 작업이 완료된 경우 반환
-        return PostResDto.builder()
-                .feed(myFeed.map(PostInfoDto::fromEntity))
-                .build();
-    }
-
-
-    public PostResDto getFollowFeed(Long userId, Pageable pageable) {
-        // 1. 유저 조회
-        Users users = userService.findByIdAndDeletedIsFalse(userId);
-
-        // 2. 팔로잉 ID 목록 조회
-        List<Long> followList = followService.findFollowingUserIdsByFollowerId(users.getId());
-
-        // 3. 팔로잉 유저가 없으면 빈 페이지 리턴
-        if (followList == null || followList.isEmpty()) {
-            return PostResDto.builder()
-                    .user(UserProfileDto.fromEntity(users))
-                    .feed(Page.empty(pageable)) // ✅ 빈 페이지로 리턴
-                    .build();
+        try {
+            Page<Feeds> feeds = feedRepository.findByUserIdWithPostAndUser(userId, pageable);
+            return feeds.map(FeedResponseDto::from);
+        } catch (DataAccessException e) {
+            throw new FeedFetchFailedException("피드 조회 중 DB 오류가 발생했습니다.");
         }
-
-        // 4. 해당 유저들의 게시글 조회
-        Page<Posts> postsLists = feedRepository.findAllByUserIdInAndDeletedIsFalse(followList, pageable);
-
-        // 5. 리턴
-        return PostResDto.builder()
-                .user(UserProfileDto.fromEntity(users))
-                .feed(postsLists.map(PostInfoDto::fromEntity))
-                .build();
     }
+
+
+    @Transactional(readOnly = true)
+    public Page<FeedResponseDto> getAllFeed(Pageable pageable) {
+
+        try {
+            Page<Feeds> allFeed = feedRepository.findAllByDeletedIsFalse(pageable);
+            return allFeed.map(FeedResponseDto::from);
+        } catch (DataAccessException e) {
+            throw new FeedFetchFailedException("피드 전체 조회 중 DB 오류가 발생했습니다.");
+        } catch (Exception e) {
+            throw new FeedFetchFailedException("피드 전체 조회 중 예기치 못한 오류가 발생했습니다.");
+        }
+    }
+
+
+    @Transactional(readOnly = true)
+    public Page<FeedResponseDto> getFollowFeed(Long userId, Pageable pageable) {
+        Users user = userService.findByIdAndDeletedIsFalse(userId);
+
+        try {
+            List<Long> followList = followService.findFollowingUserIdsByFollowerId(user.getId());
+
+            if (followList == null || followList.isEmpty()) {
+                Page<Feeds> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+                return emptyPage.map(FeedResponseDto::from);
+            }
+
+            Page<Feeds> followingFeed = feedRepository.findAllByUserIdInAndDeletedIsFalse(followList, pageable);
+            return followingFeed.map(FeedResponseDto::from);
+
+        } catch (DataAccessException e) {
+            throw new FeedFetchFailedException("팔로우 피드 조회 중 DB 오류가 발생했습니다.");
+        } catch (Exception e) {
+            throw new FeedFetchFailedException("팔로우 피드 조회 중 예기치 못한 오류가 발생했습니다.");
+        }
+    }
+
 
 
     @Transactional
     public void removeSeenFeeds(Long userId, List<Long> postIds) {
-        if (postIds == null || postIds.isEmpty()) return;
+        if (userId == null) {
+            throw new IllegalArgumentException("userId는 null일 수 없습니다.");
+        }
+
+        if (postIds == null || postIds.isEmpty()) {
+            return; // 아무 것도 삭제하지 않음
+        }
+
         feedRepository.deleteByUserIdAndPostIdIn(userId, postIds);
     }
 
 
     @Transactional
     public void deleteAllByUser(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId는 null일 수 없습니다.");
+        }
+
         List<Feeds> userFeeds = feedRepository.findByUserId(userId);
-        feedRepository.deleteAll(userFeeds);
+        if (!userFeeds.isEmpty()) {
+            feedRepository.deleteAll(userFeeds);
+        }
     }
+
 
 
     //A의 게시물이 업로드될 때: A 팔로워들의 피드 생성
+    @Transactional
     public void createFeedForFollowers(Posts post) {
-        Long userId = post.getUser().getId();
-        List<Long> followerIds = followRepository.findFollowerIdsByFollowedId(userId);
+        Long postOwnerId = post.getUser().getId();
+        List<Long> followerIds = followService.findFollowerIdsByFollowedId(postOwnerId);
 
-        if (followerIds == null || followerIds.isEmpty()) {
+        if (followerIds.isEmpty()) {
             return;
         }
 
-        List<Feeds> feeds = followerIds.stream()
-                .map(followerId -> new Feeds(followerId, post.getId()))
-                .toList();
-
+        List<Feeds> feeds = convertToFeeds(followerIds, post.getId());
         feedRepository.saveAll(feeds);
     }
 
+
+
+    private List<Feeds> convertToFeeds(List<Long> followerIds, Long postId) {
+        return followerIds.stream()
+                .map(followerId -> new Feeds(followerId, postId))
+                .toList();
+    }
+
+
     // 게시물이 삭제될 때: 해당 게시물에 대한 피드 전부 삭제
-    public void deleteFeedByPostId(Long postId) {
+    @Transactional
+    public void deleteFeedsByPostId(Long postId) {
+        if (postId == null) {
+            throw new IllegalArgumentException("postId는 null일 수 없습니다.");
+        }
         feedRepository.deleteByPostId(postId);
     }
+
 }

@@ -12,7 +12,7 @@ import com.goorm.clonestagram.post.dto.upload.ImageUploadReqDto;
 import com.goorm.clonestagram.post.dto.upload.ImageUploadResDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ class ImageServiceTest {
         imageUploadReqDto.setFile(mockMultipartFile);
         imageUploadReqDto.setContent("테스트 내용");
 
-        User testUser = User.builder()
+        Users testUser = Users.builder()
                 .id(1L)
                 .username("testuser")
                 .email("testuser@example.com")
@@ -135,7 +135,7 @@ class ImageServiceTest {
                 "file", "old-image.jpg","image/jpeg","dummy image content".getBytes()
         );
 
-        User testUser = User.builder()
+        Users testUser = Users.builder()
                 .id(1L)
                 .username("testuser")
                 .email("testuser@example.com")
@@ -190,7 +190,7 @@ class ImageServiceTest {
                 "file", "image.jpg","image/jpeg","dummy image content".getBytes()
         );
 
-        User testUser = User.builder()
+        Users testUser = Users.builder()
                 .id(1L)
                 .username("testuser")
                 .email("testuser@example.com")
@@ -220,7 +220,7 @@ class ImageServiceTest {
         verify(postsRepository).findByIdAndDeletedIsFalse(tempPost.getId());
         verify(postHashTagRepository).deleteAllByPostsId(tempPost.getId());
         verify(softDeleteRepository).save(any(SoftDelete.class));
-        verify(feedService).deleteFeedByPostId(tempPost.getId()); // ✅ feedService 호출 확인
+        verify(feedService).deleteFeedsByPostId(tempPost.getId()); // ✅ feedService 호출 확인
     }
 
     /**

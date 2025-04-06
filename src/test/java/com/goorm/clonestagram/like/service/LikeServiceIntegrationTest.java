@@ -4,7 +4,7 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ public class LikeServiceIntegrationTest {
     @Test
     public void testToggleLike() {
         // Given: 테스트용 사용자와 게시물 생성
-        User user = new User();
+        Users user = new Users();
         user.setUsername("testUser");
         user.setEmail("test@example.com");
         user.setPassword("password");
@@ -57,7 +57,7 @@ public class LikeServiceIntegrationTest {
         likeService.toggleLike(user.getId(), post.getId());
 
         // Then: 좋아요가 제대로 생성되었는지 확인
-        Optional<Like> like = likeRepository.findByUserIdAndPostsId(user.getId(), post.getId());
+        Optional<Like> like = likeRepository.findByUser_IdAndPost_Id(user.getId(), post.getId());
         assertTrue(like.isPresent(), "좋아요가 생성되어야 합니다.");
         assertEquals(1L, likeService.getLikeCount(post.getId()), "좋아요 개수가 1이어야 합니다.");
 
@@ -65,7 +65,7 @@ public class LikeServiceIntegrationTest {
         likeService.toggleLike(user.getId(), post.getId());
 
         // Then: 좋아요가 제대로 취소되었는지 확인
-        like = likeRepository.findByUserIdAndPostsId(user.getId(), post.getId());
+        like = likeRepository.findByUser_IdAndPost_Id(user.getId(), post.getId());
         assertFalse(like.isPresent(), "좋아요가 취소되어야 합니다.");
         assertEquals(0L, likeService.getLikeCount(post.getId()), "좋아요 개수가 0이어야 합니다.");
     }
@@ -73,14 +73,14 @@ public class LikeServiceIntegrationTest {
     @Test
     public void testGetLikeCount() {
         // Given: 테스트용 사용자와 게시물, 다중 좋아요 생성
-        User user1 = new User();
+        Users user1 = new Users();
         user1.setUsername("user1");
         user1.setEmail("user1@example.com");
         user1.setPassword("password1");
         user1.setDeleted(false);
         user1 = userRepository.save(user1);
 
-        User user2 = new User();
+        Users user2 = new Users();
         user2.setUsername("user2");
         user2.setEmail("user2@example.com");
         user2.setPassword("password2");

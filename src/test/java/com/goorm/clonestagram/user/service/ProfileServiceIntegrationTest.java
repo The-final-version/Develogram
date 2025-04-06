@@ -1,6 +1,6 @@
 package com.goorm.clonestagram.user.service;
 
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.dto.UserProfileDto;
 import com.goorm.clonestagram.user.dto.UserProfileUpdateDto;
 import com.goorm.clonestagram.user.repository.UserRepository;
@@ -36,12 +36,12 @@ public class ProfileServiceIntegrationTest {
     @Autowired
     private ImageService imageService;
 
-    private User testUser;
+    private Users testUser;
 
     @BeforeEach
     public void setUp() {
         // 테스트용 유저 생성
-        testUser = User.builder()
+        testUser = Users.builder()
                 .username("testUser")
                 .email("test@example.com")
                 .password("testPassword")
@@ -66,7 +66,6 @@ public class ProfileServiceIntegrationTest {
     public void testUpdateUserProfile() {
         // 테스트: 사용자 프로필 수정
         UserProfileUpdateDto updateDto = new UserProfileUpdateDto();
-        updateDto.setUsername("updatedUser");
         updateDto.setBio("Updated bio");
 
         // 이미지 업로드는 Mock 처리해야 할 수 있음, 테스트 목적상 필드값만 업데이트
@@ -81,7 +80,6 @@ public class ProfileServiceIntegrationTest {
     public void testUpdateUserProfileWithImage() {
         // 이미지 업로드가 포함된 프로필 업데이트 테스트
         UserProfileUpdateDto updateDto = new UserProfileUpdateDto();
-        updateDto.setUsername("userWithNewProfileImage");
         updateDto.setBio("Updated bio with image");
 
         // 실제 이미지 업로드는 Mock 처리할 수 있지만, 여기에선 이미지만 업데이트하는 테스트

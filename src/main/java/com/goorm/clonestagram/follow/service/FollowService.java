@@ -24,7 +24,6 @@ public class FollowService {
 
     @Transactional
     public void toggleFollow(Long followerId, Long followedId) {
-
         if (followerId.equals(followedId)) {
             throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
         }
@@ -33,47 +32,38 @@ public class FollowService {
         Users followed = userService.findByIdAndDeletedIsFalse(followedId);
 
         followRepository.findByFollowerAndFollowed(follower, followed)
-                .ifPresentOrElse(follows -> {
-                    followRepository.delete(follows);
-                }, () -> {
-                    Follows follows = new Follows(follower, followed);
-                    followRepository.save(follows);
-                });
+                .ifPresentOrElse(
+                        followRepository::delete,
+                        () -> followRepository.save(new Follows(follower, followed))
+                );
     }
 
 
     @Transactional(readOnly = true)
     public List<FollowDto> getFollowingList(Long userId) {
         Users user = userService.findByIdAndDeletedIsFalse(userId);
-        List<Follows> followsList = followRepository.findFollowingsByFollower(user); // ✅ 수정
-
-        if (followsList == null || followsList.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return followsList.stream()
-                .map(FollowMapper::toFollowingDto) // ✅ 수정
+        return followRepository.findFollowedAllByFollower(user).stream()
+                .map(FollowMapper::toFollowingDto)
                 .collect(Collectors.toList());
     }
+
 
     @Transactional(readOnly = true)
     public List<FollowDto> getFollowerList(Long userId) {
         Users user = userService.findByIdAndDeletedIsFalse(userId);
-        List<Follows> followsList = followRepository.findFollowersByFollowed(user);
-
-        if (followsList == null || followsList.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return followsList.stream()
-                .map(FollowMapper::toFollowerDto) // ✅ 수정
+        return followRepository.findFollowerAllByFollowed(user).stream()
+                .map(FollowMapper::toFollowerDto)
                 .collect(Collectors.toList());
     }
 
 
-
     public List<Long> findFollowingUserIdsByFollowerId(Long userId){
-        return followRepository.findFollowingUserIdsByFollowerId(userId);
+        return followRepository.findFollowedIdsByFollowerId(userId);
+    }
+
+
+    public List<Long> findFollowerIdsByFollowedId(Long followedUserId) {
+        return followRepository.findFollowerIdsByFollowedId(followedUserId);
     }
 
 }
