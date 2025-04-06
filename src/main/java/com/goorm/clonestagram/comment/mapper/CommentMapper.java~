@@ -15,11 +15,9 @@ public class CommentMapper {
 			.content(request.getContent())
 			.build();
 	}
-
 	public static CommentRequest toRequest(Comments comments) {
 		return new CommentRequest(comments.getUsers().getId(), comments.getPosts().getId(), comments.getContent());
 	}
-
 	public static CommentResponse toResponse(Comments comments) {
 		return new CommentResponse(
 			comments.getId(),
