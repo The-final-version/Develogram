@@ -6,11 +6,15 @@ import com.goorm.clonestagram.user.dto.UserProfileUpdateDto;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.post.repository.PostsRepository;
+import com.goorm.clonestagram.post.service.PostService;
+import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -30,6 +34,12 @@ public class ProfileServiceTest {
 
     @Mock
     private PostsRepository postsRepository;
+
+    @Mock
+    private PostService postService;
+
+    @Mock
+    private SoftDeleteRepository softDeleteRepository;
 
     @InjectMocks
     private ProfileService profileService;
@@ -60,8 +70,9 @@ public class ProfileServiceTest {
     public void getUserProfile_Success() {
         // given
         when(userRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(testUser));
-        when(followRepository.getFollowerCount(anyLong())).thenReturn(10);
-        when(followRepository.getFollowingCount(anyLong())).thenReturn(5);
+        when(followRepository.getFollowerCountByFollowedId(anyLong())).thenReturn(10);
+        when(followRepository.getFollowingCountByFollowerId(anyLong())).thenReturn(5);
+        when(postsRepository.findAllByUserIdAndDeletedIsFalse(anyLong(), any(Pageable.class))).thenReturn(Page.empty());
 
         // when
         UserProfileDto profile = profileService.getUserProfile(1L);

@@ -172,7 +172,7 @@ public class VideoServiceTest {
         // then
         assertTrue(testPost.getDeleted());
         assertNotNull(testPost.getDeletedAt());
-        verify(feedService).deleteFeedByPostId(1L);
+        verify(feedService).deleteFeedsByPostId(1L);
         verify(softDeleteRepository).save(any(SoftDelete.class));
     }
 

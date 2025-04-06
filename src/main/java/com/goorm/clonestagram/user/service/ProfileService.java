@@ -72,6 +72,8 @@ public class ProfileService {
                 .profileimg(users.getProfileimg())
                 .createdAt(users.getCreatedAt())
                 .updatedAt(users.getUpdatedAt())
+                .followerCount(followerCount)
+                .followingCount(followingCount)
                 .bio(users.getBio())
                 .build();
     }
@@ -154,6 +156,7 @@ public class ProfileService {
 
         users.setDeleted(true);
         users.setDeletedAt(LocalDateTime.now());
+        userRepository.save(users);
         softDeleteRepository.save(new SoftDelete(null, EntityType.USER, users.getId(), users.getDeletedAt()));
     }
 }
