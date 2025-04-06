@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import com.goorm.clonestagram.comment.domain.CommentEntity;
+import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.user.domain.Users;
@@ -32,7 +32,7 @@ public class CommentRepositoryTest {
 	@Autowired
 	UserRepository userRepository;
 
-	CommentEntity comment;
+	Comments comment;
 	Users users;
 	Posts posts;
 
@@ -54,19 +54,19 @@ public class CommentRepositoryTest {
 	// commentRepository.save(comment)
 	@Nested
 	@DisplayName("댓글 저장 테스트")
-	class saveTest {
+	class SaveTest {
 		@Test
 		@DisplayName("댓글 저장을 성공하면 저장된 댓글 객체를 반환한다.")
 		void success() {
 			// given
-			comment = CommentEntity.builder()
+			comment = Comments.builder()
 				.users(users)
 				.posts(posts)
 				.content("Confirm this text-saveTest")
 				.build();
 
 			// when
-			CommentEntity savedComment = commentRepository.save(comment);
+			Comments savedComment = commentRepository.save(comment);
 
 			//then
 			assertThat(savedComment.getId()).isNotNull();
@@ -77,12 +77,12 @@ public class CommentRepositoryTest {
 	// commentRepository.findById(id)
 	@Nested
 	@DisplayName("댓글 findById 테스트")
-	class findByIdTest {
+	class FindByIdTest {
 		@Test
 		@DisplayName("댓글findById를 성공하면 찾는 댓글 객체를 반환하는지 확인하는 테스트")
 		void success() {
 			// given
-			comment = CommentEntity.builder()
+			comment = Comments.builder()
 				.users(users)
 				.posts(posts)
 				.content("Confirm this text-findByIdTest")
@@ -90,7 +90,7 @@ public class CommentRepositoryTest {
 
 			// when
 			commentRepository.save(comment);
-			Optional<CommentEntity> foundComment = commentRepository.findById(comment.getId());
+			Optional<Comments> foundComment = commentRepository.findById(comment.getId());
 
 			// then
 			assertThat(foundComment).isPresent();
@@ -102,18 +102,18 @@ public class CommentRepositoryTest {
 	// commentRepository.findByPosts_Id(postId)
 	@Nested
 	@DisplayName("post Id로 댓글 목록 조회 테스트")
-	class findByPosts_IdTest {
+	class FindByPosts_IdTest {
 		@Test
 		@DisplayName("post Id로 댓글 목록을 조회하면 리스트를 반환하는지 확인하는 테스트")
 		void success() {
 			// given
-			CommentEntity comment1 = CommentEntity.builder()
+			Comments comment1 = Comments.builder()
 				.users(users).posts(posts).content("Confirm this text1")
 				.build();
-			CommentEntity comment2 = CommentEntity.builder()
+			Comments comment2 = Comments.builder()
 				.users(users).posts(posts).content("Confirm this text2")
 				.build();
-			CommentEntity comment3 = CommentEntity.builder()
+			Comments comment3 = Comments.builder()
 				.users(users).posts(posts).content("Confirm this text3")
 				.build();
 			commentRepository.save(comment1);
@@ -121,7 +121,7 @@ public class CommentRepositoryTest {
 			commentRepository.save(comment3);
 
 			// when
-			List<CommentEntity> result = commentRepository.findByPosts_Id(posts.getId());
+			List<Comments> result = commentRepository.findByPosts_Id(posts.getId());
 
 			//then
 			assertThat(result).hasSize(3);
@@ -132,12 +132,12 @@ public class CommentRepositoryTest {
 	// commentRepository.deleteById(id)
 	@Nested
 	@DisplayName("댓글 삭제 테스트")
-	class deleteByIdTest {
+	class DeleteByIdTest {
 		@Test
 		@DisplayName("댓글을 삭제하고 나면 더이상 조회되지 않아야 한다.")
 		void success() {
 			// given
-			comment = CommentEntity.builder()
+			comment = Comments.builder()
 				.users(users)
 				.posts(posts)
 				.content("Confirm this text-deleteByIdTest")
@@ -146,7 +146,7 @@ public class CommentRepositoryTest {
 
 			// when
 			commentRepository.deleteById(comment.getId());
-			Optional<CommentEntity> foundComment = commentRepository.findById(comment.getId());
+			Optional<Comments> foundComment = commentRepository.findById(comment.getId());
 
 			// then
 			assertThat(foundComment).isEmpty();

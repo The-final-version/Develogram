@@ -5,6 +5,7 @@ import com.goorm.clonestagram.comment.dto.CommentRequest;
 import com.goorm.clonestagram.comment.mapper.CommentMapper;
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
+import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
 import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.comment.repository.CommentRepository;
@@ -31,24 +32,21 @@ public class CommentService {
 	private final PostService postService;
 
 	@Transactional
-	public Comments createComment(Comments comment) {
-		if (!userService.existsByIdAndDeletedIsFalse(comment.getUsers().getId())) {
-			throw new UserNotFoundException(comment.getUsers().getId());
-		}
-		if (!postService.existsByIdAndDeletedIsFalse(comment.getPosts().getId())) {
-			throw new PostNotFoundException(comment.getPosts().getId());
-		}
+	public Comments createComment(CommentRequest commentRequest) {
+		Comments comment = CommentMapper.toEntity(commentRequest,
+			userService.findByIdAndDeletedIsFalse(commentRequest.getUserId()),
+			postService.findByIdAndDeletedIsFalse(commentRequest.getPostId()));
 
 		return commentRepository.save(comment);
 	}
 
-	@Transactional
-	public Comments createCommentWithRollback(CommentRequest commentRequest) {
-		Users users = userService.findByIdAndDeletedIsFalse(commentRequest.getUserId());
-		Posts posts = postService.findByIdAndDeletedIsFalse(commentRequest.getPostId());
-
-		return commentRepository.save(CommentMapper.toEntity(commentRequest, users, posts));
-	}
+	// @Transactional
+	// public Comments createCommentWithRollback(CommentRequest commentRequest) {
+	// 	Users users = userService.findByIdAndDeletedIsFalse(commentRequest.getUserId());
+	// 	Posts posts = postService.findByIdAndDeletedIsFalse(commentRequest.getPostId());
+	//
+	// 	return commentRepository.save(CommentMapper.toEntity(commentRequest, users, posts));
+	// }
 
 	@Transactional(readOnly = true)
 	public Comments getCommentById(Long id) {
@@ -58,6 +56,10 @@ public class CommentService {
 
 	@Transactional(readOnly = true)
 	public List<Comments> getCommentsByPostId(Long postId) {
+		if (!postService.existsByIdAndDeletedIsFalse(postId)) {
+			throw new PostNotFoundException(postId);
+		}
+
 		List<Comments> comments = commentRepository.findByPosts_Id(postId);
 
 		if (comments.isEmpty()) {
@@ -76,7 +78,7 @@ public class CommentService {
 		Posts post = postService.findByIdAndDeletedIsFalse(postId, "Comment");
 
 		if (!comment.getUsers().getId().equals(requesterId) && !post.getUser().getId().equals(requesterId)) {
-			throw new UserNotFoundException(comment.getUsers().getId());
+			throw new UnauthorizedCommentAccessException();
 		}
 
 		log.info("🗑️ 댓글 삭제 요청 - Comment ID: {}, 요청자 ID: {}", commentId, requesterId);
