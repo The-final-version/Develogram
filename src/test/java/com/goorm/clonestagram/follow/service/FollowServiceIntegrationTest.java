@@ -3,6 +3,7 @@ package com.goorm.clonestagram.follow.service;
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

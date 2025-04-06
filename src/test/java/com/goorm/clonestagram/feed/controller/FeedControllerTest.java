@@ -1,99 +1,116 @@
 package com.goorm.clonestagram.feed.controller;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.service.FeedService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.util.CustomUserDetails;
-import org.junit.jupiter.api.BeforeEach;
+import com.goorm.clonestagram.util.TestSecurityUtil;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.http.ResponseEntity;
-import java.time.LocalDateTime;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
+@SpringBootTest
+@AutoConfigureMockMvc
 class FeedControllerTest {
 
-    @Mock
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
     private FeedService feedService;
 
-    @InjectMocks
-    private FeedController feedController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public FeedService feedService() {
+            return mock(FeedService.class);
+        }
     }
 
-//
-//    public FeedControllerUnitTest() {
-//        MockitoAnnotations.openMocks(this); // 🔄 @BeforeEach 안 써도 됨
-//    }
-
     @Test
-    void 피드_조회_성공() {
-        // given
-        Users user = new Users();
-        user.setId(1L);
-        user.setUsername("test_user");
-        user.setPassword("password");
-        user.setEmail("test@naver.com");
-        CustomUserDetails mockUser = new CustomUserDetails(user); // 가짜 사용자
-
-        List<FeedResponseDto> feedList = List.of(
+    void F01C_마이피드_조회_성공() throws Exception {
+        Page<FeedResponseDto> mockPage = new PageImpl<>(List.of(
                 FeedResponseDto.builder()
-                        .feedId(1L)
-                        .postId(100L)
+                        .postId(1L)
+                        .content("내용")
                         .userId(2L)
-                        .username("other_user")
-                        .content("Hello world")
-                        .mediaUrl("https://cdn.img")
-                        .content("IMAGE")
-                        .createdAt(LocalDateTime.now())
                         .build()
-        );
+        ));
 
-        Page<FeedResponseDto> mockPage = new PageImpl<>(feedList);
+        when(feedService.getUserFeed(eq(1L), any(Pageable.class))).thenReturn(mockPage);
 
-        when(feedService.getUserFeed(eq(1L), anyInt(), anyInt()))
-                .thenReturn(mockPage);
-
-        // when
-        ResponseEntity<Page<FeedResponseDto>> response = feedController.getMyFeed(mockUser, 0, 10);
-
-        // then
-        assertThat(response.getStatusCodeValue()).isEqualTo(200);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getContent()).hasSize(1);
-        assertThat(response.getBody().getContent().get(0).getPostId()).isEqualTo(100L);
+        mockMvc.perform(get("/feeds")
+                        .with(authentication(TestSecurityUtil.mockUserDetails(1L))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].postId").value(1L))
+                .andExpect(jsonPath("$.content[0].content").value("내용"));
     }
+
 
     @Test
-    void 피드_삭제_성공() {
+    void F02C_전체피드_조회_성공() throws Exception {
         // given
-        Long userId = 1L;
-        List<Long> postIds = List.of(101L, 102L);
+        FeedResponseDto dto = new FeedResponseDto(1L, 10L, 1L, "username", "작성자", null, null);
+        Page<FeedResponseDto> page = new PageImpl<>(List.of(dto));
+        given(feedService.getAllFeed(any(Pageable.class))).willReturn(page);
 
-        CustomUserDetails userDetails = mock(CustomUserDetails.class);
-        when(userDetails.getId()).thenReturn(userId);
-
-        FeedController.SeenRequest request = new FeedController.SeenRequest();
-        request.setPostIds(postIds);
-
-        // when
-        ResponseEntity<Void> response = feedController.removeSeenFeeds(userDetails, request);
-
-        // then
-        verify(feedService).removeSeenFeeds(userId, postIds);
-        assertThat(response.getStatusCodeValue()).isEqualTo(204); // NO_CONTENT
+        // when & then
+        mockMvc.perform(get("/feeds/all")
+                        .with(authentication(TestSecurityUtil.mockUserDetails(1L))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].postId").value(10L))
+                .andExpect(jsonPath("$.content[0].content").value("작성자"));
     }
 
 
+    @Test
+    void F03C_팔로우피드_조회_성공() throws Exception {
+        when(feedService.getFollowFeed(eq(1L), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        mockMvc.perform(get("/feeds/follow")
+                        .with(authentication(TestSecurityUtil.mockUserDetails(1L))))
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    void F04C_피드_삭제_성공() throws Exception {
+        mockMvc.perform(delete("/feeds/seen")
+                        .with(authentication(TestSecurityUtil.mockUserDetails(1L)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "postIds": [1, 2]
+                            }
+                        """))
+                .andExpect(status().isNoContent());
+
+        verify(feedService).removeSeenFeeds(eq(1L), eq(List.of(1L, 2L)));
+    }
+
+
+    @Test
+    void F05C_사용자_전체_피드_삭제_성공() throws Exception {
+        mockMvc.perform(delete("/feeds/all")
+                        .with(authentication(TestSecurityUtil.mockUserDetails(1L))))
+                .andExpect(status().isNoContent());
+
+        verify(feedService, times(1)).deleteAllByUser(1L);
+    }
 }

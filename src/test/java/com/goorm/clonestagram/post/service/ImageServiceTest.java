@@ -227,7 +227,7 @@ class ImageServiceTest {
         verify(postService).findByIdAndDeletedIsFalse(tempPost.getId());
         verify(postHashTagRepository).deleteAllByPostsId(tempPost.getId());
         verify(softDeleteRepository).save(any(SoftDelete.class));
-        verify(feedService).deleteFeedByPostId(tempPost.getId()); // ✅ feedService 호출 확인
+        verify(feedService).deleteFeedsByPostId(tempPost.getId()); // ✅ feedService 호출 확인
     }
 
     /**

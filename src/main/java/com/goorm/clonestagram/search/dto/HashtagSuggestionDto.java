@@ -8,6 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class HashtagSuggestionDto {
+
     private String tagName;
     private long postCount;
 }

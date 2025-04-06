@@ -68,7 +68,9 @@ public class LikeServiceTest {
     @Test
     public void testToggleLikeRemoveLike() {
         // Given: User and posts are available, and existing like is found in the database.
-        Like existingLike = new Like(user, post);
+        Like existingLike = new Like();
+        existingLike.setUser(user);
+        existingLike.setPost(post);
 
         when(userRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(user));
         when(postRepository.findByIdAndDeletedIsFalse(1L)).thenReturn(Optional.of(post));
