@@ -53,9 +53,8 @@ dependencies {
 
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
-
-    // H2 데이터베이스 의존성 (테스트 환경에서만 사용)
-    testImplementation 'com.h2database:h2'
+    // H2 데이터베이스 의존성
+    runtimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {

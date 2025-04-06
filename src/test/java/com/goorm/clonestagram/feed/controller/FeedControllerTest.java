@@ -1,7 +1,7 @@
 package com.goorm.clonestagram.feed.controller;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.service.FeedService;
-import com.goorm.clonestagram.user.domain.User;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class FeedControllerTest {
     @Test
     void 피드_조회_성공() {
         // given
-        User user = new User();
+        Users user = new Users();
         user.setId(1L);
         user.setUsername("test_user");
         user.setPassword("password");

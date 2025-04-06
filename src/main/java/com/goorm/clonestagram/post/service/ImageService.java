@@ -53,8 +53,11 @@ public class ImageService {
      *          - 파일 저장시 IOException 발생
      */
     public ImageUploadResDto imageUpload(ImageUploadReqDto imageUploadReqDto, Long userId) throws Exception {
-
+        // 사용자 검증
         Users users = userService.findByIdAndDeletedIsFalse(userId);
+        if (users == null) {
+            throw new IllegalArgumentException("해당 유저를 찾을 수 없습니다.");
+        }
 
         String fileUrl = imageUploadReqDto.getFile();
 
@@ -65,6 +68,10 @@ public class ImageService {
         // 1. Entity 생성 (Cloudinary URL 그대로 사용)
         Posts postEntity = imageUploadReqDto.toEntity(fileUrl, users);
         Posts post = postService.save(postEntity);
+        
+        if (post == null) {
+            throw new IllegalArgumentException("게시물 생성에 실패했습니다.");
+        }
 
         // 2. 피드 생성
         feedService.createFeedForFollowers(post);
@@ -96,23 +103,26 @@ public class ImageService {
      * @exception IllegalArgumentException 게시글을 찾을 수 없을시 발생
      */
     public ImageUpdateResDto imageUpdate(Long postSeq, ImageUpdateReqDto imageUpdateReqDto, Long userId) {
-
-        boolean updated = false;
+        if (postSeq == null) {
+            throw new IllegalArgumentException("게시물 ID가 필요합니다.");
+        }
 
         //1. 게시글 ID를 통해 게시글을 찾아 반환
         Posts posts = postService.findByIdAndDeletedIsFalse(postSeq);
+        if (posts == null) {
+            throw new IllegalArgumentException("게시물을 찾을 수 없습니다");
+        }
 
         if(!posts.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("권한이 없는 유저입니다");
         }
 
+        boolean updated = false;
+
         //2. 이미지 수정 여부 파악
         if(imageUpdateReqDto.getFile() != null && !imageUpdateReqDto.getFile().isEmpty()){
-
             String fileUrl = imageUpdateReqDto.getFile();
-
             posts.setMediaName(fileUrl);
-
             updated = true;
         }
 
@@ -120,7 +130,6 @@ public class ImageService {
         if(imageUpdateReqDto.getContent() != null && !imageUpdateReqDto.getContent().trim().isEmpty()){
             //3-1. 수정된 게시글 내용 반영
             posts.setContent(imageUpdateReqDto.getContent());
-
             //3-2. 업데이트 되었음을 표시
             updated = true;
         }
@@ -131,8 +140,7 @@ public class ImageService {
             postHashTagRepository.deleteAllByPostsId(posts.getId());
 
             //4-2. 새롭게 해시 태그 리스트 저장
-            for (String tagContent : Optional.ofNullable(imageUpdateReqDto.getHashTagList())
-                    .orElse(Collections.emptyList())) {
+            for (String tagContent : imageUpdateReqDto.getHashTagList()) {
                 //4-2. tagList에서 tag 내용 하나를 추출한 후 조회
                 HashTags tag = hashTagRepository.findByTagContent(tagContent)
                         //4-2. tag가 저장되어 있지 않으면 새롭게 저장
@@ -146,10 +154,12 @@ public class ImageService {
         if(updated){
             //5. 업데이트된 게시글을 DB에 저장
             updatedPost = postService.save(posts);
+            if (updatedPost == null) {
+                throw new IllegalArgumentException("게시물 업데이트에 실패했습니다.");
+            }
         }else{
             updatedPost = posts;
         }
-
 
         //6. 모든 작업이 완료된 경우 응답 반환
         return ImageUpdateResDto.builder()
@@ -165,8 +175,15 @@ public class ImageService {
      * @param postSeq 삭제할 게시글 식별자
      */
     public void imageDelete(Long postSeq, Long userId) {
+        if (postSeq == null) {
+            throw new IllegalArgumentException("게시물 ID가 필요합니다.");
+        }
+
         //1. 식별자를 토대로 게시글 찾아 반환
         Posts posts = postService.findByIdAndDeletedIsFalse(postSeq);
+        if (posts == null) {
+            throw new IllegalArgumentException("해당 게시물이 없습니다");
+        }
 
         if(!posts.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("권한이 없는 유저입니다");

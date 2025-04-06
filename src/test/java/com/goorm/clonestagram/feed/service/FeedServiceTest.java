@@ -1,7 +1,7 @@
 package com.goorm.clonestagram.feed.service;
 
-import com.goorm.clonestagram.feed.domain.Feed;
-import com.goorm.clonestagram.feed.domain.Users;
+import com.goorm.clonestagram.feed.domain.Feeds;
+import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
@@ -44,7 +44,7 @@ class FeedServiceTest {
         int size = 10;
 
         Users user = new Users(userId);
-        com.goorm.clonestagram.user.domain.Users postOwner = com.goorm.clonestagram.user.domain.Users.builder()
+        Users postOwner = Users.builder()
                 .id(99L)
                 .username("postOwner")
                 .email("owner@example.com")
@@ -55,19 +55,18 @@ class FeedServiceTest {
                 .id(101L)
                 .content("테스트 내용")
                 .contentType(ContentType.IMAGE)
-                .users(postOwner) // ✅ 추가
+                .user(postOwner)
                 .build();
 
-        Feeds feeds = Feedsbuilder()
+        Feeds feeds = Feeds.builder()
                 .user(user)
                 .post(post)
                 .build();
 
-        Page<Feed> mockFeedPage = new PageImpl<>(List.of(feed), PageRequest.of(page, size), 1);
+        Page<Feeds> mockFeedPage = new PageImpl<>(List.of(feeds), PageRequest.of(page, size), 1);
 
         when(feedRepository.findByUserIdWithPostAndUser(eq(userId), any(Pageable.class)))
                 .thenReturn(mockFeedPage);
-
 
         // when
         Page<FeedResponseDto> result = feedService.getUserFeed(userId, page, size);
@@ -88,7 +87,7 @@ class FeedServiceTest {
         int size = 10;
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Feed> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        Page<Feeds> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
         when(feedRepository.findByUserIdWithPostAndUser(eq(userId), any(Pageable.class)))
                 .thenReturn(emptyPage);
@@ -118,7 +117,7 @@ class FeedServiceTest {
                 .id(postId)
                 .content("새 게시물")
                 .contentType(ContentType.IMAGE)
-                .users(com.goorm.clonestagram.user.domain.Users.builder().id(postOwnerId).build())
+                .user(Users.builder().id(postOwnerId).build())
                 .build();
 
         // followRepository 가 반환할 값
@@ -130,7 +129,7 @@ class FeedServiceTest {
         // then
         verify(followRepository).findFollowerIdsByFollowedId(postOwnerId);
 
-        // Iterable<Feed>로 넘어오므로 size() 사용 불가 → count()로 체크
+        // Iterable<Feeds>로 넘어오므로 size() 사용 불가 → count()로 체크
         verify(feedRepository).saveAll(argThat(feeds -> {
             long count = StreamSupport.stream(feeds.spliterator(), false).count();
             boolean allMatch = StreamSupport.stream(feeds.spliterator(), false)
@@ -153,7 +152,7 @@ class FeedServiceTest {
                 .id(postId)
                 .content("팔로워 없는 게시물")
                 .contentType(ContentType.IMAGE)
-                .users(com.goorm.clonestagram.user.domain.Users.builder().id(postOwnerId).build())
+                .user(Users.builder().id(postOwnerId).build())
                 .build();
 
         when(followRepository.findFollowerIdsByFollowedId(postOwnerId)).thenReturn(emptyFollowerList);
@@ -219,5 +218,4 @@ class FeedServiceTest {
 
         verify(feedRepository).deleteByUserIdAndPostIdIn(invalidUserId, postIds);
     }
-
 }
