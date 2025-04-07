@@ -30,7 +30,7 @@ public class FollowSearchController {
         return ResponseEntity.ok(followSearchService.searchFollowingByKeyword(userId, keyword, pageable));
     }
 
-    @GetMapping("users/{userId}/following")
+    @GetMapping("users/{userId}/follower")
     public ResponseEntity<SearchUserResDto> searchFollower(
         @PathVariable Long userId,
         @RequestParam @NotBlank String keyword,
