@@ -1,11 +1,8 @@
 package com.goorm.clonestagram.batch;
 
-import com.goorm.clonestagram.post.EntityType;
-import com.goorm.clonestagram.post.domain.SoftDelete;
-import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -17,8 +14,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.goorm.clonestagram.post.EntityType;
+import com.goorm.clonestagram.post.domain.SoftDelete;
+import com.goorm.clonestagram.post.repository.PostsRepository;
+import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
+import com.goorm.clonestagram.user.domain.service.UserInternalQueryService;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableBatchProcessing
@@ -28,36 +30,36 @@ public class SoftDeleteBatchConfig {
     private final PlatformTransactionManager transactionManager;
     private final SoftDeleteRepository softDeleteRepository;
     private final PostsRepository postsRepository;
-    private final UserRepository userRepository;
+    private final UserInternalQueryService userQueryService;
 
     @Bean
     public Job cleanUpJob() {
         return new JobBuilder("cleanUpJob", jobRepository)
-                .start(cleanUpStep())
-                .build();
+            .start(cleanUpStep())
+            .build();
     }
 
     @Bean
     public Step cleanUpStep() {
         return new StepBuilder("cleanUpStep", jobRepository)
-                .tasklet((contribution, chunkContext) -> {
-                    LocalDateTime now = LocalDateTime.now();
-                    LocalDateTime threshold = now.minusMonths(1);
+            .tasklet((contribution, chunkContext) -> {
+                LocalDateTime now = LocalDateTime.now();
+                LocalDateTime threshold = now.minusMonths(1);
 
-                    // 한 달 지난 소프트 삭제 엔티티 조회
-                    List<SoftDelete> softDeletes = softDeleteRepository.findByDeletedAtBefore(threshold);
+                // 한 달 지난 소프트 삭제 엔티티 조회
+                List<SoftDelete> softDeletes = softDeleteRepository.findByDeletedAtBefore(threshold);
 
-                    for (SoftDelete softDelete : softDeletes) {
-                        if (softDelete.getEntityType() == EntityType.POST) {
-                            postsRepository.deleteById(softDelete.getEntityId());
-                        } else if (softDelete.getEntityType() == EntityType.USER) {
-                            userRepository.deleteById(softDelete.getEntityId());
-                        }
-                        softDeleteRepository.delete(softDelete);
+                for (SoftDelete softDelete : softDeletes) {
+                    if (softDelete.getEntityType() == EntityType.POST) {
+                        postsRepository.deleteById(softDelete.getEntityId());
+                    } else if (softDelete.getEntityType() == EntityType.USER) {
+                        userQueryService.deleteUserId(softDelete.getEntityId());
                     }
+                    softDeleteRepository.delete(softDelete);
+                }
 
-                    return RepeatStatus.FINISHED;
-                }, transactionManager)
-                .build();
+                return RepeatStatus.FINISHED;
+            }, transactionManager)
+            .build();
     }
 }

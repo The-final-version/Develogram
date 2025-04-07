@@ -1,17 +1,21 @@
 package com.goorm.clonestagram.util;
 
-import com.goorm.clonestagram.user.domain.Users;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.vo.UserEmail;
+import com.goorm.clonestagram.user.domain.vo.UserName;
+import com.goorm.clonestagram.user.domain.vo.UserPassword;
 
 public class TestSecurityUtil {
     public static Authentication mockUserDetails(Long userId) {
         CustomUserDetails userDetails = new CustomUserDetails(
-                Users.builder()
+                User.builder()
                         .id(userId)
-                        .username("mockuser")
-                        .email("mock@mock.com")
-                        .password("pass")
+                        .name(new UserName("mockuser"))
+                        .email(new UserEmail("mock@mock.com"))
+                        .password(new UserPassword("pass"))
                         .build()
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

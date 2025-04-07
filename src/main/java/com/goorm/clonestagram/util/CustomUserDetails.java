@@ -1,19 +1,20 @@
 package com.goorm.clonestagram.util;
 
-import com.goorm.clonestagram.user.domain.Users;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
+import com.goorm.clonestagram.user.domain.entity.User;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final Users users;
+    private final User user;
 
-    public CustomUserDetails(Users users) {
-        this.users = users;
+    public CustomUserDetails(User user) {
+        this.user = user;
     }
 
     @Override
@@ -24,12 +25,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return users.getPassword();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return users.getEmail();
+        return user.getEmail();
     }
 
     @Override
@@ -53,11 +54,11 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public Long getId() {
-        return users.getId(); // 실제 사용자 ID 반환
+        return user.getId(); // 실제 사용자 ID 반환
     }
 
-    public Users getUser() {
-        return users;
+    public User getUser() {
+        return user;
     }
 }
 
