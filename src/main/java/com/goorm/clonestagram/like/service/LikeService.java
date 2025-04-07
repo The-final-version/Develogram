@@ -1,5 +1,6 @@
 package com.goorm.clonestagram.like.service;
 
+import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
@@ -42,11 +43,17 @@ public class LikeService {
 
 	@Transactional(readOnly = true)
 	public Long getLikeCount(Long postId) {
+		if (!postService.existsByIdAndDeletedIsFalse(postId)) {
+			throw new PostNotFoundException(postId);
+		}
 		return likeRepository.countByPost_Id(postId);
 	}
 
 	public boolean isPostLikedByLoginUser(Long postId, Long userId) {
-		return likeRepository.existsByUser_IdAndPost_Id(userId, postId);
+		Users user = userService.findByIdAndDeletedIsFalse(userId);
+		Posts post = postService.findByIdAndDeletedIsFalse(postId);
+
+		return likeRepository.existsByUser_IdAndPost_Id(user.getId(), post.getId());
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.goorm.clonestagram.comment.controller;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -34,10 +35,6 @@ public class CommentControllerTest {
 
 	@InjectMocks
 	CommentController commentController;
-
-	public static final String BASE = "/comments";
-	public static final String BY_ID = BASE + "/{commentId}";
-	public static final String BY_POST = BASE + "/post/{postId}";
 
 	// 댓글 ID로 조회: 성공, 실패 - 없는ID
 	@Nested
@@ -79,9 +76,10 @@ public class CommentControllerTest {
 			when(commentService.getCommentById(id)).thenThrow(new CommentNotFoundException(id));
 
 			// when + then
-			assertThrows(CommentNotFoundException.class, () -> {
+			CommentNotFoundException exception = assertThrows(CommentNotFoundException.class, () -> {
 				commentController.getCommentById(id);
 			});
+			assertThat(exception.getMessage()).contains("댓글을 찾을 수 없습니다");
 		}
 
 	}
