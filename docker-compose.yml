@@ -1,0 +1,18 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:8.0.31
+    ports:
+      - "3308:3306"    # 호스트 포트 3308을 컨테이너의 포트 3306에 매핑
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # 루트 비밀번호
+      MYSQL_DATABASE: mydatabase         # 생성할 기본 데이터베이스
+      MYSQL_USER: dbuser                 # 사용자 이름
+      MYSQL_PASSWORD: dbpassword         # 사용자 비밀번호
+      TZ: Asia/Seoul
+    volumes:
+      - intermark:/var/lib/mysql
+    restart: always
+
+volumes:
+  intermark:

@@ -5,6 +5,10 @@ plugins {
     id 'jacoco'
 }
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ["-parameters"]
+}
+
 group = 'com.goorm'
 version = '0.0.1-SNAPSHOT'
 

@@ -40,7 +40,8 @@ class FollowControllerTest {
     @DisplayName("F01_팔로우_토글_성공")
     void F01_팔로우_토글_성공() throws Exception {
         mockMvc.perform(post("/follow/1/profile/2")
-                        .characterEncoding("UTF-8"))
+                        .characterEncoding("UTF-8")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("팔로우 상태가 변경되었습니다."));
     }
