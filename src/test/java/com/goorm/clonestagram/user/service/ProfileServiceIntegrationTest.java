@@ -67,12 +67,13 @@ public class ProfileServiceIntegrationTest {
         // 테스트: 사용자 프로필 수정
         UserProfileUpdateDto updateDto = new UserProfileUpdateDto();
         updateDto.setBio("Updated bio");
+        updateDto.setProfileImage("updated-profile-img.jpg");
 
         // 이미지 업로드는 Mock 처리해야 할 수 있음, 테스트 목적상 필드값만 업데이트
         UserProfileDto updatedUser = profileService.updateUserProfile(testUser.getId(), updateDto);
 
         assertNotNull(updatedUser);
-        assertEquals("updatedUser", updatedUser.getUsername());
+        assertEquals(testUser.getUsername(), updatedUser.getUsername()); // username은 변경되지 않음
         assertEquals("Updated bio", updatedUser.getBio());
     }
 
@@ -81,14 +82,15 @@ public class ProfileServiceIntegrationTest {
         // 이미지 업로드가 포함된 프로필 업데이트 테스트
         UserProfileUpdateDto updateDto = new UserProfileUpdateDto();
         updateDto.setBio("Updated bio with image");
+        updateDto.setProfileImage("new-profile-img.jpg");
 
         // 실제 이미지 업로드는 Mock 처리할 수 있지만, 여기에선 이미지만 업데이트하는 테스트
         UserProfileDto updatedUser = profileService.updateUserProfile(testUser.getId(), updateDto);
 
         assertNotNull(updatedUser);
-        assertEquals("userWithNewProfileImage", updatedUser.getUsername());
+        assertEquals(testUser.getUsername(), updatedUser.getUsername()); // username은 변경되지 않음
         assertEquals("Updated bio with image", updatedUser.getBio());
         // 실제 이미지 URL 확인 (업로드된 파일이 저장된 경로 등)
-        assertTrue(updatedUser.getProfileimg().contains("default-profile-img.jpg"));
+        assertTrue(updatedUser.getProfileimg().contains("new-profile-img.jpg"));
     }
 }

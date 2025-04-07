@@ -94,14 +94,4 @@ public class GlobalExceptionHandler {
                 ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
         );
     }
-
-    /**
-     * 유효성 검증 실패 → 400 반환
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException e) {
-        return ResponseEntity.badRequest().body(
-                ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
-        );
-    }
 }
