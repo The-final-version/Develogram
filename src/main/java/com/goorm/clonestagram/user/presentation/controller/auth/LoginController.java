@@ -11,6 +11,7 @@ import com.goorm.clonestagram.user.application.dto.auth.LoginForm;
 import com.goorm.clonestagram.user.application.service.auth.UserLoginService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,7 +20,7 @@ public class LoginController {
 	private final UserLoginService userLoginService;
 
 	@PostMapping("/login")
-	public ResponseEntity<Object> login(@RequestBody LoginForm loginForm, HttpServletRequest request) {
+	public ResponseEntity<Object> login(@Valid @RequestBody LoginForm loginForm, HttpServletRequest request) {
 		try {
 			return ResponseEntity.ok(
 				userLoginService.loginAndBuildResponse(

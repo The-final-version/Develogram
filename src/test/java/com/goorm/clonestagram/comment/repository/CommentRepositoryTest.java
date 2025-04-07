@@ -39,11 +39,7 @@ public class CommentRepositoryTest {
 	@BeforeEach
 	void setUp() {
 		users = userRepository.save(UserEntity.builder()
-			.username("testuser")
-			.password("password")
-			.email("email@test.com")
-			.profileImgUrl("http://example.com/image.jpg")
-			.profileBio("Test Bio")
+			.name("testuser")
 			.build());
 
 		posts = postsRepository.save(Posts.builder()

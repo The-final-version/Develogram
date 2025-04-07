@@ -96,7 +96,7 @@ class ImageServiceTest {
 
         UserEntity testUser = UserEntity.builder()
                 .id(1L)
-                .username("testuser")
+                .name("testuser")
                 .email("testuser@example.com")
                 .password("1234")
                 .build();
@@ -145,7 +145,7 @@ class ImageServiceTest {
 
         UserEntity testUser = UserEntity.builder()
                 .id(1L)
-                .username("testuser")
+                .name("testuser")
                 .email("testuser@example.com")
                 .password("1234")
                 .build();
@@ -200,7 +200,7 @@ class ImageServiceTest {
 
         UserEntity testUser = UserEntity.builder()
                 .id(1L)
-                .username("testuser")
+                .name("testuser")
                 .email("testuser@example.com")
                 .password("1234")
                 .build();
@@ -247,7 +247,7 @@ class ImageServiceTest {
         imageUploadReqDto.setFile(mockMultipartFile);
         imageUploadReqDto.setContent("파일생성");
 
-        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(null);
+        when(userService.findByIdAndDeletedIsFalse((1L))).thenReturn(null);
 
         //when : imageUpload() 실행
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -258,7 +258,7 @@ class ImageServiceTest {
          * - "해당 유저를 찾을 수 없습니다." 에러 메세지 반환 확인
          * - findById 동작 확인
          */
-        assertEquals("해당 유저를 찾을 수 없습니다.", exception.getMessage());
+        assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage());
         verify(userService).findByIdAndDeletedIsFalse(1L);
     }
 

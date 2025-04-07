@@ -41,7 +41,7 @@ public class PostServiceTest {
     void setUp() {
         testUser = UserEntity.builder()
                 .id(1L)
-                .username("testuser")
+                .name("testuser")
                 .build();
 
         testPost = new Posts();

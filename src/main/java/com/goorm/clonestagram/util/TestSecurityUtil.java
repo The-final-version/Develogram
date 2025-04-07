@@ -14,7 +14,7 @@ public class TestSecurityUtil {
         CustomUserDetails userDetails = new CustomUserDetails(
                 UserEntity.builder()
                         .id(userId)
-                        .username("mockuser")
+                        .name("mockuser")
                         .email("mock@mock.com")
                         .password("pass")
                         .build()

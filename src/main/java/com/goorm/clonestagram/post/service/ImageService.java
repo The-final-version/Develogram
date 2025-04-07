@@ -56,8 +56,9 @@ public class ImageService {
         // 사용자 검증
         User users = userService.findByIdAndDeletedIsFalse(userId);
         if (users == null) {
-            throw new IllegalArgumentException("해당 유저를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }
+
 
         String fileUrl = imageUploadReqDto.getFile();
 

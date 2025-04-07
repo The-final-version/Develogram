@@ -21,14 +21,14 @@ public class UserJpaInternalReader implements UserInternalReadRepository {
 	@Override
 	public Optional<Long> findByName(String name) {
 		return jpaRepository.findByName(name)
-			.orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_MESSAGE + ", name=" + name)).getId()
+			.orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_MESSAGE + " name = " + name)).getId()
 			.describeConstable();
 	}
 
 	@Override
 	public User findByEmail(String email) {
 		return jpaRepository.findByEmail(email)
-			.orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_MESSAGE + ", email=" + email))
+			.orElseThrow(() -> new RuntimeException(USER_NOT_FOUND_MESSAGE + " email = " + email))
 			.toDomain();
 	}
 

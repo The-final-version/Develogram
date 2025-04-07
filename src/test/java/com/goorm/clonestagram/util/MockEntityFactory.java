@@ -11,7 +11,7 @@ public class MockEntityFactory {
     public static UserEntity mockUser(Long id, String username) {
         return UserEntity.builder()
                 .id(id)
-                .username(username)
+                .name(username)
                 .email(username + "@example.com")
                 .password("test1234")
                 .build();

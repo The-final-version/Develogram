@@ -40,7 +40,7 @@ public class LikeServiceIntegrationTest {
     public void testToggleLike() {
         // Given: 테스트용 사용자와 게시물 생성
         UserEntity user = UserEntity.builder()
-            .username("testUser")
+            .name("testUser")
             .email("test@example.com")
             .password("password")
             .build();
@@ -75,14 +75,14 @@ public class LikeServiceIntegrationTest {
     public void testGetLikeCount() {
         // Given: 테스트용 사용자와 게시물, 다중 좋아요 생성
         UserEntity user1 = UserEntity.builder()
-            .username("user1")
+            .name("user1")
             .email("user1@example.com")
             .password("password1")
             .build();
         user1 = userRepository.save(user1);
 
         UserEntity user2 = UserEntity.builder()
-            .username("user2")
+            .name("user2")
             .email("user2@example.com")
             .password("password2")
             .build();

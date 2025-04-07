@@ -51,24 +51,6 @@ public class ProfileEntity {
 		this.bio = profile.getBio();
 	}
 
-	/**
-	 * 프로필 이미지 URL을 업데이트하는 메서드
-	 * @param newProfileImg 새로운 프로필 이미지 URL
-	 * @return 업데이트된 Profile 객체
-	 */
-	public ProfileEntity updateProfileImage(String newProfileImg) {
-		return new ProfileEntity(newProfileImg, this.bio);
-	}
-
-	/**
-	 * 자기소개를 업데이트하는 메서드
-	 * @param newProfileBio 새로운 자기소개
-	 * @return 업데이트된 Profile 객체
-	 */
-	public ProfileEntity updateBio(String newProfileBio) {
-		return new ProfileEntity(this.imgUrl, newProfileBio);
-	}
-
 	public String getImgUrl() {
 		return String.valueOf(this.imgUrl);
 	}

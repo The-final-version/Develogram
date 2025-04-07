@@ -3,7 +3,7 @@ package com.goorm.clonestagram.user.application.service.profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileUpdateDto;
 import com.goorm.clonestagram.user.domain.entity.Profile;
@@ -37,7 +37,7 @@ public class ProfileUpdaterService {
 		userInternalQueryService.saveUser(user);
 
 		// 업데이트된 사용자 정보를 DTO로 변환하여 반환
-		return UsersAdapter.toUserProfileDto(user);
+		return UserAdapter.toUserProfileDto(user);
 	}
 
 

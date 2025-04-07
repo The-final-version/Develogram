@@ -35,10 +35,6 @@ public class UserPassword {
 		if (rawPassword == null) {
 			throw new IllegalArgumentException("비밀번호를 입력해주세요.");
 		}
-
-		if (rawPassword.length() < 8) {
-			throw new IllegalArgumentException("비밀번호는 최소 8자 이상이어야 합니다.");
-		}
 		this.hashedPassword = encoder.encode(rawPassword);
 	}
 

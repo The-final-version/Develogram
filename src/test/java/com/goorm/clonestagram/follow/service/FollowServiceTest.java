@@ -61,7 +61,7 @@ class FollowServiceTest {
 	void F03_팔로잉_목록_조회_성공() {
 		Long userId = 1L;
 		UserEntity user = UserEntity.builder().id(userId).build();
-		UserEntity other = UserEntity.builder().id(2L).username("상대유저").build();
+		UserEntity other = UserEntity.builder().id(2L).name("상대유저").build();
 
 		Follows follow = new Follows(user, other);
 
@@ -78,7 +78,7 @@ class FollowServiceTest {
 	void F04_팔로워_목록_조회_성공() {
 		Long userId = 1L;
 		UserEntity user = UserEntity.builder().id(userId).build();
-		UserEntity follower = UserEntity.builder().id(2L).username("팔로워").build();
+		UserEntity follower = UserEntity.builder().id(2L).name("팔로워").build();
 
 		Follows follow = new Follows(follower, user);
 

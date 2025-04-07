@@ -28,7 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity  // (선택) @PreAuthorize 등 메서드 보안 사용시
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserInternalQueryService userQueryService;

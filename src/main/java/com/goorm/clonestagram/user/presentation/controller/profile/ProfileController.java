@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileUpdateDto;
 import com.goorm.clonestagram.user.application.service.profile.ProfileDeletionService;
@@ -42,9 +42,9 @@ public class ProfileController {
      * @return 사용자의 프로필 정보를 담은 UserProfileDto 객체를 반환합니다.
      */
     @GetMapping("/{userId}/profile")
-    public ResponseEntity<UserProfileDto> getUserProfile(@PathVariable Long userId) {
+    public ResponseEntity<UserProfileDto> getUserProfile(@PathVariable("userId") Long userId) {
         User user = profileSelecterService.getUserProfile(userId);
-        return ResponseEntity.ok(UsersAdapter.toUserProfileDto(user));
+        return ResponseEntity.ok(UserAdapter.toUserProfileDto(user));
     }
 
     /**
@@ -57,7 +57,7 @@ public class ProfileController {
      * @return 수정된 사용자 정보를 담은 User 엔티티 객체를 반환합니다.
      */
     @PutMapping(path = "/{userId}/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UserProfileDto> updateUserProfile(@PathVariable Long userId,
+    public ResponseEntity<UserProfileDto> updateUserProfile(@PathVariable("userId") Long userId,
                                                    UserProfileUpdateDto userProfileUpdateDto) {
         UserProfileDto userProfileDto = profileUpdaterService.updateUserProfile(userId, userProfileUpdateDto);
         return ResponseEntity.ok(userProfileDto);
@@ -71,7 +71,7 @@ public class ProfileController {
      * @return HTTP 상태 코드 204 (NO CONTENT)를 반환합니다.
      */
     @DeleteMapping(path = "/{userId}/profile")
-    public ResponseEntity<?> deleteUserProfile(@PathVariable Long userId){
+    public ResponseEntity<?> deleteUserProfile(@PathVariable("userId") Long userId){
         profileDeletionService.deleteUserProfile(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

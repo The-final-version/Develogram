@@ -2,9 +2,8 @@ package com.goorm.clonestagram.search.service;
 
 import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.search.dto.SearchUserResDto;
-import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import jakarta.validation.constraints.NotBlank;
@@ -34,7 +33,7 @@ public class FollowSearchService {
 	public SearchUserResDto searchFollowingByKeyword(Long userId, @NotBlank String keyword,
 		Pageable pageable) {
 		Page<UserEntity> follows = followRepository.findFollowingByKeyword(userId, keyword, pageable);
-		Page<UserProfileDto> userProfileDtos = follows.map(UsersAdapter::toUserProfileDto);
+		Page<UserProfileDto> userProfileDtos = follows.map(UserAdapter::toUserProfileDto);
 
 		return SearchUserResDto.of(follows.getTotalElements(), userProfileDtos);
 	}
@@ -53,7 +52,7 @@ public class FollowSearchService {
 		Pageable pageable) {
 		Page<UserEntity> follows = followRepository.findFollowerByKeyword(userId, keyword, pageable);
 
-		Page<UserProfileDto> userProfiles = follows.map(UsersAdapter::toUserProfileDto);
+		Page<UserProfileDto> userProfiles = follows.map(UserAdapter::toUserProfileDto);
 
 		return SearchUserResDto.of(follows.getTotalElements(), userProfiles);
 	}

@@ -1,15 +1,11 @@
 package com.goorm.clonestagram.post.service;
 
-import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
-import com.goorm.clonestagram.feed.repository.FeedRepository;
-import com.goorm.clonestagram.feed.service.FeedService;
-import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -46,7 +43,7 @@ public class PostService {
 
     public PostResDto getMyPosts(Long userId, Pageable pageable) {
         //1. userId를 활용해 유저 객체 조회
-        UserProfileDto users = UsersAdapter.toUserProfileDto(userService.findByIdAndDeletedIsFalse(userId));
+        UserProfileDto users = UserAdapter.toUserProfileDto(userService.findByIdAndDeletedIsFalse(userId));
 
         //2. 해당 유저가 작성한 모든 피드 조회, 페이징 처리
         Page<Posts> myFeed = postsRepository.findAllByUserIdAndDeletedIsFalse(users.getId(), pageable);
@@ -65,5 +62,14 @@ public class PostService {
 
     public Posts save(Posts postEntity) {
         return postsRepository.save(postEntity);
+    }
+
+    public void deleteAllUserPosts(Long userId) {
+        List<Posts> posts = findAllByUserIdAndDeletedIsFalse(userId);
+        for (Posts post : posts) {
+            post.setDeleted(true);
+            post.setDeletedAt(LocalDateTime.now());
+        }
+        postsRepository.saveAll(posts);
     }
 }

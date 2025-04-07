@@ -3,6 +3,8 @@ package com.goorm.clonestagram.user.application.dto.auth;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,5 +18,10 @@ public class LoginForm {
 	@NotBlank(message = "비밀번호를 입력해주세요.")
 	@Size(min = 6, max = 20, message = "비밀번호는 6자 이상 20자 이하로 입력해주세요.")
 	private String password;
+
+	public LoginForm(String email, String password) {
+		this.email = email;
+		this.password = password;
+	}
 }
 

@@ -29,7 +29,7 @@ public class UserInternalQueryService {
 
 	public User findByEmail(String email) {
 		return Optional.ofNullable(userReadRepository.findByEmail(email))
-			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE + ", email=" + email));
+			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE + " email = " + email));
 	}
 
 	public void saveUser(User user) {

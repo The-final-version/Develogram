@@ -4,17 +4,14 @@ import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.dto.FollowDto;
 import com.goorm.clonestagram.follow.mapper.FollowMapper;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 

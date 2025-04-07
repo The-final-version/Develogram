@@ -10,9 +10,7 @@ public class TestEntityFactory {
 
     public static UserEntity createUser(String username) {
         return UserEntity.builder()
-                .username(username)
-                .email(username + "@test.com")
-                .password("1234")
+                .name(username)
                 .build();
     }
 

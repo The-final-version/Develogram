@@ -80,7 +80,6 @@ public class UserLoginService {
 	private Authentication authenticateWithSecurity(String email, String password) {
 		UsernamePasswordAuthenticationToken authToken =
 			new UsernamePasswordAuthenticationToken(email, password);
-
 		return authenticationManager.authenticate(authToken);
 	}
 
@@ -125,7 +124,7 @@ public class UserLoginService {
 	 */
 	private LoginResponseDto buildFailureResponse() {
 		return LoginResponseDto.builder()
-			.message("로그인 실패")
+			.message("로그인 실패 - 잘못된 이메일 또는 비밀번호입니다.")
 			.userId(null)
 			.accessToken(null)
 			.refreshToken(null)

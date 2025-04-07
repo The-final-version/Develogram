@@ -29,7 +29,7 @@ public class UserExternalQueryService {
 
 	public User findByIdAndDeletedIsFalse(Long userId) {
 		return userExternalReadRepository.findByIdAndDeletedIsFalse(userId)
-				.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
 	}
 
 	public boolean existsByIdAndDeletedIsFalse(Long userId) {

@@ -2,7 +2,7 @@ package com.goorm.clonestagram.search.service;
 
 import com.goorm.clonestagram.search.dto.SearchUserResDto;
 import com.goorm.clonestagram.search.dto.UserSuggestionDto;
-import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
@@ -43,7 +43,7 @@ public class UserSearchService {
 
 		Page<User> users = userExternalQueryService.searchUserByKeyword(keyword, pageable);
 
-		Page<UserProfileDto> userProfiles = UsersAdapter.toUserProfileDtoPage(users);
+		Page<UserProfileDto> userProfiles = UserAdapter.toUserProfileDtoPage(users);
 
 		return SearchUserResDto.of(users.getTotalElements(), userProfiles);
 	}

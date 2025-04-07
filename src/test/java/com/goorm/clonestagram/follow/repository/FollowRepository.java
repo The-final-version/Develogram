@@ -146,7 +146,7 @@ class FollowRepositoryTest {
     // --- 유틸 메서드 ---
     private UserEntity saveUser(String username) {
         UserEntity user = UserEntity.builder()
-                .username(username)
+                .name(username)
                 .password("pw")
                 .email(username + "@test.com")
                 .build();

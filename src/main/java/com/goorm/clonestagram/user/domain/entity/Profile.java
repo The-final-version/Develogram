@@ -4,12 +4,14 @@ import com.goorm.clonestagram.user.domain.vo.ProfileBio;
 import com.goorm.clonestagram.user.domain.vo.ProfileImageUrl;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 /**
  * Profile 클래스
  */
 @Getter
+@Builder
 @AllArgsConstructor
 public class Profile {
 	private ProfileImageUrl imgUrl;

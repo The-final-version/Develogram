@@ -36,7 +36,7 @@ public class FollowServiceIntegrationTest {
     public void testToggleFollowIntegration() {
         // Given: 실제 DB에 유저 저장
         UserEntity user1 = UserEntity.builder()
-            .username("user1")
+            .name("user1")
             .email("user1@example.com")
             .password("password1")
             .profileImgUrl("profile1")
@@ -44,7 +44,7 @@ public class FollowServiceIntegrationTest {
         user1 = userRepository.save(user1);
 
         UserEntity user2 = UserEntity.builder()
-            .username("user2")
+            .name("user2")
             .email("user2@example.com")
             .password("password2")
             .profileImgUrl("profile2")

@@ -36,7 +36,7 @@ class PostsRepositoryTest {
 	@BeforeEach
 	void setUp() {
 		testUser = UserEntity.builder()
-			.username("testuser")
+			.name("testuser")
 			.email("test111@example.com")
 			.password("testpassword")
 			.profileBio("test bio")

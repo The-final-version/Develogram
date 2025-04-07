@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 import com.goorm.clonestagram.user.domain.service.UserInternalQueryService;
 import com.goorm.clonestagram.util.CustomUserDetails;
@@ -25,7 +25,7 @@ public class UserController {
         if (userDetails == null || userDetails.getUser() == null) {
             return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.ok(UsersAdapter.toUserProfileDto(userDetails.getUser()));
+        return ResponseEntity.ok(UserAdapter.toUserProfileDto(userDetails.getUser()));
     }
 
     @GetMapping("/id")

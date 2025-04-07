@@ -20,7 +20,7 @@ class FollowMapperTest {
         UserEntity follower = UserEntity.builder().id(1L).build();
         UserEntity followed = UserEntity.builder()
                 .id(2L)
-                .username("followedUser")
+                .name("followedUser")
                 .profileImgUrl("followed.jpg")
                 .build();
 
@@ -44,7 +44,7 @@ class FollowMapperTest {
         // given
         UserEntity follower = UserEntity.builder()
                 .id(3L)
-                .username("followerUser")
+                .name("followerUser")
                 .profileImgUrl("follower.jpg")
                 .build();
         UserEntity followed = UserEntity.builder().id(1L).build();

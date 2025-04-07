@@ -57,11 +57,11 @@ public class UserEntity extends BaseEntity {
 	}
 
 	@Builder
-	public UserEntity(Long id, String email, String password, String username, String profileBio, String profileImgUrl) {
+	public UserEntity(Long id, String email, String password, String name, String profileBio, String profileImgUrl) {
 		this.id = id;
 		this.email = email;
 		this.password = password;
-		this.name = username;
+		this.name = name;
 		this.profileEntity = new ProfileEntity(profileImgUrl, profileBio);
 	}
 

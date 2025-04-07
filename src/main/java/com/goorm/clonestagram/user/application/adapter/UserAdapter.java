@@ -12,7 +12,7 @@ import com.goorm.clonestagram.user.domain.vo.UserName;
 import com.goorm.clonestagram.user.domain.vo.UserPassword;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
-public class UsersAdapter {
+public class UserAdapter {
 
 	/**
 	 * JoinDto를 Users 엔티티로 변환합니다.
@@ -89,18 +89,7 @@ public class UsersAdapter {
 	 * @return 변환된 UserProfileDto 페이지
 	 */
 	public static Page<UserProfileDto> toUserProfileDtoPage(Page<User> usersPage) {
-		return usersPage.map(UsersAdapter::toUserProfileDto);
+		return usersPage.map(UserAdapter::toUserProfileDto);
 	}
 
-	/**
-	 * List<Users>를 List<UserProfileDto>로 변환합니다.
-	 *
-	 * @param userPage Users 엔티티 리스트
-	 * @return 변환된 UserProfileDto 리스트
-	 */
-	public static List<UserProfileDto> toUserProfileDtoList(List<User> userPage) {
-		return userPage.stream()
-			.map(UsersAdapter::toUserProfileDto)
-			.toList();
-	}
 }

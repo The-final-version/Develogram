@@ -44,7 +44,7 @@ public class LikeServiceTest {
         // Test user
         user = UserEntity.builder()
                 .id(1L)
-                .username("user1").build();
+                .name("user1").build();
 
         // Test posts
         post = new Posts();

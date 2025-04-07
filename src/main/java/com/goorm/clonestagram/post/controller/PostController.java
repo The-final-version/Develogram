@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,10 +25,7 @@ public class PostController {
     @GetMapping("/feeds/user")
     public ResponseEntity<PostResDto> userPosts(@RequestParam("userId") Long userId,
                                                @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        User user = userService.findByIdAndDeletedIsFalse(userId);
-        if (user == null) {
-            throw new IllegalArgumentException("해당 유저를 찾을 수 없습니다.");
-        }
+        userService.findByIdAndDeletedIsFalse(userId);
         return ResponseEntity.ok(postService.getMyPosts(userId, pageable));
     }
 

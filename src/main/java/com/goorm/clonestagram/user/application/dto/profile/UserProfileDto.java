@@ -25,4 +25,7 @@ public class UserProfileDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    public UserProfileDto() {
+
+    }
 }
