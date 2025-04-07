@@ -1,7 +1,8 @@
 package com.goorm.clonestagram.feed.domain;
 
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 public class Feeds {
 
     public Feeds(Long userId, Long postId) {
-        this.user = new Users(userId); // 단순 참조용 프록시 객체
+        this.user = new UserEntity(userId); // 단순 참조용 프록시 객체
         this.post = new Posts(postId); // 단순 참조용 프록시 객체
         this.createdAt = LocalDateTime.now();
     }
@@ -27,11 +28,10 @@ public class Feeds {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     // ✅ 피드를 받는 유저
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private UserEntity user;
 
     // ✅ 피드에 표시될 게시물
     @ManyToOne(fetch = FetchType.LAZY)

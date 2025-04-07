@@ -2,7 +2,8 @@ package com.goorm.clonestagram.follow.mapper;
 
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.dto.FollowDto;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,11 +17,11 @@ class FollowMapperTest {
     @DisplayName("M01_팔로잉_DTO_변환_성공")
     void toFollowingDtoTest() {
         // given
-        Users follower = Users.builder().id(1L).build();
-        Users followed = Users.builder()
+        UserEntity follower = UserEntity.builder().id(1L).build();
+        UserEntity followed = UserEntity.builder()
                 .id(2L)
                 .username("followedUser")
-                .profileimg("followed.jpg")
+                .profileImgUrl("followed.jpg")
                 .build();
 
         Follows follows = new Follows(10L, follower, followed, LocalDateTime.of(2024, 1, 1, 12, 0));
@@ -41,12 +42,12 @@ class FollowMapperTest {
     @DisplayName("M02_팔로워_DTO_변환_성공")
     void toFollowerDtoTest() {
         // given
-        Users follower = Users.builder()
+        UserEntity follower = UserEntity.builder()
                 .id(3L)
                 .username("followerUser")
-                .profileimg("follower.jpg")
+                .profileImgUrl("follower.jpg")
                 .build();
-        Users followed = Users.builder().id(1L).build();
+        UserEntity followed = UserEntity.builder().id(1L).build();
 
         Follows follows = new Follows(20L, follower, followed, LocalDateTime.of(2024, 2, 1, 9, 0));
 

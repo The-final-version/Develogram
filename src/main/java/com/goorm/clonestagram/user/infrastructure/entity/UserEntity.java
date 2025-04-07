@@ -133,6 +133,21 @@ public class UserEntity extends BaseEntity {
 		);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof UserEntity)) return false;
+		UserEntity other = (UserEntity) o;
+		// "id != null" 가 전제(영속화된 엔티티)일 때만 의미 있음
+		return this.id != null && this.id.equals(other.id);
+	}
+
+	@Override
+	public int hashCode() {
+		// id가 null이면 0, 아니면 id의 hash
+		return (this.id == null) ? 0 : this.id.hashCode();
+	}
+
 	public UserEntity(Long id) {
 		this.id = id;
 	}

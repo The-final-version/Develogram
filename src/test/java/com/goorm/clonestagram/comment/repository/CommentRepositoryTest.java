@@ -10,8 +10,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,18 +30,20 @@ public class CommentRepositoryTest {
 	@Autowired
 	PostsRepository postsRepository;
 	@Autowired
-	UserRepository userRepository;
+	JpaUserExternalWriteRepository userRepository;
 
 	Comments comment;
-	Users users;
+	UserEntity users;
 	Posts posts;
 
 	@BeforeEach
 	void setUp() {
-		users = userRepository.save(Users.builder()
+		users = userRepository.save(UserEntity.builder()
 			.username("testuser")
-			.password("password123")
-			.email("testuser@example")
+			.password("password")
+			.email("email@test.com")
+			.profileImgUrl("http://example.com/image.jpg")
+			.profileBio("Test Bio")
 			.build());
 
 		posts = postsRepository.save(Posts.builder()

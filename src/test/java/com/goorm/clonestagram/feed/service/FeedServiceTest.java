@@ -4,11 +4,12 @@ import com.goorm.clonestagram.exception.FeedFetchFailedException;
 import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.follow.service.FollowService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
 import com.goorm.clonestagram.feed.dto.FeedResponseDto;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
 import com.goorm.clonestagram.post.domain.Posts;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 import com.goorm.clonestagram.util.MockEntityFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,13 +36,13 @@ class FeedServiceTest {
     private FeedRepository feedRepository;
 
     @Mock
-    private UserService userService;
+    private UserExternalQueryService userService;
 
     @Mock
     private FollowService followService;
 
-    private Users targetUser;   // 피드를 보는 유저
-    private Users postOwner;
+    private UserEntity targetUser;   // 피드를 보는 유저
+    private UserEntity postOwner;
 
     @BeforeEach
     void setUp() {
@@ -61,7 +62,7 @@ class FeedServiceTest {
         Feeds feed = MockEntityFactory.mockFeed(targetUser, post);
         Page<Feeds> feedPage = new PageImpl<>(List.of(feed), PageRequest.of(page, size), 1);
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(targetUser);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(targetUser.toDomain());
         when(feedRepository.findByUserIdWithPostAndUser(eq(userId), any(Pageable.class)))
                 .thenReturn(feedPage);
 
@@ -88,7 +89,7 @@ class FeedServiceTest {
 
         Page<Feeds> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(targetUser);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(targetUser.toDomain());
         when(feedRepository.findByUserIdWithPostAndUser(eq(userId), any(Pageable.class)))
                 .thenReturn(emptyPage);
 
@@ -131,8 +132,8 @@ class FeedServiceTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
         Long userId = 1L;
-        Users user = MockEntityFactory.mockUser(userId, "user");
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        UserEntity user = MockEntityFactory.mockUser(userId, "user");
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user.toDomain());
         when(feedRepository.findByUserIdWithPostAndUser(eq(userId), any()))
                 .thenThrow(new RecoverableDataAccessException("DB Error"));
 
@@ -150,7 +151,7 @@ class FeedServiceTest {
     void F07_전체_피드_조회_성공() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
-        Users user = MockEntityFactory.mockUser(1L, "user");
+        UserEntity user = MockEntityFactory.mockUser(1L, "user");
         Posts post = MockEntityFactory.mockPost(1L, "내용", user);
         Feeds feed = MockEntityFactory.mockFeed(user, post);
         Page<Feeds> feeds = new PageImpl<>(List.of(feed));
@@ -189,7 +190,7 @@ class FeedServiceTest {
     void F09_팔로우_피드_조회_성공() {
         // given
         Long userId = 1L;
-        Users user = MockEntityFactory.mockUser(userId, "user");
+        UserEntity user = MockEntityFactory.mockUser(userId, "user");
         Pageable pageable = PageRequest.of(0, 10);
 
         List<Long> followingIds = List.of(2L, 3L);
@@ -197,7 +198,7 @@ class FeedServiceTest {
         Feeds feed = MockEntityFactory.mockFeed(user, post);
         Page<Feeds> feedPage = new PageImpl<>(List.of(feed), pageable, 1);
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user.toDomain());
         when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(followingIds);
         when(feedRepository.findAllByUserIdInAndDeletedIsFalse(followingIds, pageable)).thenReturn(feedPage);
 
@@ -219,10 +220,10 @@ class FeedServiceTest {
     void F10_팔로우_피드_조회_실패_예외() {
         // given
         Long userId = 1L;
-        Users user = MockEntityFactory.mockUser(userId, "user");
+        UserEntity user = MockEntityFactory.mockUser(userId, "user");
         Pageable pageable = PageRequest.of(0, 10);
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user.toDomain());
         when(followService.findFollowingUserIdsByFollowerId(userId))
                 .thenThrow(new RuntimeException("DB 오류"));
 
@@ -239,7 +240,7 @@ class FeedServiceTest {
     @Test
     void F11_게시물_업로드_시_팔로워_피드_생성() {
         // given
-        Users postOwner = MockEntityFactory.mockUser(1L, "postOwner");
+        UserEntity postOwner = MockEntityFactory.mockUser(1L, "postOwner");
         Posts post = MockEntityFactory.mockPost(100L, "새 게시물", postOwner);
 
         List<Long> followerIds = List.of(2L, 3L);
@@ -266,7 +267,7 @@ class FeedServiceTest {
     @Test
     void F12_팔로워_없으면_피드_생성되지_않음() {
         // given
-        Users postOwner = MockEntityFactory.mockUser(1L, "postOwner");
+        UserEntity postOwner = MockEntityFactory.mockUser(1L, "postOwner");
         Posts post = MockEntityFactory.mockPost(100L, "내용", postOwner);
 
         when(followService.findFollowerIdsByFollowedId(postOwner.getId()))
@@ -307,11 +308,11 @@ class FeedServiceTest {
     @Test
     void F15_삭제된_게시글_피드_조회_안됨() {
         // given
-        Users user = MockEntityFactory.mockUser(1L, "user");
+        UserEntity user = MockEntityFactory.mockUser(1L, "user");
         Pageable pageable = PageRequest.of(0, 10);
 
         // 삭제된 게시글이기 때문에 실제로는 피드가 조회되지 않아야 함
-        when(userService.findByIdAndDeletedIsFalse(user.getId())).thenReturn(user);
+        when(userService.findByIdAndDeletedIsFalse(user.getId())).thenReturn(user.toDomain());
         when(feedRepository.findByUserIdWithPostAndUser(user.getId(), pageable))
                 .thenReturn(Page.empty());
 
@@ -369,7 +370,7 @@ class FeedServiceTest {
     void F19_deleteAllByUser_성공() {
         // given
         Long userId = 1L;
-        Users user = MockEntityFactory.mockUser(userId, "user");
+        UserEntity user = MockEntityFactory.mockUser(userId, "user");
         Posts post1 = MockEntityFactory.mockPost(100L, "post1", user);
         Posts post2 = MockEntityFactory.mockPost(101L, "post2", user);
 
@@ -408,10 +409,10 @@ class FeedServiceTest {
     void F21_팔로우_피드_조회_리스트_null_or_empty_처리() {
         // given
         Long userId = 1L;
-        Users user = MockEntityFactory.mockUser(userId, "user");
+        UserEntity user = MockEntityFactory.mockUser(userId, "user");
         Pageable pageable = PageRequest.of(0, 10);
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user.toDomain());
         when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(null);
 
         // when
@@ -447,9 +448,9 @@ class FeedServiceTest {
         // given
         Long userId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
-        Users user = MockEntityFactory.mockUser(userId, "user");
+        UserEntity user = MockEntityFactory.mockUser(userId, "user");
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user.toDomain());
         when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(List.of(2L, 3L));
         when(feedRepository.findAllByUserIdInAndDeletedIsFalse(any(), any()))
                 .thenThrow(new RecoverableDataAccessException("DB 오류"));
@@ -490,9 +491,9 @@ class FeedServiceTest {
         // given
         Long userId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
-        Users user = MockEntityFactory.mockUser(userId, "user");
+        UserEntity user = MockEntityFactory.mockUser(userId, "user");
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user.toDomain());
         when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(Collections.emptyList());
 
         // when

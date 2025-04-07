@@ -4,13 +4,14 @@ import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
 import com.goorm.clonestagram.comment.dto.CommentResponse;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 public class CommentMapper {
 
-	public static Comments toEntity(CommentRequest request, Users users, Posts posts) {
+	public static Comments toEntity(CommentRequest request, User user, Posts posts) {
 		return Comments.builder()
-			.users(users)
+			.users(new UserEntity(user))
 			.posts(posts)
 			.content(request.getContent())
 			.build();
@@ -24,7 +25,7 @@ public class CommentMapper {
 		return new CommentResponse(
 			comments.getId(),
 			comments.getUsers().getId(),
-			comments.getUsers().getUsername(),
+			comments.getUsers().getName(),
 			comments.getPosts().getId(),
 			comments.getContent(),
 			comments.getCreatedAt());

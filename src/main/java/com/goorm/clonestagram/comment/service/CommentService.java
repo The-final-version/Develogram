@@ -10,8 +10,7 @@ import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.comment.repository.CommentRepository;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +27,7 @@ public class CommentService {
 
 	private final CommentRepository commentRepository;
 
-	private final UserService userService;
+	private final UserExternalQueryService userService;
 	private final PostService postService;
 
 	@Transactional

@@ -1,5 +1,7 @@
 package com.goorm.clonestagram.post.service;
 
+import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
 import com.goorm.clonestagram.feed.service.FeedService;
 import com.goorm.clonestagram.like.repository.LikeRepository;
@@ -7,10 +9,9 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
 
-    private final UserService userService;
+    private final UserExternalQueryService userService;
 
     private final PostsRepository postsRepository;
 
@@ -45,16 +46,16 @@ public class PostService {
 
     public PostResDto getMyPosts(Long userId, Pageable pageable) {
         //1. userId를 활용해 유저 객체 조회
-        Users users = userService.findByIdAndDeletedIsFalse(userId);
+        UserProfileDto users = UsersAdapter.toUserProfileDto(userService.findByIdAndDeletedIsFalse(userId));
 
         //2. 해당 유저가 작성한 모든 피드 조회, 페이징 처리
         Page<Posts> myFeed = postsRepository.findAllByUserIdAndDeletedIsFalse(users.getId(), pageable);
 
         //3. 모든 작업이 완료도니 경우 응답 반환
         return PostResDto.builder()
-                .user(UserProfileDto.fromEntity(users))
-                .feed(myFeed.map(PostInfoDto::fromEntity))
-                .build();
+            .user(users)
+            .feed(myFeed.map(PostInfoDto::fromEntity))
+            .build();
     }
 
     public List<Posts> findAllByUserIdAndDeletedIsFalse(Long userId) {

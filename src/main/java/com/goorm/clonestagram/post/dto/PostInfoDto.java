@@ -34,7 +34,7 @@ public class PostInfoDto {
         return PostInfoDto.builder()
                 .id(post.getId())
                 .userId(post.getUser().getId())
-                .username(post.getUser().getUsername())
+                .username(post.getUser().getName())
                 .content(post.getContent())
                 .mediaName(post.getMediaName())
                 .contentType(post.getContentType())

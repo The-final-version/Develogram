@@ -4,8 +4,9 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +28,7 @@ public class LikeServiceIntegrationTest {
     private LikeService likeService;
 
     @Autowired
-    private UserRepository userRepository;
+    private JpaUserExternalWriteRepository userRepository;
 
     @Autowired
     private PostsRepository postsRepository;
@@ -38,11 +39,11 @@ public class LikeServiceIntegrationTest {
     @Test
     public void testToggleLike() {
         // Given: 테스트용 사용자와 게시물 생성
-        Users user = new Users();
-        user.setUsername("testUser");
-        user.setEmail("test@example.com");
-        user.setPassword("password");
-        user.setDeleted(false);
+        UserEntity user = UserEntity.builder()
+            .username("testUser")
+            .email("test@example.com")
+            .password("password")
+            .build();
         user = userRepository.save(user);
 
         Posts post = new Posts();
@@ -73,24 +74,24 @@ public class LikeServiceIntegrationTest {
     @Test
     public void testGetLikeCount() {
         // Given: 테스트용 사용자와 게시물, 다중 좋아요 생성
-        Users user1 = new Users();
-        user1.setUsername("user1");
-        user1.setEmail("user1@example.com");
-        user1.setPassword("password1");
-        user1.setDeleted(false);
+        UserEntity user1 = UserEntity.builder()
+            .username("user1")
+            .email("user1@example.com")
+            .password("password1")
+            .build();
         user1 = userRepository.save(user1);
 
-        Users user2 = new Users();
-        user2.setUsername("user2");
-        user2.setEmail("user2@example.com");
-        user2.setPassword("password2");
-        user2.setDeleted(false);
+        UserEntity user2 = UserEntity.builder()
+            .username("user2")
+            .email("user2@example.com")
+            .password("password2")
+            .build();
         user2 = userRepository.save(user2);
 
         Posts post = new Posts();
         post.setUser(user1);
         post.setContent("Test Post1");
-        post.setContentType(IMAGE);  // contents_type 추가
+        post.setContentType(IMAGE);         // contents_type 추가
         post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
         post.setDeleted(false);
         post = postsRepository.save(post);

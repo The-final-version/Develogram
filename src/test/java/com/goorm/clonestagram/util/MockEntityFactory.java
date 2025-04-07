@@ -3,12 +3,13 @@ package com.goorm.clonestagram.util;
 import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 public class MockEntityFactory {
 
-    public static Users mockUser(Long id, String username) {
-        return Users.builder()
+    public static UserEntity mockUser(Long id, String username) {
+        return UserEntity.builder()
                 .id(id)
                 .username(username)
                 .email(username + "@example.com")
@@ -16,7 +17,7 @@ public class MockEntityFactory {
                 .build();
     }
 
-    public static Posts mockPost(Long id, String content, Users owner) {
+    public static Posts mockPost(Long id, String content, UserEntity owner) {
         return Posts.builder()
                 .id(id)
                 .content(content)
@@ -25,7 +26,7 @@ public class MockEntityFactory {
                 .build();
     }
 
-    public static Feeds mockFeed(Users targetUser, Posts post) {
+    public static Feeds mockFeed(UserEntity targetUser, Posts post) {
         return Feeds.builder()
                 .user(targetUser)
                 .post(post)

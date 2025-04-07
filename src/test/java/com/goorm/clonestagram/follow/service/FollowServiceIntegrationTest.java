@@ -2,9 +2,9 @@ package com.goorm.clonestagram.follow.service;
 
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.repository.UserExternalWriteRepository;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class FollowServiceIntegrationTest {
     private FollowService followService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserExternalWriteRepository userRepository;
 
     @Autowired
     private FollowRepository followRepository;
@@ -35,18 +35,21 @@ public class FollowServiceIntegrationTest {
     @Test
     public void testToggleFollowIntegration() {
         // Given: 실제 DB에 유저 저장
-        Users user1 = new Users();
-        user1.setUsername("user1");
-        user1.setEmail("user1@example.com");  // email은 nullable=false이므로 반드시 설정
-        user1.setPassword("password1");       // password도 nullable=false
-        user1.setProfileimg("profile1");
+        UserEntity user1 = UserEntity.builder()
+            .username("user1")
+            .email("user1@example.com")
+            .password("password1")
+            .profileImgUrl("profile1")
+            .profileBio("bio1").build();
         user1 = userRepository.save(user1);
 
-        Users user2 = new Users();
-        user2.setUsername("user2");
-        user2.setEmail("user2@example.com");
-        user2.setPassword("password2");
-        user2.setProfileimg("profile2");
+        UserEntity user2 = UserEntity.builder()
+            .username("user2")
+            .email("user2@example.com")
+            .password("password2")
+            .profileImgUrl("profile2")
+            .profileBio("bio2").build();
+        user1 = userRepository.save(user1);
         user2 = userRepository.save(user2);
 
         // When: 팔로우 토글

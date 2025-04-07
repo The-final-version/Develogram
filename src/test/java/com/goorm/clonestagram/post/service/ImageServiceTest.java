@@ -12,9 +12,10 @@ import com.goorm.clonestagram.post.dto.upload.ImageUploadReqDto;
 import com.goorm.clonestagram.post.dto.upload.ImageUploadResDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.repository.UserExternalWriteRepository;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -48,7 +49,7 @@ class ImageServiceTest {
     private PostsRepository postsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserExternalWriteRepository userRepository;
 
     @Mock
     private FeedService feedService;
@@ -63,7 +64,7 @@ class ImageServiceTest {
     private PostService postService;
 
     @Mock
-    private UserService userService;
+    private UserExternalQueryService userService;
 
     @InjectMocks
     private ImageService imageService;
@@ -93,7 +94,7 @@ class ImageServiceTest {
         imageUploadReqDto.setFile(mockMultipartFile);
         imageUploadReqDto.setContent("테스트 내용");
 
-        Users testUser = Users.builder()
+        UserEntity testUser = UserEntity.builder()
                 .id(1L)
                 .username("testuser")
                 .email("testuser@example.com")
@@ -107,7 +108,7 @@ class ImageServiceTest {
                 .user(testUser)
                 .build();
 
-        when(userService.findByIdAndDeletedIsFalse(1L)).thenReturn(testUser);
+        when(userService.findByIdAndDeletedIsFalse(1L)).thenReturn(testUser.toDomain());
         when(postService.save(any(Posts.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when: 이미지 업로드 서비스 실행
@@ -142,7 +143,7 @@ class ImageServiceTest {
                 "file", "old-image.jpg","image/jpeg","dummy image content".getBytes()
         );
 
-        Users testUser = Users.builder()
+        UserEntity testUser = UserEntity.builder()
                 .id(1L)
                 .username("testuser")
                 .email("testuser@example.com")
@@ -197,7 +198,7 @@ class ImageServiceTest {
                 "file", "image.jpg","image/jpeg","dummy image content".getBytes()
         );
 
-        Users testUser = Users.builder()
+        UserEntity testUser = UserEntity.builder()
                 .id(1L)
                 .username("testuser")
                 .email("testuser@example.com")

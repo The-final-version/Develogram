@@ -5,9 +5,11 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.application.adapter.UsersAdapter;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,20 +37,21 @@ public class PostControllerTest {
     private PostService postService;
 
     @Mock
-    private UserService userService;
+    private UserExternalQueryService userService;
 
     @InjectMocks
     private PostController postController;
 
-    private Users testUser;
+    private UserEntity testUser;
     private Posts testPost;
     private PageRequest pageRequest;
 
     @BeforeEach
     void setUp() {
-        testUser = new Users();
-        testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser = UserEntity.builder()
+                .id(1L)
+                .username("testuser")
+                .build();
 
         testPost = new Posts();
         testPost.setId(1L);
@@ -67,10 +70,10 @@ public class PostControllerTest {
         // given
         List<Posts> posts = Arrays.asList(testPost);
         Page<Posts> postsPage = new PageImpl<>(posts, pageRequest, posts.size());
-        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser);
+        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser.toDomain());
         when(postService.getMyPosts(eq(1L), any())).thenReturn(PostResDto.builder()
-                .user(UserProfileDto.fromEntity(testUser))
-                .feed(postsPage.map(post -> PostInfoDto.fromEntity(post)))
+                .user(UsersAdapter.toUserProfileDto(testUser))
+                .feed(postsPage.map(PostInfoDto::fromEntity))
                 .build());
 
         // when

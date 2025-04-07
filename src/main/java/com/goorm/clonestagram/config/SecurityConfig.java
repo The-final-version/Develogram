@@ -21,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.goorm.clonestagram.common.jwt.JwtAuthenticationFilter;
 import com.goorm.clonestagram.common.jwt.JwtTokenProvider;
 import com.goorm.clonestagram.user.domain.service.UserInternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 import com.goorm.clonestagram.util.CustomUserDetails;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,7 +55,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authBuilder
-            .userDetailsService(email -> new CustomUserDetails(userQueryService.findByEmail(email)))
+            .userDetailsService(email -> new CustomUserDetails(new UserEntity(userQueryService.findByEmail(email))))
             .passwordEncoder(bCryptPasswordEncoder());
         return authBuilder.build();
     }

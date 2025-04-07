@@ -7,15 +7,16 @@ import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.vo.UserEmail;
 import com.goorm.clonestagram.user.domain.vo.UserName;
 import com.goorm.clonestagram.user.domain.vo.UserPassword;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 public class TestSecurityUtil {
     public static Authentication mockUserDetails(Long userId) {
         CustomUserDetails userDetails = new CustomUserDetails(
-                User.builder()
+                UserEntity.builder()
                         .id(userId)
-                        .name(new UserName("mockuser"))
-                        .email(new UserEmail("mock@mock.com"))
-                        .password(new UserPassword("pass"))
+                        .username("mockuser")
+                        .email("mock@mock.com")
+                        .password("pass")
                         .build()
         );
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

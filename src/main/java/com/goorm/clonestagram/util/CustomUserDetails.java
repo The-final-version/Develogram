@@ -8,12 +8,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+    private final UserEntity user;
 
-    public CustomUserDetails(User user) {
+    public CustomUserDetails(UserEntity user) {
         this.user = user;
     }
 
@@ -57,7 +58,7 @@ public class CustomUserDetails implements UserDetails {
         return user.getId(); // 실제 사용자 ID 반환
     }
 
-    public User getUser() {
+    public UserEntity getUser() {
         return user;
     }
 }

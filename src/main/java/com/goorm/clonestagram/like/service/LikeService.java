@@ -4,8 +4,10 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +18,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LikeService {
     private final LikeRepository likeRepository;
-    private final UserService userService;
+    private final UserExternalQueryService userService;
     private final PostService postService;
 
     // 좋아요 토글
     @Transactional
     public void toggleLike(Long userId, Long postId) {
-        Users user = userService.findByIdAndDeletedIsFalse(userId);
+        User user = userService.findByIdAndDeletedIsFalse(userId);
         Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
         // userId와 postId를 사용해 좋아요 여부 확인
@@ -32,7 +34,7 @@ public class LikeService {
             likeRepository.delete(existingLike.get()); // 좋아요 취소
         } else {
             Like like = new Like();
-            like.setUser(user);
+            like.setUser(new UserEntity(user));
             like.setPost(post);
             likeRepository.save(like); // 좋아요 추가
         }

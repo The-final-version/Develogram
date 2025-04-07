@@ -3,7 +3,7 @@ package com.goorm.clonestagram.post.domain;
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.like.domain.Like;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,7 +43,7 @@ public class Posts {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private Users user;
+	private UserEntity user;
 
 	/**
 	 * 게시물 내용

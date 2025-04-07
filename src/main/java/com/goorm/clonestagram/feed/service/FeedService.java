@@ -11,10 +11,9 @@ import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.*;
@@ -29,12 +28,12 @@ public class FeedService {
 
     private final FeedRepository feedRepository;
     private final FollowService followService;
-    private final UserService userService;
+    private final UserExternalQueryService userService;
     private final FollowRepository followRepository;
 
     @Transactional(readOnly = true)
     public Page<FeedResponseDto> getUserFeed(Long userId, Pageable pageable) {
-        Users user = userService.findByIdAndDeletedIsFalse(userId);
+        User user = userService.findByIdAndDeletedIsFalse(userId);
 
         try {
             Page<Feeds> feeds = feedRepository.findByUserIdWithPostAndUser(userId, pageable);
@@ -61,7 +60,7 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public Page<FeedResponseDto> getFollowFeed(Long userId, Pageable pageable) {
-        Users user = userService.findByIdAndDeletedIsFalse(userId);
+        User user = userService.findByIdAndDeletedIsFalse(userId);
 
         try {
             List<Long> followList = followService.findFollowingUserIdsByFollowerId(user.getId());

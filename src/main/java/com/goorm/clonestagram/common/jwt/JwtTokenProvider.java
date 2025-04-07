@@ -103,14 +103,12 @@ public class JwtTokenProvider {
 			// Jwts.parserBuilder() 를 사용하여 JWT를 파싱, JWT 가 위변조되지 않았는지 secretKey(key)값을 넣어 확인
 			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
 			return true;
-		} catch (SecurityException | MalformedJwtException e) {
-			log.info("Invalid JWT Token", e);
+		} catch (SecurityException | MalformedJwtException | IllegalArgumentException e) {
+			log.info("JWT 토큰이 잘못되었습니다.", e);
 		} catch (ExpiredJwtException e) {
-			log.info("Expired JWT Token", e);
+			log.info("JWT 토큰이 만료되었습니다.", e);
 		} catch (UnsupportedJwtException e) {
-			log.info("Unsupported JWT Token", e);
-		} catch (IllegalArgumentException e) {
-			log.info("JWT claims string is empty.", e);
+			log.info("지원하지 않는 JWT 토큰입니다.", e);
 		}
 		return false;
 	}

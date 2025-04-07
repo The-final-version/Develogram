@@ -1,9 +1,10 @@
 package com.goorm.clonestagram.follow.dto;
 
-import com.goorm.clonestagram.user.domain.Users;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+import com.goorm.clonestagram.user.domain.entity.User;
 
 @NoArgsConstructor
 @Builder
@@ -20,15 +21,15 @@ public class FollowDto {
     private String followedProfileImg;   // 팔로우 받는 유저 프로필 이미지
     private LocalDateTime createdAt; // 팔로우 생성 시간
 
-    public FollowDto(Long id, Users follower, Users followed, LocalDateTime createdAt, String followerName, String followedName, String followerProfileimg, String followedProfileImg) {
+    public FollowDto(Long id, User follower, User followed, LocalDateTime createdAt, String followerName, String followedName, String followerProfileimg, String followedProfileImg) {
         this.id = id;
         this.followerId = follower.getId();
         this.followedId = followed.getId();
         this.createdAt = createdAt;
-        this.followerName = follower.getUsername(); // 팔로우 하는 유저 이름
-        this.followedName = followed.getUsername();     // 팔로우 받는 유저 이름
-        this.followerProfileimg = follower.getProfileimg(); // 팔로우 하는 유저 프로필 이미지
-        this.followedProfileImg = followed.getProfileimg();   // 팔로우 받는 유저 프로필 이미지
+        this.followerName = follower.getName();                         // 팔로우 하는 유저 이름
+        this.followedName = followed.getName();                         // 팔로우 받는 유저 이름
+        this.followerProfileimg = follower.getProfile().getImgUrl();    // 팔로우 하는 유저 프로필 이미지
+        this.followedProfileImg = followed.getProfile().getImgUrl();    // 팔로우 받는 유저 프로필 이미지
     }
 
 }

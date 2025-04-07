@@ -32,7 +32,7 @@ public class FeedResponseDto {
                 .feedId(feed.getId())
                 .postId(feed.getPost().getId())
                 .userId(feed.getUser().getId())
-                .username(feed.getPost().getUser().getUsername()) // 게시글 작성자
+                .username(feed.getPost().getUser().getName()) // 게시글 작성자
                 .content(feed.getPost().getContent())
                 .mediaUrl(feed.getPost().getMediaName())
                 .createdAt(feed.getCreatedAt())
