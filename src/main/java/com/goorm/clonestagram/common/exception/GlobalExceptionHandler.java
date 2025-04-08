@@ -3,6 +3,7 @@ package com.goorm.clonestagram.common.exception;
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 
+import com.goorm.clonestagram.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -68,4 +69,11 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
 	}
+
+
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<String> handleUserNotFound(UserNotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	}
+
 }

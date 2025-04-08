@@ -16,8 +16,7 @@ public class FollowController {
     private final FollowService followService;
 
     @PostMapping(
-            value = "/{follower}/profile/{followed}",
-            produces = MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"
+            value = "/{follower}/profile/{followed}"
     )
     public ResponseEntity<String> toggleFollow(@PathVariable Long follower, @PathVariable Long followed) {
         // 팔로우 상태를 확인하고 토글 처리
