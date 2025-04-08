@@ -23,4 +23,5 @@ public interface PostsRepository extends JpaRepository<Posts, Long> {
     Page<Posts> findAllByDeletedIsFalse(Pageable pageable);
 
 
+    void deleteAllByUser_Id(Long userId);
 }
