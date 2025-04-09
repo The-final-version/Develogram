@@ -145,6 +145,25 @@ class FeedServiceTest {
         verify(feedRepository, times(1)).findByUserIdWithPostAndUser(eq(userId), any());
     }
 
+    @Test
+    void F04_팔로우_피드가_비어있을_때() {
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        Users user = MockEntityFactory.mockUser(userId, "user");
+        List<Long> followings = List.of(2L, 3L);
+
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(followings);
+        when(feedRepository.findAllByUserIdAndPostOwnerInWithPostAndUser(userId, followings, pageable))
+                .thenReturn(Page.empty());
+
+        Page<FeedResponseDto> result = feedService.getFollowFeed(userId, pageable);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+
 
     @Test
     void F07_전체_피드_조회_성공() {
@@ -187,31 +206,28 @@ class FeedServiceTest {
 
     @Test
     void F09_팔로우_피드_조회_성공() {
-        // given
         Long userId = 1L;
         Users user = MockEntityFactory.mockUser(userId, "user");
         Pageable pageable = PageRequest.of(0, 10);
-
         List<Long> followingIds = List.of(2L, 3L);
+
         Posts post = MockEntityFactory.mockPost(100L, "hello", MockEntityFactory.mockUser(2L, "user2"));
         Feeds feed = MockEntityFactory.mockFeed(user, post);
         Page<Feeds> feedPage = new PageImpl<>(List.of(feed), pageable, 1);
 
         when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
         when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(followingIds);
-        when(feedRepository.findAllByUserIdInAndDeletedIsFalse(followingIds, pageable)).thenReturn(feedPage);
+        when(feedRepository.findAllByUserIdAndPostOwnerInWithPostAndUser(userId, followingIds, pageable)).thenReturn(feedPage);
 
-        // when
         Page<FeedResponseDto> result = feedService.getFollowFeed(userId, pageable);
 
-        // then
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         assertEquals("hello", result.getContent().get(0).getContent());
 
         verify(userService).findByIdAndDeletedIsFalse(userId);
         verify(followService).findFollowingUserIdsByFollowerId(userId);
-        verify(feedRepository).findAllByUserIdInAndDeletedIsFalse(followingIds, pageable);
+        verify(feedRepository).findAllByUserIdAndPostOwnerInWithPostAndUser(userId, followingIds, pageable);
     }
 
 
@@ -406,7 +422,6 @@ class FeedServiceTest {
 
     @Test
     void F21_팔로우_피드_조회_리스트_null_or_empty_처리() {
-        // given
         Long userId = 1L;
         Users user = MockEntityFactory.mockUser(userId, "user");
         Pageable pageable = PageRequest.of(0, 10);
@@ -414,16 +429,14 @@ class FeedServiceTest {
         when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
         when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(null);
 
-        // when
         Page<FeedResponseDto> result = feedService.getFollowFeed(userId, pageable);
 
-        // then
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
         verify(userService).findByIdAndDeletedIsFalse(userId);
         verify(followService).findFollowingUserIdsByFollowerId(userId);
-        verify(feedRepository, never()).findAllByUserIdInAndDeletedIsFalse(any(), any());
+        verify(feedRepository, never()).findAllByUserIdAndPostOwnerInWithPostAndUser(any(), any(), any());
     }
 
     @Test
@@ -444,22 +457,20 @@ class FeedServiceTest {
 
     @Test
     void F23_팔로우_피드_DB_예외_발생시_커버() {
-        // given
         Long userId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
         Users user = MockEntityFactory.mockUser(userId, "user");
 
         when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
         when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(List.of(2L, 3L));
-        when(feedRepository.findAllByUserIdInAndDeletedIsFalse(any(), any()))
+        when(feedRepository.findAllByUserIdAndPostOwnerInWithPostAndUser(any(), any(), any()))
                 .thenThrow(new RecoverableDataAccessException("DB 오류"));
 
-        // when & then
         assertThrows(FeedFetchFailedException.class, () -> {
             feedService.getFollowFeed(userId, pageable);
         });
 
-        verify(feedRepository).findAllByUserIdInAndDeletedIsFalse(any(), any());
+        verify(feedRepository).findAllByUserIdAndPostOwnerInWithPostAndUser(any(), any(), any());
     }
 
     @Test
@@ -529,4 +540,20 @@ class FeedServiceTest {
         verify(feedRepository, never()).deleteByUserIdAndPostIdIn(any(), any());
     }
 
+
+    @Test
+    void F26_팔로우목록_없을때_빈피드_반환() {
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        Users user = MockEntityFactory.mockUser(userId, "user");
+
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
+        when(followService.findFollowingUserIdsByFollowerId(userId)).thenReturn(Collections.emptyList());
+
+        Page<FeedResponseDto> result = feedService.getFollowFeed(userId, pageable);
+
+        assertNotNull(result);
+        assertEquals(0, result.getTotalElements());
+        verify(feedRepository, never()).findAllByUserIdAndPostOwnerInWithPostAndUser(any(), any(), any());
+    }
 }

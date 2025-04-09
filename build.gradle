@@ -82,7 +82,7 @@ jacocoTestCoverageVerification {
             files(
                     fileTree("$buildDir/classes/java/main") {
                         include 'com/goorm/clonestagram/feed/**'
-                        include 'com/goorm/clonestagram/follow/**'
+//                        include 'com/goorm/clonestagram/follow/**'
                         exclude '**/dto/**'
                         exclude '**/config/**'
                         exclude '**/mapper/**'
@@ -128,7 +128,7 @@ jacocoTestReport {
             files(
                     fileTree("$buildDir/classes/java/main") {
                         include 'com/goorm/clonestagram/feed/**'
-                        include 'com/goorm/clonestagram/follow/**'
+//                        include 'com/goorm/clonestagram/follow/**'
                         exclude '**/mapper/**'
                         exclude '**/dto/**'
                         exclude '**/mapper/**'

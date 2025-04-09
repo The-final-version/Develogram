@@ -33,7 +33,13 @@ public interface FeedRepository extends JpaRepository<Feeds, Long> {
     Page<Feeds> findAllByDeletedIsFalse(Pageable pageable);
 
 
-    @Query("SELECT f FROM Feeds f WHERE f.user.id IN :followIds AND f.post.deleted = false")
+    @Query(
+            value = "SELECT f FROM Feeds f " +
+                    "JOIN FETCH f.post p " +
+                    "JOIN FETCH p.user u " +
+                    "WHERE f.user.id IN :followIds AND p.deleted = false",
+            countQuery = "SELECT COUNT(f) FROM Feeds f WHERE f.user.id IN :followIds AND f.post.deleted = false"
+    )
     Page<Feeds> findAllByUserIdInAndDeletedIsFalse(@Param("followIds") List<Long> followIds, Pageable pageable);
 
 
@@ -44,5 +50,40 @@ public interface FeedRepository extends JpaRepository<Feeds, Long> {
     List<Feeds> findByUserId(Long userId);
 
     void deleteByPostId(Long postId);
+
+//    @Query(
+//            value = "SELECT f FROM Feeds f " +
+//                    "JOIN FETCH f.post p " +
+//                    "JOIN FETCH p.user u " +
+//                    "WHERE f.user.id IN :followIds AND p.deleted = false",
+//            countQuery = "SELECT COUNT(f) FROM Feeds f WHERE f.user.id IN :followIds AND f.post.deleted = false"
+//    )
+//    Page<Feeds> findAllByUserIdInWithPostAndUser(@Param("followIds") List<Long> followIds, Pageable pageable);
+
+    @Query("SELECT f FROM Feeds f " +
+            "JOIN FETCH f.post p " +
+            "JOIN FETCH p.user pu " +
+            "JOIN FETCH f.user fu " +
+            "WHERE f.user.id = :userId " +
+            "ORDER BY f.createdAt DESC")
+    List<Feeds> findAllByUserIdWithDetails(@Param("userId") Long userId); // 디버깅용
+
+
+    // FeedRepository.java
+    @Query(
+            value = "SELECT f FROM Feeds f " +
+                    "JOIN FETCH f.post p " +
+                    "JOIN FETCH p.user u " +
+                    "WHERE f.user.id = :userId AND p.user.id IN :followedIds AND p.deleted = false",
+            countQuery = "SELECT COUNT(f) FROM Feeds f WHERE f.user.id = :userId AND f.post.user.id IN :followedIds AND f.post.deleted = false"
+    )
+    Page<Feeds> findAllByUserIdAndPostOwnerInWithPostAndUser(
+            @Param("userId") Long userId,
+            @Param("followedIds") List<Long> followedIds,
+            Pageable pageable
+    );
+
+    void deleteAllByPostIdIn(List<Long> postIds);
+    void deleteAllByUserId(Long userId);
 
 }

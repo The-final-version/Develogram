@@ -1,6 +1,7 @@
 package com.goorm.clonestagram.common.exception;
 
 import com.goorm.clonestagram.exception.CommentNotFoundException;
+import com.goorm.clonestagram.exception.FeedFetchFailedException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 
 import org.springframework.http.HttpStatus;
@@ -67,5 +68,10 @@ public class GlobalExceptionHandler {
 		problem.setDetail(ex.getMessage());
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+	}
+
+	@ExceptionHandler(FeedFetchFailedException.class)
+	public ResponseEntity<String> handleFeedFetchFailed(FeedFetchFailedException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
 }

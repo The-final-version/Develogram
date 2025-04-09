@@ -10,4 +10,8 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comments, Long> {
 	List<Comments> findByPosts_Id(Long postId);
+
+	void deleteAllByPostsIdIn(List<Long> postIds);
+
+	void deleteAllByPosts_Id(Long postId);
 }

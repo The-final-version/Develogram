@@ -46,4 +46,7 @@ public interface FollowRepository extends JpaRepository<Follows, Long> {
     // 팔로워 검색
     @Query("SELECT f.follower FROM Follows f WHERE f.followed.id = :followedId AND f.follower.username LIKE %:keyword%")
     Page<Users> findFollowerByKeyword(@Param("followedId") Long followedId, @Param("keyword") String keyword, Pageable pageable);
+
+    void deleteAllByFollowerId(Long followerId);
+    void deleteAllByFollowedId(Long followedId);
 }
