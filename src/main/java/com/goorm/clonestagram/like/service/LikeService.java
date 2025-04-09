@@ -1,20 +1,20 @@
 package com.goorm.clonestagram.like.service;
 
-import com.goorm.clonestagram.exception.PostNotFoundException;
-import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.like.domain.Like;
-import com.goorm.clonestagram.like.repository.LikeRepository;
-import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import com.goorm.clonestagram.exception.PostNotFoundException;
+import com.goorm.clonestagram.like.domain.Like;
+import com.goorm.clonestagram.like.repository.LikeRepository;
+import com.goorm.clonestagram.post.domain.Posts;
+import com.goorm.clonestagram.post.service.PostService;
+import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.service.UserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +40,22 @@ public class LikeService {
 			} catch (DataIntegrityViolationException e) {
 				// 동시에 두 요청이 온 경우 하나는 성공하고 하나는 이곳으로 옴.
 				if (likeRepository.existsByUser_IdAndPost_Id(userId, postId)) {
-					likeRepository.save(new Like(user, post));
+					throw e;
 				}
 			}
+		}
+
+		syncLikeCount(postId);
+	}
+
+	@Transactional
+	public void syncLikeCount(Long postId) {
+		Long count = likeRepository.countByPost_Id(postId);
+
+		if (likeRepository.existsLikeCountByPostId(postId)) {
+			likeRepository.updateLikeCount(postId, count);
+		} else {
+			likeRepository.saveLikeCount(postId, count);
 		}
 	}
 
@@ -51,7 +64,9 @@ public class LikeService {
 		if (!postService.existsByIdAndDeletedIsFalse(postId)) {
 			throw new PostNotFoundException(postId);
 		}
-		return likeRepository.countByPost_Id(postId);
+
+		// return likeRepository.countByPost_Id(postId);
+		return likeRepository.findLikeCount(postId).orElse(0L);
 	}
 
 	public boolean isPostLikedByLoginUser(Long postId, Long userId) {

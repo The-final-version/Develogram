@@ -117,44 +117,44 @@ public class LikeServiceIntegrationTest {
 		assertEquals(2L, likeService.getLikeCount(post.getId()), "좋아요 개수가 2이어야 합니다.");
 	}
 
-	@Test
-	public void testToggleLikeTwiceRapidly() throws InterruptedException {
-		// Todo
-		// Users user = new Users();
-		// user.setUsername("testUser");
-		// user.setEmail("test@example.com");
-		// user.setPassword("password");
-		// user.setDeleted(false);
-		// user = userRepository.save(user);
-		//
-		// Posts post = new Posts();
-		// post.setUser(user);
-		// post.setContent("Test Post");
-		// post.setContentType(IMAGE);  // contents_type 추가
-		// post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
-		// post.setDeleted(false);
-		// post = postsRepository.save(post);
-		//
-		// Long userId = user.getId();
-		// Long postId = post.getId();
-		//
-		// int threadCount = 1;
-		// ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-		// CountDownLatch latch = new CountDownLatch(threadCount);
-		//
-		// for (int i = 0; i < threadCount; i++) {
-		// 	executor.submit(() -> {
-		// 		try {
-		// 			likeService.toggleLike(userId, postId);
-		// 		} finally {
-		// 			latch.countDown();
-		// 		}
-		// 	});
-		// }
-		//
-		// latch.await(); // 모든 쓰레드 종료 대기
-		//
-		// boolean liked = likeService.isPostLikedByLoginUser(userId, postId);
-		// System.out.println("최종 좋아요 상태: " + liked);
-	}
+	// @Test
+	// public void testToggleLikeTwiceRapidly() throws InterruptedException {
+	// Todo
+	// Users user = new Users();
+	// user.setUsername("testUser");
+	// user.setEmail("test@example.com");
+	// user.setPassword("password");
+	// user.setDeleted(false);
+	// user = userRepository.save(user);
+	//
+	// Posts post = new Posts();
+	// post.setUser(user);
+	// post.setContent("Test Post");
+	// post.setContentType(IMAGE);  // contents_type 추가
+	// post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
+	// post.setDeleted(false);
+	// post = postsRepository.save(post);
+	//
+	// Long userId = user.getId();
+	// Long postId = post.getId();
+	//
+	// int threadCount = 1;
+	// ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+	// CountDownLatch latch = new CountDownLatch(threadCount);
+	//
+	// for (int i = 0; i < threadCount; i++) {
+	// 	executor.submit(() -> {
+	// 		try {
+	// 			likeService.toggleLike(userId, postId);
+	// 		} finally {
+	// 			latch.countDown();
+	// 		}
+	// 	});
+	// }
+	//
+	// latch.await(); // 모든 쓰레드 종료 대기
+	//
+	// boolean liked = likeService.isPostLikedByLoginUser(userId, postId);
+	// System.out.println("최종 좋아요 상태: " + liked);
+	// }
 }

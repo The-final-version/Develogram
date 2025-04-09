@@ -112,7 +112,7 @@ public class LikeServiceTest {
 
 		// then
 		assertThat(result).isEqualTo(3L);
-		verify(likeRepository, times(1)).findLikeCount(postId);
+		verify(likeRepository, times(1)).countByPost_Id(postId);
 	}
 
 	@Test
