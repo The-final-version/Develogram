@@ -2,6 +2,7 @@ package com.goorm.clonestagram.feed.repository;
 
 import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.post.domain.Posts;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,34 +16,32 @@ import java.util.List;
 @Repository
 public interface FeedRepository extends JpaRepository<Feeds, Long> {
 
-    /**
-     * 유저의 피드를 게시물 + 작성자(user)까지 함께 페치 조인하여 조회 (페이징 지원)
-     */
-    @Query(
-            value = "SELECT f FROM Feeds f " +
-                    "JOIN FETCH f.post p " +
-                    "JOIN FETCH p.user u " +
-                    "WHERE f.user.id = :userId AND p.deleted = false " +
-                    "ORDER BY f.createdAt DESC",
-            countQuery = "SELECT COUNT(f) FROM Feeds f WHERE f.user.id = :userId"
-    )
-    Page<Feeds> findByUserIdWithPostAndUser(@Param("userId") Long userId, Pageable pageable);
+	/**
+	 * 유저의 피드를 게시물 + 작성자(user)까지 함께 페치 조인하여 조회 (페이징 지원)
+	 */
+	@Query(
+		value = "SELECT f FROM Feeds f " +
+			"JOIN FETCH f.post p " +
+			"JOIN FETCH p.user u " +
+			"WHERE f.user.id = :userId AND p.deleted = false " +
+			"ORDER BY f.createdAt DESC",
+		countQuery = "SELECT COUNT(f) FROM Feeds f WHERE f.user.id = :userId"
+	)
+	Page<Feeds> findByUserIdWithPostAndUser(@Param("userId") Long userId, Pageable pageable);
 
+	@Query("SELECT f FROM Feeds f WHERE f.post.deleted = false")
+	Page<Feeds> findAllByDeletedIsFalse(Pageable pageable);
 
-    @Query("SELECT f FROM Feeds f WHERE f.post.deleted = false")
-    Page<Feeds> findAllByDeletedIsFalse(Pageable pageable);
+	@Query("SELECT f FROM Feeds f WHERE f.user.id IN :followIds AND f.post.deleted = false")
+	Page<Feeds> findAllByUserIdInAndDeletedIsFalse(@Param("followIds") List<Long> followIds, Pageable pageable);
 
+	void deleteByUserIdAndPostIdIn(Long userId, List<Long> postIds);
 
-    @Query("SELECT f FROM Feeds f WHERE f.user.id IN :followIds AND f.post.deleted = false")
-    Page<Feeds> findAllByUserIdInAndDeletedIsFalse(@Param("followIds") List<Long> followIds, Pageable pageable);
+	/**
+	 * 특정 유저의 전체 피드 조회 (테스트 또는 삭제용)
+	 */
+	List<Feeds> findByUserId(Long userId);
 
-
-    void deleteByUserIdAndPostIdIn(Long userId, List<Long> postIds);
-    /**
-     * 특정 유저의 전체 피드 조회 (테스트 또는 삭제용)
-     */
-    List<Feeds> findByUserId(Long userId);
-
-    void deleteByPostId(Long postId);
+	void deleteByPostId(Long postId);
 
 }

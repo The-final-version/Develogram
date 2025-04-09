@@ -26,40 +26,40 @@ import lombok.RequiredArgsConstructor;
 @EnableBatchProcessing
 @RequiredArgsConstructor
 public class SoftDeleteBatchConfig {
-    private final JobRepository jobRepository;
-    private final PlatformTransactionManager transactionManager;
-    private final SoftDeleteRepository softDeleteRepository;
-    private final PostsRepository postsRepository;
-    private final UserInternalQueryService userQueryService;
+	private final JobRepository jobRepository;
+	private final PlatformTransactionManager transactionManager;
+	private final SoftDeleteRepository softDeleteRepository;
+	private final PostsRepository postsRepository;
+	private final UserInternalQueryService userQueryService;
 
-    @Bean
-    public Job cleanUpJob() {
-        return new JobBuilder("cleanUpJob", jobRepository)
-            .start(cleanUpStep())
-            .build();
-    }
+	@Bean
+	public Job cleanUpJob() {
+		return new JobBuilder("cleanUpJob", jobRepository)
+			.start(cleanUpStep())
+			.build();
+	}
 
-    @Bean
-    public Step cleanUpStep() {
-        return new StepBuilder("cleanUpStep", jobRepository)
-            .tasklet((contribution, chunkContext) -> {
-                LocalDateTime now = LocalDateTime.now();
-                LocalDateTime threshold = now.minusMonths(1);
+	@Bean
+	public Step cleanUpStep() {
+		return new StepBuilder("cleanUpStep", jobRepository)
+			.tasklet((contribution, chunkContext) -> {
+				LocalDateTime now = LocalDateTime.now();
+				LocalDateTime threshold = now.minusMonths(1);
 
-                // 한 달 지난 소프트 삭제 엔티티 조회
-                List<SoftDelete> softDeletes = softDeleteRepository.findByDeletedAtBefore(threshold);
+				// 한 달 지난 소프트 삭제 엔티티 조회
+				List<SoftDelete> softDeletes = softDeleteRepository.findByDeletedAtBefore(threshold);
 
-                for (SoftDelete softDelete : softDeletes) {
-                    if (softDelete.getEntityType() == EntityType.POST) {
-                        postsRepository.deleteById(softDelete.getEntityId());
-                    } else if (softDelete.getEntityType() == EntityType.USER) {
-                        userQueryService.deleteUserId(softDelete.getEntityId());
-                    }
-                    softDeleteRepository.delete(softDelete);
-                }
+				for (SoftDelete softDelete : softDeletes) {
+					if (softDelete.getEntityType() == EntityType.POST) {
+						postsRepository.deleteById(softDelete.getEntityId());
+					} else if (softDelete.getEntityType() == EntityType.USER) {
+						userQueryService.deleteUserId(softDelete.getEntityId());
+					}
+					softDeleteRepository.delete(softDelete);
+				}
 
-                return RepeatStatus.FINISHED;
-            }, transactionManager)
-            .build();
-    }
+				return RepeatStatus.FINISHED;
+			}, transactionManager)
+			.build();
+	}
 }

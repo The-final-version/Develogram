@@ -3,7 +3,6 @@ package com.goorm.clonestagram.post.service;
 import com.goorm.clonestagram.feed.service.FeedService;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
 import com.goorm.clonestagram.post.ContentType;
-import com.goorm.clonestagram.post.EntityType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.domain.SoftDelete;
 import com.goorm.clonestagram.post.dto.update.ImageUpdateReqDto;
@@ -12,9 +11,9 @@ import com.goorm.clonestagram.post.dto.upload.ImageUploadReqDto;
 import com.goorm.clonestagram.post.dto.upload.ImageUploadResDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.domain.repository.UserExternalWriteRepository;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalReadRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,14 +22,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,7 +40,7 @@ class ImageServiceTest {
     private PostsRepository postsRepository;
 
     @Mock
-    private UserExternalWriteRepository userRepository;
+    private JpaUserExternalReadRepository userRepository;
 
     @Mock
     private FeedService feedService;
@@ -108,7 +99,7 @@ class ImageServiceTest {
                 .user(testUser)
                 .build();
 
-        when(userService.findByIdAndDeletedIsFalse(1L)).thenReturn(testUser.toDomain());
+        when(userService.findByIdAndDeletedIsFalse(1L)).thenReturn(testUser);
         when(postService.save(any(Posts.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when: 이미지 업로드 서비스 실행

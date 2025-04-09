@@ -2,9 +2,9 @@ package com.goorm.clonestagram.user.domain.service;
 
 import java.util.Optional;
 
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.goorm.clonestagram.exception.user.error.UserNotFoundException;
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.repository.UserInternalReadRepository;
 import com.goorm.clonestagram.user.domain.repository.UserInternalWriteRepository;
@@ -20,16 +20,15 @@ public class UserInternalQueryService {
 	private final UserInternalReadRepository userReadRepository;
 	private final UserInternalWriteRepository userWriteRepository;
 
-	private final String USER_NOT_FOUND_MESSAGE = "해당 사용자가 존재하지 않습니다.";
 
 	public Long findUserIdByUsername(String username) {
 		return userReadRepository.findByName(username)
-			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public User findByEmail(String email) {
 		return Optional.ofNullable(userReadRepository.findByEmail(email))
-			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE + " email = " + email));
+			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public void saveUser(User user) {
@@ -46,11 +45,11 @@ public class UserInternalQueryService {
 
 	public User findUserById(Long userId) {
 		return userReadRepository.findByIdAndDeletedIsFalse(userId)
-			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public User findByIdAndDeletedIsFalse(Long userId) {
 		return userReadRepository.findByIdAndDeletedIsFalse(userId)
-			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+			.orElseThrow(UserNotFoundException::new);
 	}
 }

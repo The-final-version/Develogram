@@ -1,6 +1,7 @@
 package com.goorm.clonestagram.post.dto.update;
 
 import com.goorm.clonestagram.post.ContentType;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,10 +15,10 @@ import java.util.List;
 @Getter
 @Builder
 public class VideoUpdateResDto {
-    private String content;
-    private ContentType type;
-    private LocalDateTime updatedAt;
-    private List<String> hashTagList;
+	private String content;
+	private ContentType type;
+	private LocalDateTime updatedAt;
+	private List<String> hashTagList;
 
 }
 

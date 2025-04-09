@@ -1,12 +1,11 @@
 package com.goorm.clonestagram.like.service;
 
-import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,13 +18,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LikeService {
 	private final LikeRepository likeRepository;
-	private final UserService userService;
+	private final UserExternalQueryService userService;
 	private final PostService postService;
 
 	// 좋아요 토글
 	@Transactional
 	public void toggleLike(Long userId, Long postId) {
-		Users user = userService.findByIdAndDeletedIsFalse(userId);
+		UserEntity user = userService.findByIdAndDeletedIsFalse(userId);
 		Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
 		// userId와 postId를 사용해 좋아요 여부 확인
@@ -43,17 +42,11 @@ public class LikeService {
 
 	@Transactional(readOnly = true)
 	public Long getLikeCount(Long postId) {
-		if (!postService.existsByIdAndDeletedIsFalse(postId)) {
-			throw new PostNotFoundException(postId);
-		}
 		return likeRepository.countByPost_Id(postId);
 	}
 
 	public boolean isPostLikedByLoginUser(Long postId, Long userId) {
-		Users user = userService.findByIdAndDeletedIsFalse(userId);
-		Posts post = postService.findByIdAndDeletedIsFalse(postId);
-
-		return likeRepository.existsByUser_IdAndPost_Id(user.getId(), post.getId());
+		return likeRepository.existsByUserIdAndPost_Id(userId, postId);
 	}
 
 }

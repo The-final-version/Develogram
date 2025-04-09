@@ -5,15 +5,15 @@ package com.goorm.clonestagram.post;
  * - IMAGE, VIDEO
  */
 public enum EntityType {
-        POST("post"),
-        USER("user");
-        private final String value;
+	POST("post"),
+	USER("user");
+	private final String value;
 
-        EntityType(String value) {
-                this.value = value;
-        }
+	EntityType(String value) {
+		this.value = value;
+	}
 
-        public String getValue() {
-                return value;
-        }
+	public String getValue() {
+		return value;
+	}
 }

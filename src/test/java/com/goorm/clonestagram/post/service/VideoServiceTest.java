@@ -91,7 +91,7 @@ public class VideoServiceTest {
     @Test
     void 비디오업로드_성공() {
         // given
-        when(userExternalQueryService.findByIdAndDeletedIsFalse(anyLong())).thenReturn(testUser.toDomain());
+        when(userExternalQueryService.findByIdAndDeletedIsFalse(anyLong())).thenReturn(testUser);
         when(postsRepository.save(any(Posts.class))).thenReturn(testPost);
         when(hashTagRepository.findByTagContent(anyString())).thenReturn(Optional.empty());
         when(hashTagRepository.save(any(HashTags.class))).thenReturn(testHashTag);

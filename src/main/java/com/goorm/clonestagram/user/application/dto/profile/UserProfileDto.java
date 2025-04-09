@@ -14,18 +14,18 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class UserProfileDto {
-    private Long id;
-    private String username;
-    private String userEmail;
-    private String profileImgUrl;
-    private String profileBio;
-    private int followerCount;
-    private int followingCount;
+	private Long id;
+	private String username;
+	private String userEmail;
+	private String profileImgUrl;
+	private String profileBio;
+	private int followerCount;
+	private int followingCount;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
-    public UserProfileDto() {
+	public UserProfileDto() {
 
-    }
+	}
 }

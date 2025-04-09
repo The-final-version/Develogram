@@ -2,12 +2,12 @@ package com.goorm.clonestagram.comment.service;
 
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
-import com.goorm.clonestagram.comment.mapper.CommentMapper;
 import com.goorm.clonestagram.comment.repository.CommentRepository;
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
-import com.goorm.clonestagram.exception.UserNotFoundException;
+import com.goorm.clonestagram.exception.user.ErrorCode;
+import com.goorm.clonestagram.exception.user.error.UserNotFoundException;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
@@ -119,7 +119,7 @@ class CommentServiceTest {
 			// Given
 			CommentRequest request = new CommentRequest(11L, 111L, "Test Comment");
 
-			when(userService.findByIdAndDeletedIsFalse(11L)).thenReturn(mockUsers.toDomain());
+			when(userService.findByIdAndDeletedIsFalse(11L)).thenReturn(mockUsers);
 			when(postService.findByIdAndDeletedIsFalse(111L)).thenReturn(mockPost);
 
 			ArgumentCaptor<Comments> captor = ArgumentCaptor.forClass(Comments.class);
@@ -145,14 +145,14 @@ class CommentServiceTest {
 		void createComment_ShouldThrowException_WhenUserDoesNotExist() {
 			// Given: 모든 userId에 대해 false 반환
 			CommentRequest request = new CommentRequest(11L, 111L, "Test Comment");
-			when(userService.findByIdAndDeletedIsFalse(anyLong())).thenThrow(new UserNotFoundException(11L));
+			when(userService.findByIdAndDeletedIsFalse(anyLong())).thenThrow(new UserNotFoundException());
 
 			// When & Then: 예외 발생 여부 확인
 			Exception exception = assertThrows(UserNotFoundException.class,
 				() -> commentService.createComment(request));
 
 			// 예외 메시지 검증
-			assertTrue(exception.getMessage().contains("존재하지 않는 사용자입니다. ID: 11"));
+			assertTrue(exception.getMessage().contains(ErrorCode.USER_NOT_FOUND.getMessage()));
 
 			// Verify: userRepository.existsById()가 1번 호출되었는지 확인
 			verify(userService, times(1)).findByIdAndDeletedIsFalse(anyLong());
@@ -165,7 +165,7 @@ class CommentServiceTest {
 		void createComment_ShouldThrowException_WhenPostDoesNotExist() {
 			// Given: 특정 postId (mockComment의 postId)에 대해 false 반환 (게시글이 존재하지 않도록 설정)
 			CommentRequest request = new CommentRequest(11L, 111L, "Test Comment");
-			when(userService.findByIdAndDeletedIsFalse(anyLong())).thenReturn(mockUsers.toDomain());
+			when(userService.findByIdAndDeletedIsFalse(anyLong())).thenReturn(mockUsers);
 			when(postService.findByIdAndDeletedIsFalse(testComment.getPosts().getId()))
 				.thenThrow(new IllegalArgumentException("게시물이 없습니다."));
 

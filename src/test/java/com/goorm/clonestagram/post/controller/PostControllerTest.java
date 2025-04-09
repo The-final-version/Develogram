@@ -32,9 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class PostControllerTest {
 
@@ -75,7 +73,7 @@ public class PostControllerTest {
         // given
         List<Posts> posts = Arrays.asList(testPost);
         Page<Posts> postsPage = new PageImpl<>(posts, pageRequest, posts.size());
-        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser.toDomain());
+        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser);
         when(postService.getMyPosts(eq(1L), any())).thenReturn(PostResDto.builder()
                 .user(UserAdapter.toUserProfileDto(testUser))
                 .feed(postsPage.map(PostInfoDto::fromEntity))

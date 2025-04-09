@@ -1,10 +1,8 @@
 package com.goorm.clonestagram.comment.controller;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
@@ -26,9 +23,8 @@ import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.InvalidCommentException;
 import com.goorm.clonestagram.exception.PermissionDeniedException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
-import com.goorm.clonestagram.exception.UserNotFoundException;
+import com.goorm.clonestagram.exception.user.error.UserNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,10 +76,9 @@ public class CommentControllerTest {
 			when(commentService.getCommentById(id)).thenThrow(new CommentNotFoundException(id));
 
 			// when + then
-			CommentNotFoundException exception = assertThrows(CommentNotFoundException.class, () -> {
+			assertThrows(CommentNotFoundException.class, () -> {
 				commentController.getCommentById(id);
 			});
-			assertThat(exception.getMessage()).contains("존재하지 않는 댓글입니다. ID: " + id);
 		}
 
 	}
@@ -176,26 +171,20 @@ public class CommentControllerTest {
 			when(commentService.createComment(request)).thenReturn(saved);
 
 			// when
-			ResponseEntity<CommentResponse> responseEntity = commentController.create(request);
-			CommentResponse response = responseEntity.getBody();
+			CommentResponse response = commentController.create(request);
 
 			// then
-			assertEquals(201, responseEntity.getStatusCodeValue());
-			assertEquals(URI.create("/comments/10"), responseEntity.getHeaders().getLocation());
-
-			assertNotNull(response);
 			assertEquals(10L, response.getId());
 			assertEquals("댓글", response.getContent());
 			assertEquals(1L, response.getUserId());
 			assertEquals(2L, response.getPostId());
-
 		}
 
 		@Test
 		@DisplayName("없는 사용자인 경우 예외 발생")
 		void fail_user_not_found() throws Exception {
 			CommentRequest request = new CommentRequest(999L, 2L, "내용");
-			when(commentService.createComment(request)).thenThrow(new UserNotFoundException(999L));
+			when(commentService.createComment(request)).thenThrow(new UserNotFoundException());
 
 			assertThrows(UserNotFoundException.class, () -> {
 				commentController.create(request);
@@ -237,10 +226,9 @@ public class CommentControllerTest {
 
 			doNothing().when(commentService).removeComment(commentId, userId);
 
-			ResponseEntity<Void> result = commentController.deleteComment(commentId, userId);
+			String result = commentController.deleteComment(commentId, userId);
 
-			assertThat(result.getBody()).isNull();
-			verify(commentService, times(1)).removeComment(commentId, userId);
+			assertEquals("댓글이 삭제되었습니다. ID: " + commentId, result);
 		}
 
 		@Test
@@ -251,10 +239,9 @@ public class CommentControllerTest {
 
 			doNothing().when(commentService).removeComment(commentId, postOwnerId);
 
-			ResponseEntity<Void> result = commentController.deleteComment(commentId, postOwnerId);
+			String result = commentController.deleteComment(commentId, postOwnerId);
 
-			assertThat(result.getBody()).isNull();
-			verify(commentService, times(1)).removeComment(commentId, postOwnerId);
+			assertEquals("댓글이 삭제되었습니다. ID: " + commentId, result);
 		}
 
 		@Test

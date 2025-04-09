@@ -1,7 +1,5 @@
 package com.goorm.clonestagram.user.application.adapter;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 
 import com.goorm.clonestagram.user.application.dto.auth.JoinDto;
@@ -15,7 +13,7 @@ import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 public class UserAdapter {
 
 	/**
-	 * JoinDto를 Users 엔티티로 변환합니다.
+	 * JoinDto를 User 엔티티로 변환합니다.
 	 *
 	 * @param joinDto 회원가입 요청 DTO
 	 * @return 변환된 Users 엔티티
@@ -30,12 +28,12 @@ public class UserAdapter {
 		return new User(
 			new UserEmail(joinDto.getEmail()),
 			new UserPassword(joinDto.getPassword()),
-			new UserName(joinDto.getUsername())
+			new UserName(joinDto.getName())
 		);
 	}
 
 	/**
-	 * Users 엔티티를 UserProfileDto로 변환합니다.
+	 * User 엔티티를 UserProfileDto로 변환합니다.
 	 *
 	 * @param user Users 엔티티
 	 * @return 변환된 UserProfileDto
@@ -59,7 +57,7 @@ public class UserAdapter {
 	}
 
 	/**
-	 * UsersEntit를 UserProfileDto로 변환합니다.
+	 * UserEntit를 UserProfileDto로 변환합니다.
 	 *
 	 * @param userEntity Users 엔티티
 	 * @return 변환된 UserProfileDto
@@ -83,12 +81,12 @@ public class UserAdapter {
 	}
 
 	/**
-	 * Page<Users>를 Page<UserProfileDto>로 변환합니다.
+	 * Page<UserEntity>를 Page<UserProfileDto>로 변환합니다.
 	 *
 	 * @param usersPage Users 엔티티 페이지
 	 * @return 변환된 UserProfileDto 페이지
 	 */
-	public static Page<UserProfileDto> toUserProfileDtoPage(Page<User> usersPage) {
+	public static Page<UserProfileDto> toUserEntityProfileDtoPage(Page<UserEntity> usersPage) {
 		return usersPage.map(UserAdapter::toUserProfileDto);
 	}
 

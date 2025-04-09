@@ -11,14 +11,14 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class BatchScheduler {
-    private final JobLauncher jobLauncher;
-    private final Job cleanUpJob;
+	private final JobLauncher jobLauncher;
+	private final Job cleanUpJob;
 
-    @Scheduled(cron = "0 0 0 * * *")  // 매일 자정
-    public void runCleanupJob() throws Exception {
-        jobLauncher.run(cleanUpJob, new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis())
-                .toJobParameters());
-    }
+	@Scheduled(cron = "0 0 0 * * *")  // 매일 자정
+	public void runCleanupJob() throws Exception {
+		jobLauncher.run(cleanUpJob, new JobParametersBuilder()
+			.addLong("time", System.currentTimeMillis())
+			.toJobParameters());
+	}
 }
 

@@ -39,8 +39,8 @@ class FollowServiceTest {
 		UserEntity follower = UserEntity.builder().id(followerId).build();
 		UserEntity followed = UserEntity.builder().id(followedId).build();
 
-		given(userService.findByIdAndDeletedIsFalse(followerId)).willReturn(follower.toDomain());
-		given(userService.findByIdAndDeletedIsFalse(followedId)).willReturn(followed.toDomain());
+		given(userService.findByIdAndDeletedIsFalse(followerId)).willReturn(follower);
+		given(userService.findByIdAndDeletedIsFalse(followedId)).willReturn(followed);
 		given(followRepository.findByFollowerAndFollowed(follower, followed)).willReturn(Optional.empty());
 
 		// when
@@ -65,7 +65,7 @@ class FollowServiceTest {
 
 		Follows follow = new Follows(user, other);
 
-		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user.toDomain());
+		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
 		given(followRepository.findFollowedAllByFollower(user)).willReturn(List.of(follow));
 
 		List<FollowDto> result = followService.getFollowingList(userId);
@@ -82,7 +82,7 @@ class FollowServiceTest {
 
 		Follows follow = new Follows(follower, user);
 
-		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user.toDomain());
+		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
 		given(followRepository.findFollowerAllByFollowed(user)).willReturn(List.of(follow));
 
 		List<FollowDto> result = followService.getFollowerList(userId);
@@ -153,7 +153,7 @@ class FollowServiceTest {
 		Long userId = 1L;
 		UserEntity user = UserEntity.builder().id(userId).build();
 
-		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user.toDomain());
+		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
 		given(followRepository.findFollowedAllByFollower(user)).willReturn(List.of());
 
 		// when
@@ -169,7 +169,7 @@ class FollowServiceTest {
 		Long userId = 1L;
 		UserEntity user = UserEntity.builder().id(userId).build();
 
-		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user.toDomain());
+		given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
 		given(followRepository.findFollowerAllByFollowed(user)).willReturn(List.of());
 
 		// when

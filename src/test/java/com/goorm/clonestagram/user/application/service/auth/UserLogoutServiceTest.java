@@ -3,6 +3,8 @@ package com.goorm.clonestagram.user.application.service.auth;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.security.Principal;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.AfterEach;
@@ -32,12 +34,19 @@ class UserLogoutServiceTest {
 		SecurityContextHolder.clearContext();
 	}
 
+
 	@Test
 	@DisplayName("로그아웃: 세션이 존재하는 경우, 세션 무효화 및 SecurityContextHolder 초기화")
 	void testLogoutWithSession() {
 		// given: 세션이 존재하는 경우
 		when(request.getSession(false)).thenReturn(session);
-		// SecurityContextHolder에 임의의 인증 정보가 존재하는 상황
+
+		// given: Principal 모킹 및 설정
+		Principal mockPrincipal = mock(Principal.class);
+		when(mockPrincipal.getName()).thenReturn("testUser");
+		when(request.getUserPrincipal()).thenReturn(mockPrincipal);
+
+		// SecurityContextHolder에 임의의 인증 정보 설정
 		SecurityContextHolder.getContext().setAuthentication(mock(org.springframework.security.core.Authentication.class));
 
 		// when
@@ -53,13 +62,20 @@ class UserLogoutServiceTest {
 	void testLogoutWithoutSession() {
 		// given: 세션이 존재하지 않는 경우
 		when(request.getSession(false)).thenReturn(null);
+
+		// given: Principal 모킹 및 설정 (세션 유무와 상관없이 principal은 필요)
+		Principal mockPrincipal = mock(Principal.class);
+		when(mockPrincipal.getName()).thenReturn("testUser");
+		when(request.getUserPrincipal()).thenReturn(mockPrincipal);
+
+		// SecurityContextHolder에 임의의 인증 정보 설정
 		SecurityContextHolder.getContext().setAuthentication(mock(org.springframework.security.core.Authentication.class));
 
 		// when
 		userLogoutService.logout(request);
 
 		// then
-		verify(session, never()).invalidate(); // 세션 무효화 호출 없이 SecurityContextHolder만 초기화
+		verify(session, never()).invalidate();
 		assertNull(SecurityContextHolder.getContext().getAuthentication(), "SecurityContextHolder가 초기화되어야 함");
 	}
 }

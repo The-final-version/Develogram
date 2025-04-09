@@ -15,8 +15,8 @@ import com.goorm.clonestagram.hashtag.entity.PostHashTags;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
 import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
 import com.goorm.clonestagram.feed.service.FeedService;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,7 @@ public class ImageService {
      */
     public ImageUploadResDto imageUpload(ImageUploadReqDto imageUploadReqDto, Long userId) throws Exception {
         // 사용자 검증
-        User users = userService.findByIdAndDeletedIsFalse(userId);
+        UserEntity users = userService.findByIdAndDeletedIsFalse(userId);
         if (users == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
         }

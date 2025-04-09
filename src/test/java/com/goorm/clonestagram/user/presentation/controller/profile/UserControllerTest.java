@@ -66,7 +66,7 @@ class UserControllerTest {
 				.id(userId)
 				.name(new UserName("홍길동"))
 				.email(new UserEmail("test@example.com"))
-				.password(new UserPassword("hashed-password"))
+				.password(new UserPassword("hashedpassword1!"))
 				.profile(Profile.builder()
 					.bio(new ProfileBio("소개"))
 					.imgUrl(new ProfileImageUrl("http://img.com/profile.jpg"))
@@ -106,13 +106,11 @@ class UserControllerTest {
 
 			when(userQueryService.findUserIdByUsername(username)).thenReturn(expectedId);
 
-			// 테스트에서는 /user/id에도 인증정보를 추가 (보안 필터가 활성화되어 있기 때문)
-			// (인증이 필요하지 않은 엔드포인트라 하더라도 보안 설정에 의해 401 응답이 발생할 수 있음)
 			User dummyUser = User.builder()
 				.id(expectedId)
 				.name(new UserName(username))
 				.email(new UserEmail("test@example.com"))
-				.password(new UserPassword("hashed-password"))
+				.password(new UserPassword("hashedpassword1!"))
 				.profile(Profile.builder()
 					.bio(new ProfileBio("소개"))
 					.imgUrl(new ProfileImageUrl("http://img.com/profile.jpg"))

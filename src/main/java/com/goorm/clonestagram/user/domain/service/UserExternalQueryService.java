@@ -7,29 +7,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.goorm.clonestagram.user.domain.entity.User;
-import com.goorm.clonestagram.user.domain.repository.UserExternalReadRepository;
+import com.goorm.clonestagram.exception.user.error.UserNotFoundException;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalReadRepository;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 
 import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
 public class UserExternalQueryService {
-	private final UserExternalReadRepository userExternalReadRepository;
+	private final JpaUserExternalReadRepository userExternalReadRepository;
+	private final JpaUserExternalWriteRepository userExternalWriteRepository;
 
 	private static final String USER_NOT_FOUND_MESSAGE = "해당 사용자가 존재하지 않습니다.";
 
-	public Page<User> searchUserByKeyword(String keyword, Pageable pageable) {
+	public Page<UserEntity> searchUserByKeyword(String keyword, Pageable pageable) {
 		return userExternalReadRepository.searchUserByFullText(keyword, pageable);
 	}
 
-	public List<User> findByName_NameContainingIgnoreCase(String keyword) {
+	public List<UserEntity> findByName_NameContainingIgnoreCase(String keyword) {
 		return userExternalReadRepository.findByNameContainingIgnoreCase(keyword);
 	}
 
-	public User findByIdAndDeletedIsFalse(Long userId) {
+	public UserEntity findByIdAndDeletedIsFalse(Long userId) {
 		return userExternalReadRepository.findByIdAndDeletedIsFalse(userId)
-			.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
+			.orElseThrow(UserNotFoundException::new);
 	}
 
 	public boolean existsByIdAndDeletedIsFalse(Long userId) {

@@ -1,5 +1,7 @@
 package com.goorm.clonestagram.user.domain.service;
 
+import com.goorm.clonestagram.exception.user.ErrorCode;
+import com.goorm.clonestagram.exception.user.error.UserNotFoundException;
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.repository.UserInternalReadRepository;
 import com.goorm.clonestagram.user.domain.repository.UserInternalWriteRepository;
@@ -36,7 +38,6 @@ class UserInternalQueryServiceTest {
 	@InjectMocks
 	private UserInternalQueryService userInternalQueryService;
 
-	private final String NOT_FOUND_MSG = "해당 사용자가 존재하지 않습니다.";
 	private User mockUser;
 
 	@BeforeEach
@@ -81,8 +82,8 @@ class UserInternalQueryServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> userInternalQueryService.findUserIdByUsername(username))
-				.isInstanceOf(UsernameNotFoundException.class)
-				.hasMessageContaining(NOT_FOUND_MSG);
+				.isInstanceOf(UserNotFoundException.class)
+				.hasMessageContaining(ErrorCode.USER_NOT_FOUND.getMessage());
 			verify(userReadRepository, times(1)).findByName(username);
 		}
 	}
@@ -120,8 +121,7 @@ class UserInternalQueryServiceTest {
 
 			// when & then
 			assertThatThrownBy(() -> userInternalQueryService.findByEmail(email))
-				.isInstanceOf(UsernameNotFoundException.class)
-				.hasMessageContaining("email = " + email);
+				.isInstanceOf(UserNotFoundException.class);
 			verify(userReadRepository, times(1)).findByEmail(email);
 		}
 	}
@@ -271,8 +271,8 @@ class UserInternalQueryServiceTest {
 				.thenReturn(Optional.empty());
 
 			assertThatThrownBy(() -> userInternalQueryService.findUserById(userId))
-				.isInstanceOf(UsernameNotFoundException.class)
-				.hasMessageContaining(NOT_FOUND_MSG);
+				.isInstanceOf(UserNotFoundException.class)
+				.hasMessageContaining(ErrorCode.USER_NOT_FOUND.getMessage());
 			verify(userReadRepository, times(1))
 				.findByIdAndDeletedIsFalse(userId);
 		}
@@ -308,8 +308,8 @@ class UserInternalQueryServiceTest {
 				.thenReturn(Optional.empty());
 
 			assertThatThrownBy(() -> userInternalQueryService.findByIdAndDeletedIsFalse(userId))
-				.isInstanceOf(UsernameNotFoundException.class)
-				.hasMessageContaining(NOT_FOUND_MSG);
+				.isInstanceOf(UserNotFoundException.class)
+				.hasMessageContaining(ErrorCode.USER_NOT_FOUND.getMessage());
 			verify(userReadRepository, times(1))
 				.findByIdAndDeletedIsFalse(userId);
 		}

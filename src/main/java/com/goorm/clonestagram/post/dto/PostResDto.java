@@ -2,6 +2,7 @@ package com.goorm.clonestagram.post.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+
 import org.springframework.data.domain.Page;
 
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
@@ -13,6 +14,6 @@ import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 @Getter
 @Builder
 public class PostResDto {
-    private UserProfileDto user;
-    private Page<PostInfoDto> feed;
+	private UserProfileDto user;
+	private Page<PostInfoDto> feed;
 }

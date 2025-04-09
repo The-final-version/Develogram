@@ -6,11 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.goorm.clonestagram.post.EntityType;
-import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.post.domain.SoftDelete;
-import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
 import com.goorm.clonestagram.post.service.PostService;
 import com.goorm.clonestagram.post.service.SoftDeleteService;
 import com.goorm.clonestagram.user.domain.entity.User;

@@ -28,14 +28,14 @@ class UserJpaInternalWriterTest {
 	@DisplayName("save(User): 도메인 객체를 저장 후 변환된 도메인 객체 반환")
 	void testSaveDomainUser() {
 		// given: 도메인 객체 생성 (User.builder()가 존재한다고 가정)
-		User domainUser = User.builder()
-			.email(new UserEmail("test@example.com"))
-			.name(new UserName("Test User"))
-			.password(new UserPassword("password"))
+		UserEntity domainUser = UserEntity.builder()
+			.email("test@example.com")
+			.name("Test User")
+			.password("password1@")
 			.build();
 
 		// when: 도메인 객체 저장
-		User savedUser = userJpaInternalWriter.save(domainUser);
+		UserEntity savedUser = userJpaInternalWriter.saveEntity(domainUser);
 
 		// then: 반환된 도메인 객체가 null이 아니고, 필드 값이 일치하며, DB에도 저장되어야 함
 		assertThat(savedUser).isNotNull();
@@ -55,12 +55,12 @@ class UserJpaInternalWriterTest {
 	@DisplayName("deleteById: id로 도메인 엔티티 삭제")
 	void testDeleteById() {
 		// given: 도메인 객체 저장
-		User domainUser = User.builder()
-			.email(new UserEmail("delete@example.com"))
-			.name(new UserName("Delete User"))
-			.password(new UserPassword("password"))
+		UserEntity domainUser = UserEntity.builder()
+			.email("delete@example.com")
+			.name("Delete User")
+			.password("password1@")
 			.build();
-		User savedUser = userJpaInternalWriter.save(domainUser);
+		UserEntity savedUser = userJpaInternalWriter.saveEntity(domainUser);
 		Long id = savedUser.getId();
 		assertThat(jpaUserInternalWriteRepository.findById(id)).isPresent();
 

@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class UserSuggestionDto {
-    private Long id;
-    private String username;
-    private String profileimg;
+	private Long id;
+	private String username;
+	private String profileimg;
 }

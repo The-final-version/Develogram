@@ -1,6 +1,5 @@
 package com.goorm.clonestagram.user.infrastructure.repository;
 
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import com.goorm.clonestagram.user.domain.entity.User;
@@ -21,8 +20,15 @@ public class UserJpaInternalWriter implements UserInternalWriteRepository {
 			.toDomain();
 	}
 
+
+	@Override
+	public UserEntity saveEntity(final UserEntity user) {
+		return jpaUserInternalWriteRepository.save(user);
+	}
+
+
 	@Override
 	public void deleteById(Long id) {
-		((CrudRepository<UserEntity, Long>) jpaUserInternalWriteRepository).deleteById(id);
+		jpaUserInternalWriteRepository.deleteById(id);
 	}
 }

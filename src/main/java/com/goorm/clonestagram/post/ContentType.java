@@ -5,5 +5,5 @@ package com.goorm.clonestagram.post;
  * - IMAGE, VIDEO
  */
 public enum ContentType {
-        IMAGE, VIDEO;
+	IMAGE, VIDEO;
 }

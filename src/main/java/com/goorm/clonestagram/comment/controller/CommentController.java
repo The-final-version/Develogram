@@ -8,10 +8,8 @@ import com.goorm.clonestagram.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -58,33 +56,23 @@ public class CommentController {
 	}
 
 	@PostMapping
-	public ResponseEntity<CommentResponse> create(@RequestBody CommentRequest request) throws Exception {
+	public CommentResponse create(@RequestBody CommentRequest request) throws Exception {
 		Comments entity = commentService.createComment(request);
 
-		CommentResponse response = CommentResponse.builder()
+		return CommentResponse.builder()
 			.id(entity.getId())
 			.userId(entity.getUsers().getId())
-			.username(entity.getUsers().getUsername())
 			.postId(entity.getPosts().getId())
 			.content(entity.getContent())
 			.content(entity.getContent())
 			.createdAt(entity.getCreatedAt())
 			.build();
 
-		URI location = URI.create("/comments/" + response.getId());
-
-		return ResponseEntity
-			.created(location)
-			.body(response);
 	}
 
-	// 아래 방식처럼 requester의 id값을 클라이언트가 넘기는 것은 보안의 위험이 있음.
-	// 리팩터링 해야함. 지금은 메모만 해둠
-	// Todo
 	@DeleteMapping("/{commentId}")
-	public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, @RequestParam Long requesterId) {
+	public String deleteComment(@PathVariable Long commentId, @RequestParam Long requesterId) {
 		commentService.removeComment(commentId, requesterId);
-
-		return ResponseEntity.noContent().build();
+		return "댓글이 삭제되었습니다. ID: " + commentId;
 	}
 }

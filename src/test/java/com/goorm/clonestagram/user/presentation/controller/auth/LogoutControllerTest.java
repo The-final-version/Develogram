@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureMockMvc(addFilters = false)
@@ -27,7 +28,7 @@ class LogoutControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
+	@MockitoBean
 	private UserLogoutService logoutService;
 
 	@TestConfiguration

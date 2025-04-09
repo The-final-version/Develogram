@@ -1,5 +1,8 @@
 package com.goorm.clonestagram.user.application.service.auth;
 
+import com.goorm.clonestagram.exception.user.ErrorCode;
+import com.goorm.clonestagram.exception.user.error.DuplicateEmailException;
+import com.goorm.clonestagram.exception.user.error.PasswordMismatchException;
 import com.goorm.clonestagram.user.application.dto.auth.JoinDto;
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserInternalQueryService;
@@ -27,21 +30,11 @@ class UserJoinServiceTest {
 	@InjectMocks
 	private UserJoinService userJoinService;
 
-	@BeforeEach
-	void setUp() {
-		// no stubbing
-	}
-
 	@Test
 	@DisplayName("정상 가입: Bean Validation 통과 & 이메일 미중복 → saveUser() 호출")
 	void joinProcess_Success() {
 		// given
-		JoinDto dto = JoinDto.builder()
-			.email("valid@test.com")
-			.password("mypassword")
-			.confirmPassword("mypassword")
-			.username("홍길동")
-			.build();
+		JoinDto dto = new JoinDto("valid@test.com", "mypassword11@", "mypassword11@", "홍길동");
 
 		when(userInternalQueryService.existsByEmail("valid@test.com"))
 			.thenReturn(false);
@@ -60,44 +53,34 @@ class UserJoinServiceTest {
 		@Test
 		@DisplayName("이메일 중복 시 -> '이미 사용 중인 이메일입니다: ...' (IllegalStateException)")
 		void duplicateEmail_Fail() {
-			JoinDto dto = JoinDto.builder()
-				.email("duplicate@test.com")
-				.password("mypassword")
-				.confirmPassword("mypassword")
-				.username("홍길동")
-				.build();
+			JoinDto dto = new JoinDto("duplicate@test.com", "mypassword1!", "mypassword1!", "홍길동");
 
 			// Bean Validation 통과
 			when(userInternalQueryService.existsByEmail("duplicate@test.com"))
 				.thenReturn(true);
 
-			IllegalStateException ex =
-				assertThrows(IllegalStateException.class, () -> userJoinService.joinProcess(dto));
+			DuplicateEmailException ex =
+				assertThrows(DuplicateEmailException.class, () -> userJoinService.joinProcess(dto));
 
-			assertThat(ex.getMessage()).contains("이미 사용 중인 이메일입니다: duplicate@test.com");
+			assertThat(ex.getMessage()).contains(ErrorCode.USER_DUPLICATE_EMAIL.getMessage());
 			verify(userInternalQueryService, never()).saveUser(any());
 		}
 	}
 
 	@Test
-	@DisplayName("비밀번호 불일치 시 -> '비밀번호가 일치하지 않습니다.' (IllegalStateException)")
+	@DisplayName("비밀번호 불일치 시 -> '비밀번호가 일치하지 않습니다.' (PasswordMismatchException)")
 	void passwordMismatch_Fail() {
 		// given: 비밀번호와 비밀번호 확인 값이 다른 경우
-		JoinDto dto = JoinDto.builder()
-			.email("valid@test.com")
-			.password("password123")
-			.confirmPassword("differentPassword")
-			.username("홍길동")
-			.build();
+		JoinDto dto = new JoinDto("valid@test.com", "password123@", "differentPassword", "홍길동");
 
 		when(userInternalQueryService.existsByEmail("valid@test.com"))
 			.thenReturn(false);
 
 		// when & then
-		IllegalStateException ex =
-			assertThrows(IllegalStateException.class, () -> userJoinService.joinProcess(dto));
+		PasswordMismatchException ex =
+			assertThrows(PasswordMismatchException.class, () -> userJoinService.joinProcess(dto));
 
-		assertThat(ex.getMessage()).contains("비밀번호가 일치하지 않습니다.");
+		assertThat(ex.getMessage()).contains("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
 		verify(userInternalQueryService, never()).saveUser(any());
 	}
 }

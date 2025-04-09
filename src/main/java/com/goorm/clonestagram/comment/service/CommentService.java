@@ -6,7 +6,6 @@ import com.goorm.clonestagram.comment.mapper.CommentMapper;
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
-import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.comment.repository.CommentRepository;
 import com.goorm.clonestagram.post.service.PostService;

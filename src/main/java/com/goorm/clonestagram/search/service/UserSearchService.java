@@ -6,6 +6,7 @@ import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,18 +42,18 @@ public class UserSearchService {
 			.map(s -> "+" + s + "*")
 			.collect(Collectors.joining(" "));
 
-		Page<User> users = userExternalQueryService.searchUserByKeyword(keyword, pageable);
+		Page<UserEntity> users = userExternalQueryService.searchUserByKeyword(keyword, pageable);
 
-		Page<UserProfileDto> userProfiles = UserAdapter.toUserProfileDtoPage(users);
+		Page<UserProfileDto> userProfiles = UserAdapter.toUserEntityProfileDtoPage(users);
 
 		return SearchUserResDto.of(users.getTotalElements(), userProfiles);
 	}
 
 	@Transactional(readOnly = true)
 	public List<UserSuggestionDto> findUsersByKeyword(String keyword) {
-		List<User> users = userExternalQueryService.findByName_NameContainingIgnoreCase(keyword);
+		List<UserEntity> users = userExternalQueryService.findByName_NameContainingIgnoreCase(keyword);
 		return users.stream()
-			.map(user -> new UserSuggestionDto(user.getId(), user.getName(), user.getProfile().getImgUrl()))
+			.map(user -> new UserSuggestionDto(user.getId(), user.getName(), user.getProfileEntity().getImgUrl()))
 			.collect(Collectors.toList());
 	}
 

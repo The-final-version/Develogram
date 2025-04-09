@@ -3,6 +3,7 @@ package com.goorm.clonestagram.post.dto.update;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -15,8 +16,8 @@ import java.util.List;
 @Setter
 public class ImageUpdateReqDto {
 
-    private String file;
-    private String content;
-    private List<String> hashTagList;
+	private String file;
+	private String content;
+	private List<String> hashTagList;
 
 }

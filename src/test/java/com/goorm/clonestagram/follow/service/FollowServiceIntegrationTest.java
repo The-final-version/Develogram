@@ -2,8 +2,8 @@ package com.goorm.clonestagram.follow.service;
 
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
-import com.goorm.clonestagram.user.domain.repository.UserExternalWriteRepository;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalReadRepository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,7 @@ public class FollowServiceIntegrationTest {
     private FollowService followService;
 
     @Autowired
-    private UserExternalWriteRepository userRepository;
+    private JpaUserExternalReadRepository userRepository;
 
     @Autowired
     private FollowRepository followRepository;

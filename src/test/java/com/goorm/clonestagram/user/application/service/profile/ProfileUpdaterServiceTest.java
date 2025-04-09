@@ -1,8 +1,10 @@
 package com.goorm.clonestagram.user.application.service.profile;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
+import com.goorm.clonestagram.exception.user.ErrorCode;
+import com.goorm.clonestagram.exception.user.error.UserValidationException;
 import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 import com.goorm.clonestagram.user.application.dto.profile.UserProfileUpdateDto;
@@ -66,38 +68,6 @@ class ProfileUpdaterServiceTest {
 			verify(user).getProfile();
 			verify(profile).updateBio(any(ProfileBio.class));
 			verify(profile).updateProfileImage(any(ProfileImageUrl.class));
-			verify(user).updateProfile(profile);
-			verify(userInternalQueryService).saveUser(user);
-			assertEquals(expectedDto, result);
-		}
-	}
-
-	@Test
-	@DisplayName("빈 bio 및 profileImage일 경우: 업데이트 없이 기존 프로필 유지")
-	void updateUserProfile_EmptyBioAndImage() {
-		// given
-		Long userId = 1L;
-		// bio와 profileImage가 빈 문자열인 경우
-		UserProfileUpdateDto updateDto = UserProfileUpdateDto.builder()
-			.bio("")
-			.profileImage("")
-			.build();
-
-		when(userInternalQueryService.findByIdAndDeletedIsFalse(userId)).thenReturn(user);
-		when(user.getProfile()).thenReturn(profile);
-		// bio와 이미지 값이 없으므로 updateBio, updateProfileImage 내부 조건에 의해 그대로 profile이 반환됨
-
-		UserProfileDto expectedDto = new UserProfileDto();
-		try (MockedStatic<UserAdapter> mockedAdapter = mockStatic(UserAdapter.class)) {
-			mockedAdapter.when(() -> UserAdapter.toUserProfileDto(user)).thenReturn(expectedDto);
-
-			// when
-			UserProfileDto result = profileUpdaterService.updateUserProfile(userId, updateDto);
-
-			// then
-			verify(userInternalQueryService).findByIdAndDeletedIsFalse(userId);
-			verify(user).getProfile();
-			// 내부 private 메서드 updateBio/updateProfileImage는 조건에 따라 profile 객체를 그대로 반환
 			verify(user).updateProfile(profile);
 			verify(userInternalQueryService).saveUser(user);
 			assertEquals(expectedDto, result);

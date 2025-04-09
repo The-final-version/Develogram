@@ -9,11 +9,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
 public class CustomUserDetails implements UserDetails {
-
+    @NotBlank(message = "사용자 정보가 없습니다.")
     private final UserEntity user;
 
     public CustomUserDetails(UserEntity user) {

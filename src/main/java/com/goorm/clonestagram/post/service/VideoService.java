@@ -14,8 +14,8 @@ import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
 import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class VideoService {
      */
     public VideoUploadResDto videoUpload(VideoUploadReqDto videoUploadReqDto, Long userId) {
 
-        User users = userExternalQueryService.findByIdAndDeletedIsFalse(userId);
+        UserEntity users = userExternalQueryService.findByIdAndDeletedIsFalse(userId);
 
         String fileUrl = videoUploadReqDto.getFile();
 

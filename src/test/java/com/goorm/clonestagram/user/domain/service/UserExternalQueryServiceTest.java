@@ -1,7 +1,12 @@
 package com.goorm.clonestagram.user.domain.service;
 
+import com.goorm.clonestagram.exception.user.ErrorCode;
+import com.goorm.clonestagram.exception.user.error.UserNotFoundException;
 import com.goorm.clonestagram.user.domain.entity.User;
-import com.goorm.clonestagram.user.domain.repository.UserExternalReadRepository;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalReadRepository;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,21 +32,22 @@ import static org.mockito.Mockito.*;
 class UserExternalQueryServiceTest {
 
 	@Mock
-	private UserExternalReadRepository userExternalReadRepository;
+	private JpaUserExternalReadRepository userExternalReadRepository;
 
 	@InjectMocks
 	private UserExternalQueryService userExternalQueryService;
 
-	private User mockUser;
+	private UserEntity mockUser;
 
 	private static final String NOT_FOUND_MSG = "해당 사용자가 존재하지 않습니다.";
-
+	@AfterEach
+	void tearDown() {
+		userExternalReadRepository.deleteAllInBatch();
+	}
 	@BeforeEach
 	void setUp() {
-		// 간단한 Mock User 생성 (필드 자유롭게)
-		mockUser = User.builder()
+		mockUser = UserEntity.builder()
 			.id(100L)
-			// 기타 필드 필요 시 set
 			.build();
 	}
 
@@ -58,13 +64,13 @@ class UserExternalQueryServiceTest {
 			// given
 			String keyword = "testKeyword";
 			Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
-			Page<User> mockPage = new PageImpl<>(List.of(mockUser), pageable, 1);
+			Page<UserEntity> mockPage = new PageImpl<>(List.of(mockUser), pageable, 1);
 
 			when(userExternalReadRepository.searchUserByFullText(keyword, pageable))
 				.thenReturn(mockPage);
 
 			// when
-			Page<User> result = userExternalQueryService.searchUserByKeyword(keyword, pageable);
+			Page<UserEntity> result = userExternalQueryService.searchUserByKeyword(keyword, pageable);
 
 			// then
 			assertThat(result.getTotalElements()).isEqualTo(1);
@@ -79,13 +85,13 @@ class UserExternalQueryServiceTest {
 			// given
 			String keyword = "noMatch";
 			Pageable pageable = PageRequest.of(0, 10);
-			Page<User> emptyPage = Page.empty();
+			Page<UserEntity> emptyPage = Page.empty();
 
 			when(userExternalReadRepository.searchUserByFullText(keyword, pageable))
 				.thenReturn(emptyPage);
 
 			// when
-			Page<User> result = userExternalQueryService.searchUserByKeyword(keyword, pageable);
+			Page<UserEntity> result = userExternalQueryService.searchUserByKeyword(keyword, pageable);
 
 			// then
 			assertThat(result).isEmpty();
@@ -124,12 +130,12 @@ class UserExternalQueryServiceTest {
 		void findByName_Success() {
 			// given
 			String keyword = "testuser";
-			User user2 = User.builder().id(200L).build();
+			UserEntity user2 = UserEntity.builder().id(200L).build();
 			when(userExternalReadRepository.findByNameContainingIgnoreCase(keyword))
 				.thenReturn(List.of(mockUser, user2));
 
 			// when
-			List<User> result = userExternalQueryService.findByName_NameContainingIgnoreCase(keyword);
+			List<UserEntity> result = userExternalQueryService.findByName_NameContainingIgnoreCase(keyword);
 
 			// then
 			assertThat(result).hasSize(2);
@@ -146,7 +152,7 @@ class UserExternalQueryServiceTest {
 				.thenReturn(Collections.emptyList());
 
 			// when
-			List<User> result = userExternalQueryService.findByName_NameContainingIgnoreCase(keyword);
+			List<UserEntity> result = userExternalQueryService.findByName_NameContainingIgnoreCase(keyword);
 
 			// then
 			assertThat(result).isEmpty();
@@ -187,7 +193,7 @@ class UserExternalQueryServiceTest {
 			when(userExternalReadRepository.findByIdAndDeletedIsFalse(userId))
 				.thenReturn(Optional.of(mockUser));
 
-			User result = userExternalQueryService.findByIdAndDeletedIsFalse(userId);
+			UserEntity result = userExternalQueryService.findByIdAndDeletedIsFalse(userId);
 
 			assertThat(result).isEqualTo(mockUser);
 			verify(userExternalReadRepository, times(1))
@@ -202,8 +208,8 @@ class UserExternalQueryServiceTest {
 				.thenReturn(Optional.empty());
 
 			assertThatThrownBy(() -> userExternalQueryService.findByIdAndDeletedIsFalse(userId))
-				.isInstanceOf(UsernameNotFoundException.class)
-				.hasMessageContaining("해당 사용자가 존재하지 않습니다.");
+				.isInstanceOf(UserNotFoundException.class)
+				.hasMessageContaining(ErrorCode.USER_NOT_FOUND.getMessage());
 
 			verify(userExternalReadRepository, times(1))
 				.findByIdAndDeletedIsFalse(userId);

@@ -1,9 +1,14 @@
 package com.goorm.clonestagram.common.jwt;
 
 import java.security.Key;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +29,20 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
+import com.goorm.clonestagram.exception.user.error.AuthTokenMissingException;
+import com.goorm.clonestagram.exception.user.error.DuplicateLoginException;
+import com.goorm.clonestagram.exception.user.error.ExpiredJwtExceptionCustom;
+import com.goorm.clonestagram.exception.user.error.InvalidJwtException;
+
 @Slf4j
 @Component
 public class JwtTokenProvider {
 
 	private final Key key;
+	private final LoginDeviceRegistry registry;
 
-	public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+	public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, LoginDeviceRegistry registry) {
+		this.registry = registry;
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		this.key = Keys.hmacShaKeyFor(keyBytes);
 	}
@@ -38,35 +50,53 @@ public class JwtTokenProvider {
 	/**
 	 * 토큰 생성
 	 *
+	 * @param userEmail    사용자 이메일
+	 * @param device       로그인한 기기 정보
 	 * @return JwtToken (accessToken, refreshToken 등)
 	 */
-	public JwtToken generateToken(String userEmail) {
-		long now = (new Date()).getTime();
+	/**
+	 * 로그인 시 토큰 생성 + 중복 로그인 차단
+	 */
+	public JwtToken generateToken(String userEmail, String device) {
 
-		// Access Token 유효시간 예시 (24시간)
-		Date accessTokenExpiresIn = new Date(now + 86400000);
+		// 1) 다른 기기에서 이미 로그인되어 있으면 거부
+		if (registry.isDuplicated(userEmail, device)) {
+			throw new DuplicateLoginException("중복 로그인: 이미 다른 기기에서 사용 중입니다.");
+		}
 
-		// Access Token 생성
+		// 2) (email → device) 저장 / 갱신
+		registry.save(userEmail, device);
+
+		long now = System.currentTimeMillis();
+		Date accessExp  = new Date(now + 60 * 60 * 1000L);  // 1h
+		Date refreshExp = new Date(now + 7  * 24 * 60 * 60 * 1000L); // 7d
+
+		// Access Token
 		String accessToken = Jwts.builder()
-			.setSubject(userEmail)               // 사용자 email
-			.claim("auth", "ROLE_USER")   // 권한
-			.setExpiration(accessTokenExpiresIn) // 만료 시간
+			.setSubject(userEmail)
+			.claim("auth", "ROLE_USER")
+			.claim("device", device)
+			.setExpiration(accessExp)
 			.signWith(key, SignatureAlgorithm.HS256)
 			.compact();
 
-		// Refresh Token (같은 24시간 예시)
+		// Refresh Token
 		String refreshToken = Jwts.builder()
-			.setExpiration(new Date(now + 86400000))
+			.setExpiration(refreshExp)
 			.signWith(key, SignatureAlgorithm.HS256)
 			.compact();
 
-		// 결과 반환
 		return JwtToken.builder()
 			.grantType("Bearer")
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
+			.accessTokenExpiration(LocalDateTime.now().plusHours(1))
+			.refreshTokenExpiration(LocalDateTime.now().plusDays(7))
+			.loginTime(LocalDateTime.now())
+			.device(device)
 			.build();
 	}
+
 
 	/**
 	 * 토큰으로부터 인증 정보를 가져오기
@@ -78,7 +108,7 @@ public class JwtTokenProvider {
 		Claims claims = parseClaims(accessToken);
 
 		if (claims.get("auth") == null) {
-			throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+			throw new AuthTokenMissingException();
 		}
 
 		// 권한 정보 가져오기
@@ -98,19 +128,18 @@ public class JwtTokenProvider {
 	 * @param token JWT Token
 	 * @return boolean (true: 유효한 토큰, false: 무효한 토큰)
 	 */
-	public boolean validateToken(String token) {
+	public boolean validateToken(String token) throws ExpiredJwtExceptionCustom, InvalidJwtException {
+		if (token == null || token.isBlank())
+			throw new AuthTokenMissingException();
 		try {
-			// Jwts.parserBuilder() 를 사용하여 JWT를 파싱, JWT 가 위변조되지 않았는지 secretKey(key)값을 넣어 확인
 			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
 			return true;
-		} catch (SecurityException | MalformedJwtException | IllegalArgumentException e) {
-			log.info("JWT 토큰이 잘못되었습니다.", e);
 		} catch (ExpiredJwtException e) {
-			log.info("JWT 토큰이 만료되었습니다.", e);
-		} catch (UnsupportedJwtException e) {
-			log.info("지원하지 않는 JWT 토큰입니다.", e);
+			throw new ExpiredJwtExceptionCustom();
+		} catch (SecurityException | MalformedJwtException |
+				 UnsupportedJwtException | IllegalArgumentException e) {
+			throw new InvalidJwtException();
 		}
-		return false;
 	}
 
 	/**
@@ -119,7 +148,7 @@ public class JwtTokenProvider {
 	 * @param accessToken JWT accessToken
 	 * @return Claims
 	 */
-	private Claims parseClaims(String accessToken) {
+	Claims parseClaims(String accessToken) {
 		try {
 			return Jwts.parserBuilder()
 				.setSigningKey(key)

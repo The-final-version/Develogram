@@ -1,68 +1,82 @@
 package com.goorm.clonestagram.common.jwt;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-	private final JwtTokenProvider jwtTokenProvider;
-	// 공개 엔드포인트 목록 (요청 URI가 이 목록으로 시작하면 JWT 인증 로직을 건너뛰도록 함)
-	private static final List<String> PUBLIC_ENDPOINTS = List.of(
-		"/login",
-		"/join",
-		"/v3/api-docs",
-		"/swagger-ui",
-		"/swagger-ui.html",
-		"/swagger.html",
-		"/search/tag/suggestions",
-		"/search/tag",
-		"/me"
+	private final JwtTokenProvider jwt;                // 토큰 유틸
+	private final LoginDeviceRegistry registry; 	   // 로그인‑기기 저장소
+	private final AntPathMatcher matcher = new AntPathMatcher();
+
+	/** 인증을 건너뛸 공개 URL 목록 */
+	private static final List<String> PUBLIC = List.of(
+		"/login/**", "/join/**",
+		"/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+		"/search/tag/**", "/me"
 	);
+
+	/** 공개 URL 이면 필터를 아예 건너뛴다 */
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-		throws IOException, ServletException {
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		String requestURI = httpRequest.getRequestURI();
-
-		// 공개 엔드포인트인 경우 JWT 인증 로직을 건너뛰고 다음 필터로 바로 진행
-		if (PUBLIC_ENDPOINTS.stream().anyMatch(requestURI::startsWith)) {
-			chain.doFilter(request, response);
-			return;
-		}
-
-		// 1. Request Header에서 JWT 토큰 추출
-		String token = resolveToken((HttpServletRequest) request);
-
-		// 2. 유효한 토큰인지 확인
-		if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
-			// 토큰이 유효하면 토큰에서 Authentication 객체를 가져와서 SecurityContext에 저장
-			Authentication authentication = jwtTokenProvider.getAuthentication(token);
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-		}
-
-		// 다음 필터 진행
-		chain.doFilter(request, response);
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		String uri = request.getRequestURI();
+		return PUBLIC.stream().anyMatch(p -> matcher.match(p, uri));
 	}
 
-	// Request Header에서 토큰 정보 추출
-	private String resolveToken(HttpServletRequest request) {
-		String bearerToken = request.getHeader("Authorization"); // "Authorization: Bearer xxxxxxxxxx"
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-			return bearerToken.substring(7);
+	@Override
+	protected void doFilterInternal(HttpServletRequest req,
+		HttpServletResponse res,
+		FilterChain chain)
+		throws ServletException, IOException {
+
+		/* 1) 토큰 추출 */
+		String token = resolveToken(req);
+
+		/* 2) 토큰 검증 + 동일 기기 확인 */
+		if (StringUtils.hasText(token)) {
+			try {
+				if (jwt.validateToken(token)) {
+					var claims = jwt.parseClaims(token);
+					String email  = claims.getSubject();
+					String device = claims.get("device", String.class);
+
+					// 저장된 기기와 일치하지 않으면 401
+					if (!registry.match(email, device)) {
+						res.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+							"다른 기기에서 로그인했거나 세션이 만료되었습니다.");
+						return;
+					}
+
+					Authentication auth = jwt.getAuthentication(token);
+					SecurityContextHolder.getContext().setAuthentication(auth);
+				}
+			} catch (Exception ex) {   // 만료·위조 등
+				res.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
+				return;
+			}
 		}
-		return null;
+
+		/* 4) 다음 필터로 진행 */
+		chain.doFilter(req, res);
+	}
+
+	/** Authorization 헤더에서 Bearer 토큰만 추출 */
+	private String resolveToken(HttpServletRequest request) {
+		String bearer = request.getHeader("Authorization");
+		return (StringUtils.hasText(bearer) && bearer.startsWith("Bearer "))
+			? bearer.substring(7) : null;
 	}
 }

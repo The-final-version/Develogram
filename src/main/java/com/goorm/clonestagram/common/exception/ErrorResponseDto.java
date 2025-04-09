@@ -8,8 +8,6 @@ import lombok.*;
  */
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ErrorResponseDto {
-    private String errorMessage;
+	private String errorMessage;
 }

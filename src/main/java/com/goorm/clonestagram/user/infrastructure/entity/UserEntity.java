@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Version;
 
 /**
  * User 엔티티
@@ -38,17 +39,21 @@ public class UserEntity extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "email", nullable = true)
+	@Column(name = "email", unique = true)
 	private String email;
 
-	@Column(name = "password", nullable = true)
+	@Column(name = "password")
 	private String password;
 
-	@Column(name = "name", nullable = true)
+	@Column(name = "name", unique = true)
 	private String name;
 
 	@Embedded
 	private ProfileEntity profileEntity;
+
+	@Version
+	@Column(name = "version")
+	private Long version;
 
 	public UserEntity(String email, String password, String name) {
 		this.email = email;
@@ -144,11 +149,14 @@ public class UserEntity extends BaseEntity {
 
 	@Override
 	public int hashCode() {
-		// id가 null이면 0, 아니면 id의 hash
 		return (this.id == null) ? 0 : this.id.hashCode();
 	}
 
 	public UserEntity(Long id) {
 		this.id = id;
+	}
+
+	public void setName(String s) {
+		this.name = s;
 	}
 }

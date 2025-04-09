@@ -23,6 +23,8 @@ import com.goorm.clonestagram.user.domain.vo.ProfileImageUrl;
 import com.goorm.clonestagram.user.domain.vo.UserEmail;
 import com.goorm.clonestagram.user.domain.vo.UserName;
 import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

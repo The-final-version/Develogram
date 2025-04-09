@@ -1,6 +1,8 @@
 package com.goorm.clonestagram.user.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.goorm.clonestagram.exception.user.ErrorCode;
+import com.goorm.clonestagram.exception.user.error.UserValidationException;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
@@ -11,15 +13,21 @@ public class UserName {
 
 	private final String name;
 
-	// JPA용 protected 생성자
 	protected UserName() {
 		this.name = null;
 	}
 
 	public UserName(String name) {
-		/*if (name == null || name.trim().isEmpty()) {
-			throw new IllegalArgumentException("이름을 입력해주세요.");
-		}*/
+		if (name == null || name.trim().isEmpty())
+			throw new UserValidationException(ErrorCode.USER_NAME_BLANK);
+		if (name.length() < 2)
+			throw new UserValidationException(ErrorCode.USER_NAME_TOO_SHORT);
+		if (name.length() > 20)
+			throw new UserValidationException(ErrorCode.USER_NAME_TOO_LONG);
+		if (name.matches(".*[0-9].*"))
+			throw new UserValidationException(ErrorCode.USER_NAME_NUMBER);
+		if (name.matches(".*[!@#$%^&*()\\-+].*"))
+			throw new UserValidationException(ErrorCode.USER_NAME_SPECIAL);
 		this.name = name;
 	}
 
@@ -27,5 +35,4 @@ public class UserName {
 	public String getName() {
 		return name;
 	}
-
 }

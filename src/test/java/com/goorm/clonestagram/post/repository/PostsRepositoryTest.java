@@ -2,7 +2,6 @@ package com.goorm.clonestagram.post.repository;
 
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.repository.UserExternalWriteRepository;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 

@@ -1,16 +1,24 @@
 package com.goorm.clonestagram.user.application.service.auth;
 
+import com.goorm.clonestagram.exception.user.error.DuplicateEmailException;
+import com.goorm.clonestagram.exception.user.error.PasswordMismatchException;
+import com.goorm.clonestagram.exception.user.error.UserDatabaseException;
 import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.application.dto.auth.JoinDto;
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserInternalQueryService;
+import com.goorm.clonestagram.user.domain.vo.UserPassword;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.Valid;
 
+@Slf4j
 @Service
 @Validated
 @RequiredArgsConstructor
@@ -18,29 +26,35 @@ public class UserJoinService {
 
     private final UserInternalQueryService userInternalQueryService;
 
-    public void joinProcess(@Valid JoinDto joinDto) {
+    public void joinProcess(JoinDto joinDto) {
         // 1) 이메일 중복 체크
         checkIfEmailAlreadyExists(joinDto.getEmail());
 
         // 2) 비밀번호 불일치 검사(도메인 로직)
         validatePassword(joinDto.getPassword(), joinDto.getConfirmPassword());
 
-        // 3) 새 유저 엔티티 생성
-        User newUser = UserAdapter.fromUserProfileDto(joinDto);
+        try {
+            // 3) 새 유저 엔티티 생성
+            User newUser = UserAdapter.fromUserProfileDto(joinDto);
 
-        // 4) DB 저장
-        userInternalQueryService.saveUser(newUser);
+            // 4) DB 저장
+            userInternalQueryService.saveUser(newUser);
+            log.info("[JOIN] 신규 회원 가입: {}", newUser.getEmail());
+        } catch (DataAccessException e) {
+            log.error("[DB] 회원가입 저장 오류", e);
+            throw new UserDatabaseException();
+        }
     }
 
     private void checkIfEmailAlreadyExists(String email) {
         if (userInternalQueryService.existsByEmail(email)) {
-            throw new IllegalStateException("이미 사용 중인 이메일입니다: " + email);
+            throw new DuplicateEmailException();
         }
     }
 
     private void validatePassword(String password, String confirmPassword) {
-        if (!password.equals(confirmPassword)) {
-            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
+        if(!password.equals(confirmPassword)) {
+            throw new PasswordMismatchException();
         }
     }
 }

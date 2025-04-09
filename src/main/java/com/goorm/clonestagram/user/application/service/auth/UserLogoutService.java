@@ -3,10 +3,14 @@ package com.goorm.clonestagram.user.application.service.auth;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.goorm.clonestagram.common.jwt.LoginDeviceRegistry;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserLogoutService {
@@ -25,5 +29,11 @@ public class UserLogoutService {
 
 		// 2) SecurityContextHolder 초기화
 		SecurityContextHolder.clearContext();
+
+		// 3) JWT 토큰의 기기 ID 삭제
+		if (request.getUserPrincipal() != null) {
+			String username = request.getUserPrincipal().getName();
+			LoginDeviceRegistry.remove(username);
+		}
 	}
 }

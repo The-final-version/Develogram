@@ -22,9 +22,6 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileDto> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null || userDetails.getUser() == null) {
-            return ResponseEntity.status(401).build();
-        }
         return ResponseEntity.ok(UserAdapter.toUserProfileDto(userDetails.getUser()));
     }
 

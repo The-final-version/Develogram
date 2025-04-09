@@ -1,5 +1,7 @@
 package com.goorm.clonestagram.user.application.service.profile;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.goorm.clonestagram.user.domain.entity.User;
@@ -14,6 +16,7 @@ public class ProfileSelecterService {
 
     /**
      * (public) 사용자 프로필 조회
+     *
      * @param userId 조회할 사용자의 ID
      * @return 사용자 프로필 정보
      * @throws IllegalArgumentException 사용자가 존재하지 않으면 예외 발생

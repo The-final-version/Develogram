@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserInternalQueryService;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +35,6 @@ class ProfileSelecterServiceTest {
 
 		// when
 		User result = profileSelecterService.getUserProfile(userId);
-
 		// then
 		assertNotNull(result);
 		assertEquals(mockUser, result);

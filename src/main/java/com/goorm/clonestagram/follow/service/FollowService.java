@@ -28,8 +28,8 @@ public class FollowService {
 			throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
 		}
 
-		UserEntity follower = new UserEntity(userService.findByIdAndDeletedIsFalse(followerId));
-		UserEntity followed = new UserEntity(userService.findByIdAndDeletedIsFalse(followedId));
+		UserEntity follower = userService.findByIdAndDeletedIsFalse(followerId);
+		UserEntity followed = userService.findByIdAndDeletedIsFalse(followedId);
 
 		followRepository.findByFollowerAndFollowed(follower, followed)
 			.ifPresentOrElse(
@@ -40,7 +40,7 @@ public class FollowService {
 
 	@Transactional(readOnly = true)
 	public List<FollowDto> getFollowingList(Long userId) {
-		UserEntity user = new UserEntity(userService.findByIdAndDeletedIsFalse(userId));
+		UserEntity user = userService.findByIdAndDeletedIsFalse(userId);
 		return followRepository.findFollowedAllByFollower(user).stream()
 			.map(FollowMapper::toFollowingDto)
 			.collect(Collectors.toList());
@@ -48,7 +48,7 @@ public class FollowService {
 
 	@Transactional(readOnly = true)
 	public List<FollowDto> getFollowerList(Long userId) {
-		UserEntity user = new UserEntity(userService.findByIdAndDeletedIsFalse(userId));
+		UserEntity user = userService.findByIdAndDeletedIsFalse(userId);
 		return followRepository.findFollowerAllByFollowed(user).stream()
 			.map(FollowMapper::toFollowerDto)
 			.collect(Collectors.toList());

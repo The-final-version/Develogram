@@ -6,6 +6,7 @@ import com.goorm.clonestagram.post.EntityType;
 import com.goorm.clonestagram.post.domain.SoftDelete;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
 import com.goorm.clonestagram.user.domain.entity.User;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
