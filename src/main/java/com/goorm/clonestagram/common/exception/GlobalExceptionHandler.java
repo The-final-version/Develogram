@@ -2,6 +2,7 @@ package com.goorm.clonestagram.common.exception;
 
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
+import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
 
 import com.goorm.clonestagram.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -71,9 +72,21 @@ public class GlobalExceptionHandler {
 	}
 
 
+	@ExceptionHandler(UnauthorizedCommentAccessException.class)
+	public ResponseEntity<ProblemDetail> handleUnauthorizedCommentAccessException(
+		UnauthorizedCommentAccessException ex) {
+		ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+		problem.setTitle("권한이 없습니다");
+		problem.setDetail(ex.getMessage());
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+	}
+
+
 	@ExceptionHandler(UserNotFoundException.class)
 	public ResponseEntity<String> handleUserNotFound(UserNotFoundException e) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 	}
+
 
 }
