@@ -1,6 +1,10 @@
 package com.goorm.clonestagram.common.exception;
 
 import com.goorm.clonestagram.exception.CommentNotFoundException;
+import com.goorm.clonestagram.exception.PostNotFoundException;
+import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
+
+import com.goorm.clonestagram.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +25,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException e) {
 		return ResponseEntity.badRequest().body(
-				ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+			ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
 		);
 	}
 
@@ -32,7 +36,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<ErrorResponseDto> handleRuntimeException(RuntimeException e) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-				ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+			ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
 		);
 	}
 
@@ -42,7 +46,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException e) {
 		return ResponseEntity.badRequest().body(
-				ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+			ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
 		);
 	}
 
@@ -57,4 +61,32 @@ public class GlobalExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
 	}
+
+	@ExceptionHandler(PostNotFoundException.class)
+	public ResponseEntity<ProblemDetail> handlePostNotFound(PostNotFoundException ex) {
+		ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+		problem.setTitle("게시글을 찾을 수 없습니다");
+		problem.setDetail(ex.getMessage());
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+	}
+
+
+	@ExceptionHandler(UnauthorizedCommentAccessException.class)
+	public ResponseEntity<ProblemDetail> handleUnauthorizedCommentAccessException(
+		UnauthorizedCommentAccessException ex) {
+		ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+		problem.setTitle("권한이 없습니다");
+		problem.setDetail(ex.getMessage());
+
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+	}
+
+
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<String> handleUserNotFound(UserNotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	}
+
+
 }

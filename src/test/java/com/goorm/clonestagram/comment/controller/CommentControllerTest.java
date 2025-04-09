@@ -1,8 +1,10 @@
 package com.goorm.clonestagram.comment.controller;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
@@ -77,9 +80,10 @@ public class CommentControllerTest {
 			when(commentService.getCommentById(id)).thenThrow(new CommentNotFoundException(id));
 
 			// when + then
-			assertThrows(CommentNotFoundException.class, () -> {
+			CommentNotFoundException exception = assertThrows(CommentNotFoundException.class, () -> {
 				commentController.getCommentById(id);
 			});
+			assertThat(exception.getMessage()).contains("존재하지 않는 댓글입니다. ID: " + id);
 		}
 
 	}
@@ -172,13 +176,19 @@ public class CommentControllerTest {
 			when(commentService.createComment(request)).thenReturn(saved);
 
 			// when
-			CommentResponse response = commentController.create(request);
+			ResponseEntity<CommentResponse> responseEntity = commentController.create(request);
+			CommentResponse response = responseEntity.getBody();
 
 			// then
+			assertEquals(201, responseEntity.getStatusCodeValue());
+			assertEquals(URI.create("/comments/10"), responseEntity.getHeaders().getLocation());
+
+			assertNotNull(response);
 			assertEquals(10L, response.getId());
 			assertEquals("댓글", response.getContent());
 			assertEquals(1L, response.getUserId());
 			assertEquals(2L, response.getPostId());
+
 		}
 
 		@Test
@@ -227,9 +237,10 @@ public class CommentControllerTest {
 
 			doNothing().when(commentService).removeComment(commentId, userId);
 
-			String result = commentController.deleteComment(commentId, userId);
+			ResponseEntity<Void> result = commentController.deleteComment(commentId, userId);
 
-			assertEquals("댓글이 삭제되었습니다. ID: " + commentId, result);
+			assertThat(result.getBody()).isNull();
+			verify(commentService, times(1)).removeComment(commentId, userId);
 		}
 
 		@Test
@@ -240,9 +251,10 @@ public class CommentControllerTest {
 
 			doNothing().when(commentService).removeComment(commentId, postOwnerId);
 
-			String result = commentController.deleteComment(commentId, postOwnerId);
+			ResponseEntity<Void> result = commentController.deleteComment(commentId, postOwnerId);
 
-			assertEquals("댓글이 삭제되었습니다. ID: " + commentId, result);
+			assertThat(result.getBody()).isNull();
+			verify(commentService, times(1)).removeComment(commentId, postOwnerId);
 		}
 
 		@Test
