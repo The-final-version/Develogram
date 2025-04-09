@@ -7,14 +7,18 @@ import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FollowService {
@@ -31,12 +35,21 @@ public class FollowService {
         Users follower = userService.findByIdAndDeletedIsFalse(followerId);
         Users followed = userService.findByIdAndDeletedIsFalse(followedId);
 
-        followRepository.findByFollowerAndFollowed(follower, followed)
-                .ifPresentOrElse(
-                        followRepository::delete,
-                        () -> followRepository.save(new Follows(follower, followed))
-                );
+        // 락 걸고 조회
+        Optional<Follows> followOpt = followRepository.findByFollowerAndFollowedWithLock(follower, followed);
+
+        if (followOpt.isPresent()) {
+            followRepository.delete(followOpt.get());
+        } else {
+            try {
+                followRepository.save(new Follows(follower, followed));
+            } catch (DataIntegrityViolationException e) {
+                // 동시 요청으로 인해 중복 삽입 예외 발생 시 무시하거나 로그 처리
+                log.warn("중복 팔로우 요청 감지: followerId={}, followedId={}", followerId, followedId);
+            }
+        }
     }
+
 
 
     @Transactional(readOnly = true)

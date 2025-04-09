@@ -8,6 +8,8 @@ import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.util.IntegrationTestHelper;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -17,6 +19,9 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -225,4 +230,63 @@ public class FollowIntegrationTest {
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
+
+
+
+    @Test
+    @DisplayName("toggleFollow 빠른 연타 홀수번 → 팔로우가 유지되어야 함")
+    void toggleFollow_oddCountFastToggle_shouldRemainFollowed() {
+        Users follower = testHelper.createUser("follower");
+        Users followed = testHelper.createUser("followed");
+
+        int toggleCount = 5; // 홀수번 toggle → 최종적으로 팔로우 유지
+
+        for (int i = 0; i < toggleCount; i++) {
+            restTemplate.exchange(
+                    "/follow/" + follower.getId() + "/profile/" + followed.getId(),
+                    HttpMethod.POST,
+                    new HttpEntity<>(headers),
+                    Void.class
+            );
+        }
+
+        List<FollowDto> followings = testHelper.getFollowings(follower.getId());
+        System.out.println("팔로우 목록: " + followings);
+        // then: 팔로우가 존재해야 함
+        assertThat(followings)
+                .extracting(FollowDto::getFollowedId)
+                .contains(followed.getId());
+
+        testHelper.deleteUserAndDependencies(follower);
+        testHelper.deleteUserAndDependencies(followed);
+    }
+
+    @Test
+    @DisplayName("toggleFollow 빠른 연타 짝수번 → 팔로우가 없어야 함")
+    void toggleFollow_evenCountFastToggle_shouldUnfollow() {
+        Users follower = testHelper.createUser("follower");
+        Users followed = testHelper.createUser("followed");
+
+        int toggleCount = 6; // 짝수번 toggle → 최종적으로 팔로우 없어야 함
+
+        for (int i = 0; i < toggleCount; i++) {
+            restTemplate.exchange(
+                    "/follow/" + follower.getId() + "/profile/" + followed.getId(),
+                    HttpMethod.POST,
+                    new HttpEntity<>(headers),
+                    Void.class
+            );
+        }
+
+        List<FollowDto> followings = testHelper.getFollowings(follower.getId());
+
+        // then: 팔로우가 없어야 함
+        assertThat(followings).isEmpty();
+
+        testHelper.deleteUserAndDependencies(follower);
+        testHelper.deleteUserAndDependencies(followed);
+    }
+
+
+
 }
