@@ -65,4 +65,8 @@ public class PostService {
     public Posts save(Posts postEntity) {
         return postsRepository.save(postEntity);
     }
+
+    public Posts saveAndFlush(Posts postEntity) {
+        return postsRepository.saveAndFlush(postEntity);
+    }
 }

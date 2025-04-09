@@ -19,6 +19,7 @@ import com.goorm.clonestagram.feed.service.FeedService;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ import java.util.Optional;
  * 이미지 업로드 요청을 처리하는 서비스
  * - 검증이 완료된 이미지를 받아 업로드 서비스 수행
  */
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -103,6 +105,7 @@ public class ImageService {
      * @exception IllegalArgumentException 게시글을 찾을 수 없을시 발생
      */
     public ImageUpdateResDto imageUpdate(Long postSeq, ImageUpdateReqDto imageUpdateReqDto, Long userId) {
+        log.info(">>> imageUpdate 시작 - postSeq: {}, userId: {}", postSeq, userId);
         if (postSeq == null) {
             throw new IllegalArgumentException("게시물 ID가 필요합니다.");
         }
@@ -112,6 +115,7 @@ public class ImageService {
         if (posts == null) {
             throw new IllegalArgumentException("게시물을 찾을 수 없습니다");
         }
+        log.info(">>> 조회 직후 posts.getContent(): '{}'", posts.getContent());
 
         if(!posts.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("권한이 없는 유저입니다");
@@ -122,52 +126,69 @@ public class ImageService {
         //2. 이미지 수정 여부 파악
         if(imageUpdateReqDto.getFile() != null && !imageUpdateReqDto.getFile().isEmpty()){
             String fileUrl = imageUpdateReqDto.getFile();
+            log.info(">>> 이미지 업데이트 시도: {}", fileUrl);
             posts.setMediaName(fileUrl);
             updated = true;
         }
 
         //3. 게시글 내용 수정 여부 파악
         if(imageUpdateReqDto.getContent() != null && !imageUpdateReqDto.getContent().trim().isEmpty()){
+            String newContent = imageUpdateReqDto.getContent();
+            log.info(">>> 내용 업데이트 시도. 현재 content: '{}', 새 content: '{}'", posts.getContent(), newContent);
             //3-1. 수정된 게시글 내용 반영
-            posts.setContent(imageUpdateReqDto.getContent());
+            posts.setContent(newContent);
             //3-2. 업데이트 되었음을 표시
             updated = true;
+            log.info(">>> setContent 호출 후 posts.getContent(): '{}'", posts.getContent());
         }
 
         //4. 해시태그 수정 여부 파악
         if(imageUpdateReqDto.getHashTagList() != null && !imageUpdateReqDto.getHashTagList().isEmpty()){
+            log.info(">>> 해시태그 업데이트 시도: {}", imageUpdateReqDto.getHashTagList());
             //4-1. 기존의 해시태그 리스트 삭제
             postHashTagRepository.deleteAllByPostsId(posts.getId());
+            log.info(">>> 기존 해시태그 삭제 완료 (Post ID: {})", posts.getId());
 
             //4-2. 새롭게 해시 태그 리스트 저장
             for (String tagContent : imageUpdateReqDto.getHashTagList()) {
+                log.info(">>> 새 해시태그 처리 중: {}", tagContent);
                 //4-2. tagList에서 tag 내용 하나를 추출한 후 조회
                 HashTags tag = hashTagRepository.findByTagContent(tagContent)
                         //4-2. tag가 저장되어 있지 않으면 새롭게 저장
-                        .orElseGet(() -> hashTagRepository.save(new HashTags(null, tagContent)));
+                        .orElseGet(() -> {
+                            log.info(">>> 새 해시태그 저장: {}", tagContent);
+                            return hashTagRepository.save(new HashTags(null, tagContent));
+                        });
                 //4-3. 추출된 태그의 id와 피드의 id를 관계테이블에 저장
                 postHashTagRepository.save(new PostHashTags(null,tag,posts));
+                log.info(">>> PostHashTags 저장 완료: Tag={}, Post={}", tag.getId(), posts.getId());
             }
+            updated = true;
         }
 
-        Posts updatedPost;
         if(updated){
-            //5. 업데이트된 게시글을 DB에 저장
-            updatedPost = postService.save(posts);
-            if (updatedPost == null) {
-                throw new IllegalArgumentException("게시물 업데이트에 실패했습니다.");
-            }
-        }else{
-            updatedPost = posts;
+             log.info(">>> updated=true, saveAndFlush 호출 전 posts.getContent(): '{}'", posts.getContent());
+             // 변경 감지 대신 명시적 saveAndFlush 호출
+             postService.saveAndFlush(posts); // saveAndFlush() 호출 (반환값 사용 안함)
+             log.info(">>> saveAndFlush 호출 후 posts.getContent(): '{}'", posts.getContent());
+             // if (posts == null) { // 반환값 사용 안하므로 관련 검사 제거
+             //     throw new IllegalArgumentException("게시물 업데이트에 실패했습니다.");
+             // }
+        } else {
+             log.info(">>> updated=false, 변경 없음");
         }
 
+        log.info(">>> 응답 DTO 생성 전 posts.getContent(): '{}'", posts.getContent());
         //6. 모든 작업이 완료된 경우 응답 반환
-        return ImageUpdateResDto.builder()
-                .content(updatedPost.getContent())
-                .type(updatedPost.getContentType())
-                .updatedAt(updatedPost.getUpdatedAt())
+        // 영속성 컨텍스트 내에서 변경된 'posts' 엔티티를 사용하여 DTO 생성
+        ImageUpdateResDto responseDto = ImageUpdateResDto.builder()
+                .content(posts.getContent()) // 원본 posts 변수 사용
+                .type(posts.getContentType()) // 원본 posts 변수 사용
+                .updatedAt(posts.getUpdatedAt())
                 .hashTagList(imageUpdateReqDto.getHashTagList())
                 .build();
+        log.info(">>> imageUpdate 종료");
+        return responseDto;
     }
 
     /**
