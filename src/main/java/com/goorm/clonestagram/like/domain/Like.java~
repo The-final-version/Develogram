@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "likes")
+@Table(name = "likes", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "post_id"}))
 public class Like {
 
     @Id
@@ -41,5 +41,6 @@ public class Like {
         this.post = post;
         this.createdAt = LocalDateTime.now();
     }
+
 
 }
