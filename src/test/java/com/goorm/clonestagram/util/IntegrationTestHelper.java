@@ -1,7 +1,6 @@
 package com.goorm.clonestagram.util;
 
 import com.goorm.clonestagram.comment.repository.CommentRepository;
-<<<<<<< HEAD
 import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
 import com.goorm.clonestagram.feed.service.FeedService;
@@ -12,33 +11,22 @@ import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.service.PostService;
-=======
-import com.goorm.clonestagram.post.repository.PostsRepository;
->>>>>>> 74983a0405220ca7f5f366d297afe54f6eb89d17
 import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-<<<<<<< HEAD
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-=======
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
->>>>>>> 74983a0405220ca7f5f366d297afe54f6eb89d17
 
 @Component
 public class IntegrationTestHelper {
 
     private final UserRepository userRepository;
-<<<<<<< HEAD
     private final PostsRepository postsRepository;
     private final CommentRepository commentRepository;
     private final FollowRepository followRepository;
@@ -67,47 +55,22 @@ public class IntegrationTestHelper {
         this.postService = postService;
         this.followService = followService;
         this.feedService = feedService;
-=======
-    private final PostsRepository postRepository;
-    private final CommentRepository commentRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Autowired
-    public IntegrationTestHelper(UserRepository userRepository,
-                                 PostsRepository postRepository,
-                                 CommentRepository commentRepository,
-                                 BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-        this.commentRepository = commentRepository;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
->>>>>>> 74983a0405220ca7f5f366d297afe54f6eb89d17
     }
 
     /**
      * 임의의 유저를 생성합니다.
      */
     public Users createUser(String baseUsername) {
-<<<<<<< HEAD
+
         String trimmedBase = baseUsername.length() > 12 ? baseUsername.substring(0, 12) : baseUsername;
         String suffix = UUID.randomUUID().toString().substring(0, 5);
-=======
-        // baseUsername이 너무 길면 잘라주기
-        String trimmedBase = baseUsername.length() > 12 ? baseUsername.substring(0, 12) : baseUsername;
 
-        // 짧은 UUID (5자만 사용)
-        String suffix = UUID.randomUUID().toString().substring(0, 5);
-
->>>>>>> 74983a0405220ca7f5f366d297afe54f6eb89d17
         String uniqueUsername = trimmedBase + "_" + suffix;
 
         Users user = Users.builder()
                 .username(uniqueUsername)
-<<<<<<< HEAD
                 .password(bCryptPasswordEncoder.encode("password"))
-=======
-                .password(bCryptPasswordEncoder.encode("password")) // ✅ 여기 중요
->>>>>>> 74983a0405220ca7f5f366d297afe54f6eb89d17
                 .email(uniqueUsername + "@example.com")
                 .build();
         return userRepository.save(user);
@@ -118,7 +81,6 @@ public class IntegrationTestHelper {
      */
     @Transactional
     public void deleteUserAndDependencies(Users user) {
-<<<<<<< HEAD
         Long userId = user.getId();
 
         List<Posts> posts = postsRepository.findAllByUserIdAndDeletedIsFalse(userId);
@@ -213,15 +175,4 @@ public class IntegrationTestHelper {
         }
     }
 
-=======
-        // comment 삭제 (연관관계: Comments.users)
-        commentRepository.deleteAllByUsers_Id(user.getId());
-
-        // post 삭제 (연관관계: Posts.users)
-        postRepository.deleteAllByUser_Id(user.getId());
-
-        // 유저 삭제
-        userRepository.deleteById(user.getId());
-    }
->>>>>>> 74983a0405220ca7f5f366d297afe54f6eb89d17
 }
