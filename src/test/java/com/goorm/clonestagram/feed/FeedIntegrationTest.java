@@ -184,7 +184,8 @@ class FeedIntegrationTest {
         request.setPostIds(List.of(1L));
         HttpHeaders noSession = new HttpHeaders(); // 세션 없음
         ResponseEntity<String> response = restTemplate.exchange("/feeds/seen", HttpMethod.DELETE, new HttpEntity<>(request, noSession), String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED); // 401
+
     }
 
     @Test
