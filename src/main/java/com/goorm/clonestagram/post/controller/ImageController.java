@@ -27,9 +27,9 @@ public class ImageController {
 
     /**
      * 이미지 업로드
-     * - 요청으로부터 파일을 받아 유효성 검사 후, 서비스 계층에 전달
+     * - 요청으로부터 이미지 URL과 내용을 받아 서비스 계층에 전달 (서비스에서 URL 사용 가정)
      *
-     * @param imageUploadReqDto 업로드할 이미지와 관련된 요청 DTO
+     * @param imageUploadReqDto 업로드할 이미지 URL, 내용, 해시태그 등을 포함한 DTO
      * @return 업로드 성공 시 ImageUploadResDto 반환
      * @throws Exception 업로드 도중 발생할 수 있는 예외
      */
@@ -46,13 +46,11 @@ public class ImageController {
                 log.warn("🚫 인증된 사용자 정보가 없습니다.");
                 return ResponseEntity.status(403).build();
             }
-
             Long userId = userDetail.getId();
             log.info("✅ 인증된 사용자 ID: {}", userId);
 
             ImageUploadResDto result = imageService.imageUpload(imageUploadReqDto, userId);
             log.info("✅ 이미지 업로드 완료: {}", result);
-
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
@@ -74,7 +72,7 @@ public class ImageController {
     @PutMapping(value = "/image/{postSeq}")
     public ResponseEntity<ImageUpdateResDto> imageUpdate(@PathVariable("postSeq") Long postSeq,
                                                          @AuthenticationPrincipal CustomUserDetails userDetail,
-                                                         ImageUpdateReqDto imageUpdateReqDto){
+                                                         @RequestBody ImageUpdateReqDto imageUpdateReqDto){
         Long userId = userDetail.getId();
 
         return ResponseEntity.ok(imageService.imageUpdate(postSeq, imageUpdateReqDto, userId));
