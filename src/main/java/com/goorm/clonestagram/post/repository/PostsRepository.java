@@ -24,4 +24,5 @@ public interface PostsRepository extends JpaRepository<Posts, Long> {
 
 
     void deleteAllByUserId(Long userId);
+    void deleteAllByUser_Id(Long userId);
 }

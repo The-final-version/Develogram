@@ -32,6 +32,8 @@ dependencies {
     //Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
     //swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
     //mysql
@@ -138,3 +140,25 @@ jacocoTestReport {
 }
 
 check.dependsOn jacocoTestCoverageVerification
+
+tasks.register("followTest", Test) {
+    useJUnitPlatform()
+    include '**/FollowIntegrationTest.class'
+}
+
+tasks.register("followCoverage", JacocoReport) {
+    dependsOn 'followTest'
+    executionData fileTree(buildDir).include("**/jacoco/*.exec")
+    reports {
+        html.required = true
+        xml.required = true
+    }
+    classDirectories.setFrom(
+            files([
+                    fileTree(dir: "$buildDir/classes/java/main", include: [
+                            "com/goorm/clonestagram/follow/**",
+                    ])
+            ])
+    )
+    sourceDirectories.setFrom files("src/main/java")
+}

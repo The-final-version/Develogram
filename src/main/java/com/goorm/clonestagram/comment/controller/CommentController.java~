@@ -82,7 +82,7 @@ public class CommentController {
 	// 리팩터링 해야함. 지금은 메모만 해둠
 	// Todo
 	@DeleteMapping("/{commentId}")
-	public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, @RequestParam Long requesterId) {
+	public ResponseEntity<void> deleteComment(@PathVariable Long commentId, @RequestParam Long requesterId) {
 		commentService.removeComment(commentId, requesterId);
 
 		return ResponseEntity.noContent().build();

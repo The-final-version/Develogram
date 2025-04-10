@@ -18,11 +18,15 @@ public interface FollowRepository extends JpaRepository<Follows, Long> {
     Optional<Follows> findByFollowerAndFollowed(Users follower, Users followed);
 
     // 팔로잉 목록 (내가 팔로우한 유저들)
-    @Query("SELECT f FROM Follows f WHERE f.follower = :follower")
+    @Query("SELECT f FROM Follows f " +
+            "WHERE f.follower = :follower " +
+            "AND f.followed.deleted = false")
     List<Follows> findFollowedAllByFollower(@Param("follower") Users follower);
 
     // 팔로워 목록 (나를 팔로우한 유저들)
-    @Query("SELECT f FROM Follows f WHERE f.followed = :followed")
+    @Query("SELECT f FROM Follows f " +
+            "WHERE f.followed = :followed " +
+            "AND f.follower.deleted = false")
     List<Follows> findFollowerAllByFollowed(@Param("followed") Users followed);
 
     // 나를 팔로우한 유저 ID 목록
