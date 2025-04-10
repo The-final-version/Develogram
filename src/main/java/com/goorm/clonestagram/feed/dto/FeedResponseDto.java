@@ -39,18 +39,6 @@ public class FeedResponseDto {
     }
 
     public static FeedResponseDto from(Feeds feed) {
-        log.info("✅ Feed DTO 변환: postId={}, mediaUrl={}", feed.getPost().getId(), feed.getPost().getMediaName());
-        Posts post = feed.getPost();
-        if (post == null) {
-            throw new IllegalStateException("Feed에 연결된 Post가 null입니다.");
-        }
-        if (post.getUser() == null) {
-            throw new IllegalStateException("Post에 연결된 User가 null입니다.");
-        }
-        if ("EXCEPTION_TEST".equals(post.getContent())) {
-            throw new IllegalStateException("테스트 예외 발생");
-        }
-
 
         return FeedResponseDto.builder()
                 .feedId(feed.getId())

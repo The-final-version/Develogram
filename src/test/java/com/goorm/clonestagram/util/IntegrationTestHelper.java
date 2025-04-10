@@ -79,29 +79,18 @@ public class IntegrationTestHelper {
     public void deleteUserAndDependencies(Users user) {
         Long userId = user.getId();
 
-        // ✅ 1. 해당 유저의 모든 게시물 ID 조회
         List<Posts> posts = postsRepository.findAllByUserIdAndDeletedIsFalse(userId);
         List<Long> postIds = posts.stream()
                 .map(Posts::getId)
                 .collect(Collectors.toList());
-
-        // ✅ 2. 피드 및 댓글 선제 삭제
         if (!postIds.isEmpty()) {
-            feedRepository.deleteAllByPostIdIn(postIds); // bulk 삭제 메서드 필요
-            commentRepository.deleteAllByPostsIdIn(postIds); // bulk 삭제 메서드 필요
+            feedRepository.deleteAllByPostIdIn(postIds);
+            commentRepository.deleteAllByPostsIdIn(postIds);
         }
-
-        // ✅ 3. 게시물 삭제 (deleted 컬럼과 상관없이 전체 삭제)
-        postsRepository.deleteAllByUserId(userId); // 메서드 이름 정비
-
-        // ✅ 4. 팔로우 관계 제거
-        followRepository.deleteAllByFollowerId(userId); // bulk
-        followRepository.deleteAllByFollowedId(userId); // bulk
-
-        // ✅ 5. 피드에서 해당 유저가 주체인 것도 삭제
-        feedRepository.deleteAllByUserId(userId); // 피드의 user_id 외래키 보호
-
-        // ✅ 6. 유저 삭제
+        postsRepository.deleteAllByUserId(userId);
+        followRepository.deleteAllByFollowerId(userId);
+        followRepository.deleteAllByFollowedId(userId);
+        feedRepository.deleteAllByUserId(userId);
         userRepository.deleteById(userId);
     }
 
@@ -129,29 +118,6 @@ public class IntegrationTestHelper {
                 .post(saved)
                 .build());
         return saved;
-    }
-
-    /**
-     * 게시물 생성 후 피드까지 자동 생성하는 메서드
-     */
-    public Posts createPostWithFeed(Users user) {
-        Posts post = Posts.builder()
-                .user(user)
-                .content("피드 테스트 게시물")
-                .mediaName("media.jpg")
-                .contentType(ContentType.IMAGE)
-                .build();
-
-        Posts saved = postService.save(post);
-        feedService.createFeedForFollowers(saved); // ✅ 피드 자동 생성
-        return saved;
-    }
-
-
-    @Transactional
-    public void deletePost(Posts post) {
-        commentRepository.deleteAllByPosts_Id(post.getId());
-        postsRepository.deleteById(post.getId());
     }
 
 

@@ -133,7 +133,7 @@ class FeedIntegrationTest {
         helper.follow(userA, userB);
 
         // ✅ 피드 포함 게시물 생성
-        postB = helper.createPostWithFeed(userB);
+        postB = helper.createPost(userB);
         System.out.println("🔥 post.mediaName = " + postB.getMediaName());
 
         List<Feeds> allFeeds = feedRepository.findAllByUserIdWithDetails(userA.getId());
@@ -198,36 +198,6 @@ class FeedIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 
-    @Test
-    @Order(10)
-    void FI10_팔로우_피드_조회_DB_예외_발생시() {
-        // 1. 유저 생성 및 팔로우
-        userB = helper.createUser("userB");
-        helper.follow(userA, userB);
-
-        // 2. userB의 게시물 생성
-        postB = helper.createPost(userB);
-
-        // 3. post.user를 null로 설정해서 예외 유도 (DB에는 반영하지 않음!)
-        postB.setUser(null); // flush 하지 않음
-
-        // 4. userA 피드에서 해당 피드 가져오기
-        List<Feeds> feeds = feedRepository.findByUserId(userA.getId());
-        assertFalse(feeds.isEmpty(), "피드가 존재해야 합니다.");
-
-        Feeds feed = feeds.get(0);
-        feed.setPost(postB); // user == null 상태인 post 연결
-
-        // 5. FeedResponseDto.from(feed) 호출 시 예외 발생 테스트
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            FeedResponseDto.from(feed);
-        });
-
-        assertEquals("Post에 연결된 User가 null입니다.", exception.getMessage());
-        System.out.println("✅ 예외 유도 성공: FeedResponseDto.from() 내부에서 post.user == null 예외 발생");
-
-
-    }
 
 
 }
