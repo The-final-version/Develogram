@@ -10,6 +10,7 @@ import com.goorm.clonestagram.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,10 +35,14 @@ public class LikeService {
 		if (existingLike.isPresent()) {
 			likeRepository.delete(existingLike.get()); // 좋아요 취소
 		} else {
-			Like like = new Like();
-			like.setUser(user);
-			like.setPost(post);
-			likeRepository.save(like); // 좋아요 추가
+			try {
+				likeRepository.save(new Like(user, post)); // 좋아요 추가
+			} catch (DataIntegrityViolationException e) {
+				// 동시에 두 요청이 온 경우 하나는 성공하고 하나는 이곳으로 옴.
+				if (likeRepository.existsByUser_IdAndPost_Id(userId, postId)) {
+					likeRepository.save(new Like(user, post));
+				}
+			}
 		}
 	}
 
