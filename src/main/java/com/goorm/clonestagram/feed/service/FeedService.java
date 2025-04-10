@@ -16,6 +16,7 @@ import com.goorm.clonestagram.user.dto.UserProfileDto;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeedService {
 
     private final FeedRepository feedRepository;
@@ -38,6 +40,9 @@ public class FeedService {
 
         try {
             Page<Feeds> feeds = feedRepository.findByUserIdWithPostAndUser(userId, pageable);
+            // ✅ 강제 평가
+            feeds.map(FeedResponseDto::from).getContent(); // 이게 있어야 예외 발생됨
+
             return feeds.map(FeedResponseDto::from);
         } catch (DataAccessException e) {
             throw new FeedFetchFailedException("피드 조회 중 DB 오류가 발생했습니다.");
@@ -64,6 +69,7 @@ public class FeedService {
         Users user = userService.findByIdAndDeletedIsFalse(userId);
 
         try {
+            log.info("🚀 getFollowFeed 진입 - userId: {}", userId);
             List<Long> followList = followService.findFollowingUserIdsByFollowerId(user.getId());
 
             if (followList == null || followList.isEmpty()) {
@@ -71,12 +77,21 @@ public class FeedService {
                 return emptyPage.map(FeedResponseDto::from);
             }
 
-            Page<Feeds> followingFeed = feedRepository.findAllByUserIdInAndDeletedIsFalse(followList, pageable);
+            log.info("🔁 feedRepository.findAllByUserIdInWithPostAndUser 실행");
+
+            Page<Feeds> followingFeed = feedRepository.findAllByUserIdAndPostOwnerInWithPostAndUser(userId, followList, pageable);
+
+            log.info("📦 followingFeed size = {}", followingFeed.getContent().size());
+            followingFeed.forEach(f -> log.info("🎯 post.media = {}", f.getPost().getMediaName()));
+
             return followingFeed.map(FeedResponseDto::from);
 
+
         } catch (DataAccessException e) {
+            log.error("❌ DataAccessException 발생: {}", e.getMessage(), e);
             throw new FeedFetchFailedException("팔로우 피드 조회 중 DB 오류가 발생했습니다.");
         } catch (Exception e) {
+            log.error("❌ 일반 Exception 발생: {}", e.getMessage(), e);
             throw new FeedFetchFailedException("팔로우 피드 조회 중 예기치 못한 오류가 발생했습니다.");
         }
     }
@@ -112,26 +127,38 @@ public class FeedService {
 
 
     //A의 게시물이 업로드될 때: A 팔로워들의 피드 생성
-    @Transactional
     public void createFeedForFollowers(Posts post) {
-        Long postOwnerId = post.getUser().getId();
-        List<Long> followerIds = followService.findFollowerIdsByFollowedId(postOwnerId);
-
+        List<Long> followerIds = followService.findFollowerIdsByFollowedId(post.getUser().getId());
+        log.info("🟡 게시물 업로드 유저 ID: {}, 팔로워 수: {}", post.getUser().getId(), followerIds.size());
+        log.info("🟨 피드 저장 대상 팔로워들: {}", followerIds);
         if (followerIds.isEmpty()) {
+            log.info("⚠️ 팔로워가 없어 피드 생성 스킵됨");
             return;
         }
 
-        List<Feeds> feeds = convertToFeeds(followerIds, post.getId());
-        feedRepository.saveAll(feeds);
-    }
-
-
-
-    private List<Feeds> convertToFeeds(List<Long> followerIds, Long postId) {
-        return followerIds.stream()
-                .map(followerId -> new Feeds(followerId, postId))
+        List<Feeds> feeds = followerIds.stream()
+                .map(followerId -> {
+                    Feeds f = Feeds.builder()
+                            .user(Users.builder().id(followerId).build())  // ✅ 피드를 보는 유저
+                            .post(post)
+                            .build();
+                    log.info("📥 피드 생성 대상 유저ID={}, postID={}", followerId, post.getId());
+                    return f;
+                })
                 .toList();
+
+        feedRepository.saveAll(feeds);
+        log.info("✅ 피드 생성 완료 - 생성된 피드 수: {}", feeds.size());
     }
+
+
+
+
+//    private List<Feeds> convertToFeeds(List<Long> followerIds, Long postId) {
+//        return followerIds.stream()
+//                .map(followerId -> new Feeds(followerId, postId))
+//                .toList();
+//    }
 
 
     // 게시물이 삭제될 때: 해당 게시물에 대한 피드 전부 삭제

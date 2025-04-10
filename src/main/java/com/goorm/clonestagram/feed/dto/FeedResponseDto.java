@@ -1,10 +1,15 @@
 package com.goorm.clonestagram.feed.dto;
 import com.goorm.clonestagram.feed.domain.Feeds;
+import com.goorm.clonestagram.post.domain.Posts;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Optional;
 
+@Slf4j
 @Getter
 public class FeedResponseDto {
     private final Long feedId;
@@ -27,7 +32,14 @@ public class FeedResponseDto {
         this.createdAt = createdAt;
     }
 
+
+    private static boolean isTestProfile() {
+        return Arrays.asList(Optional.ofNullable(System.getProperty("spring.profiles.active"))
+                .orElse("").split(",")).contains("test");
+    }
+
     public static FeedResponseDto from(Feeds feed) {
+
         return FeedResponseDto.builder()
                 .feedId(feed.getId())
                 .postId(feed.getPost().getId())

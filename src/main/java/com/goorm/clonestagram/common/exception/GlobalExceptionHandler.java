@@ -2,8 +2,8 @@ package com.goorm.clonestagram.common.exception;
 
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
-import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
 
+import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
 import com.goorm.clonestagram.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;

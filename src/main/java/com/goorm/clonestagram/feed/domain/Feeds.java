@@ -11,16 +11,17 @@ import java.time.LocalDateTime;
         @UniqueConstraint(columnNames = {"user_id", "post_id"})
 })
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class Feeds {
 
-    public Feeds(Long userId, Long postId) {
-        this.user = new Users(userId); // 단순 참조용 프록시 객체
-        this.post = new Posts(postId); // 단순 참조용 프록시 객체
-        this.createdAt = LocalDateTime.now();
-    }
+//    public Feeds(Long userId, Long postId) {
+//        this.user = new Users(userId); // 단순 참조용 프록시 객체
+//        this.post = new Posts(postId); // 단순 참조용 프록시 객체
+//        this.createdAt = LocalDateTime.now();
+//    }
 
 
     @Id
@@ -45,6 +46,9 @@ public class Feeds {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+//    public void setPost(Posts postB) {
+//    }
 
 //    private boolean deleted;
 }
