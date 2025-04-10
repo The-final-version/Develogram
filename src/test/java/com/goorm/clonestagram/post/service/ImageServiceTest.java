@@ -178,7 +178,7 @@ class ImageServiceTest {
         assertNotNull(imageUpdateResDto);
         assertEquals("수정된 내용", imageUpdateResDto.getContent());
         verify(postService).findByIdAndDeletedIsFalse(tempPost.getId());
-        verify(postService).save(any(Posts.class));
+        verify(postService).saveAndFlush(any(Posts.class));
     }
 
     /**
