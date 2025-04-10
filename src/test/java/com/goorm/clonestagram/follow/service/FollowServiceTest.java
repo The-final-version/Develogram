@@ -39,7 +39,7 @@ class FollowServiceTest {
 
         given(userService.findByIdAndDeletedIsFalse(followerId)).willReturn(follower);
         given(userService.findByIdAndDeletedIsFalse(followedId)).willReturn(followed);
-        given(followRepository.findByFollowerAndFollowed(follower, followed)).willReturn(Optional.empty());
+        given(followRepository.findByFollowerAndFollowedWithLock(follower, followed)).willReturn(Optional.empty());
 
         // when
         followService.toggleFollow(followerId, followedId);

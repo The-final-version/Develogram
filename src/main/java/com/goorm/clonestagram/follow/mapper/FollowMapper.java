@@ -26,4 +26,14 @@ public class FollowMapper {
                 .createdAt(f.getCreatedAt())
                 .build();
     }
+
+    public static FollowDto toSimpleDto(Follows f) {
+        return FollowDto.builder()
+                .id(f.getId())
+                .followerId(f.getFollower().getId())
+                .followedId(f.getFollowed().getId())
+                .createdAt(f.getCreatedAt())
+                .build();
+    }
+
 }

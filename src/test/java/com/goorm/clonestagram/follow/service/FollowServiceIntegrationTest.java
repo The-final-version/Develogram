@@ -53,7 +53,7 @@ public class FollowServiceIntegrationTest {
         followService.toggleFollow(user1.getId(), user2.getId());
 
         // Then: 실제 DB에서 확인
-        Optional<Follows> follow = followRepository.findByFollowerAndFollowed(user1, user2);
+        Optional<Follows> follow = followRepository.findByFollowerAndFollowedWithLock(user1, user2);
         assertTrue(follow.isPresent());
     }
 }

@@ -5,6 +5,8 @@ import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.feed.repository.FeedRepository;
 import com.goorm.clonestagram.feed.service.FeedService;
 import com.goorm.clonestagram.follow.domain.Follows;
+import com.goorm.clonestagram.follow.dto.FollowDto;
+import com.goorm.clonestagram.follow.mapper.FollowMapper;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.follow.service.FollowService;
 import com.goorm.clonestagram.post.ContentType;
@@ -173,6 +175,13 @@ public class IntegrationTestHelper {
             feed.setPost(post);
             feedRepository.save(feed);
         }
+    }
+
+    public List<FollowDto> getFollowings(Long userId) {
+        List<Follows> follows = followRepository.findAllByFollowerId(userId);
+        return follows.stream()
+                .map(FollowMapper::toSimpleDto)
+                .toList();
     }
 
 }
