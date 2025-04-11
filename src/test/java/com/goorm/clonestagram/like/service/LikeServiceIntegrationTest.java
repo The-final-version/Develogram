@@ -8,21 +8,21 @@ import com.goorm.clonestagram.post.service.PostService;
 import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.util.IntegrationTestHelper;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.goorm.clonestagram.post.ContentType.IMAGE;
-import static com.goorm.clonestagram.post.ContentType.VIDEO;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,6 +30,8 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")  // <- 이게 있어야 test 환경으로 바뀜
 @SpringBootTest
 @Transactional
+@Rollback
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LikeServiceIntegrationTest {
 
 	@Autowired
@@ -48,8 +50,18 @@ public class LikeServiceIntegrationTest {
 	private PostService postService;
 
 	@Autowired
+	IntegrationTestHelper testHelper;
+
+	@Autowired
 	@MockitoSpyBean
 	private LikeRepository likeRepository;
+
+	@BeforeEach
+	public void setUp() {
+		likeRepository.deleteAll();
+		postsRepository.deleteAll();
+		userRepository.deleteAll();
+	}
 
 	@Test
 	public void testToggleLike() {
@@ -121,12 +133,14 @@ public class LikeServiceIntegrationTest {
 
 	@Test
 	public void testToggleLikeRapidly() throws InterruptedException {
-		Users user = new Users();
-		user.setUsername("testUser");
-		user.setEmail("test@example.com");
-		user.setPassword("password");
-		user.setDeleted(false);
-		user = userRepository.save(user);
+		Users user = testHelper.createUser("testUserForIntegrationTest");
+
+		// Users user = new Users();
+		// user.setUsername("testUser");
+		// user.setEmail("test@example.com");
+		// user.setPassword("password");
+		// user.setDeleted(false);
+		// user = userRepository.save(user);
 
 		Posts post = new Posts();
 		post.setUser(user);
@@ -168,6 +182,13 @@ public class LikeServiceIntegrationTest {
 		boolean liked = likeService.isPostLikedByLoginUser(userId, postId);
 		assertThat(liked).isEqualTo(threadCount % 2 != 0);
 		assertThat(likeService.getLikeCount(postId)).isEqualTo(threadCount % 2 != 0 ? 1L : 0L);
+
+		// // ✅ 트랜잭션 분리된 서비스에서 상태 조회
+		// boolean liked = transactionalHelper.checkLiked(userId, postId);
+		// assertThat(liked).isEqualTo(threadCount % 2 != 0);
+		//
+		// long likeCount = transactionalHelper.getLikeCount(postId);
+		// assertThat(likeCount).isEqualTo(threadCount % 2 != 0 ? 1L : 0L);
 
 	}
 }
