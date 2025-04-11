@@ -18,8 +18,9 @@ import java.util.List;
 public interface FollowRepository extends JpaRepository<Follows, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT f FROM Follows f WHERE f.follower = :follower AND f.followed = :followed")
-    Optional<Follows> findByFollowerAndFollowedWithLock(Users follower, Users followed);
+    @Query("SELECT f FROM Follows f WHERE f.follower.id = :followerId AND f.followed.id = :followedId")
+    Optional<Follows> findByFollowerAndFollowedWithLock(@Param("followerId") Long followerId, @Param("followedId") Long followedId);
+
 
 //    Optional<Follows> findByFollowerAndFollowed(Users follower, Users followed);
 

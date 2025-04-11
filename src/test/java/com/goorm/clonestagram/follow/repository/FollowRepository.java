@@ -45,7 +45,7 @@ class FollowRepositoryTest {
         Users followed = saveUser("userB");
         followRepository.save(new Follows(follower, followed));
 
-        Optional<Follows> result = followRepository.findByFollowerAndFollowedWithLock(follower, followed);
+        Optional<Follows> result = followRepository.findByFollowerAndFollowedWithLock(follower.getId(), followed.getId());
 
         assertThat(result).isPresent();
     }

@@ -8,7 +8,9 @@ import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DeadlockLoserDataAccessException;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +27,34 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserService userService;
+    private final FollowWriteService followWriteService;
 
     @Transactional
     public void toggleFollow(Long followerId, Long followedId) {
+        int maxRetries = 3;
+        int attempt = 0;
+
+        while (attempt < maxRetries) {
+            try {
+                performToggle(followerId, followedId);
+                return;
+            } catch (DeadlockLoserDataAccessException | CannotAcquireLockException e) {
+                attempt++;
+                log.warn("\uD83D\uDD01 데드락 발생, 재시도 {}/{}: followerId={}, followedId={}, message={}",
+                        attempt, maxRetries, followerId, followedId, e.getMessage());
+
+                if (attempt >= maxRetries) {
+                    throw e;
+                }
+
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ignored) {}
+            }
+        }
+    }
+
+    private void performToggle(Long followerId, Long followedId) {
         if (followerId.equals(followedId)) {
             throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
         }
@@ -35,20 +62,21 @@ public class FollowService {
         Users follower = userService.findByIdAndDeletedIsFalse(followerId);
         Users followed = userService.findByIdAndDeletedIsFalse(followedId);
 
-        // 락 걸고 조회
-        Optional<Follows> followOpt = followRepository.findByFollowerAndFollowedWithLock(follower, followed);
+        // 항상 followerId < followedId 순서 고정 → 데드락 방지
+        Users first = follower.getId() < followed.getId() ? follower : followed;
+        Users second = follower.getId() < followed.getId() ? followed : follower;
+
+        Optional<Follows> followOpt = followRepository.findByFollowerAndFollowedWithLock(first.getId(), second.getId());
 
         if (followOpt.isPresent()) {
             followRepository.delete(followOpt.get());
         } else {
-            try {
-                followRepository.save(new Follows(follower, followed));
-            } catch (DataIntegrityViolationException e) {
-                // 동시 요청으로 인해 중복 삽입 예외 발생 시 무시하거나 로그 처리
-                log.warn("중복 팔로우 요청 감지: followerId={}, followedId={}", followerId, followedId);
-            }
+            Follows follows = new Follows(first, second);
+            followWriteService.tryCreate(follows);
         }
     }
+
+
 
 
 
