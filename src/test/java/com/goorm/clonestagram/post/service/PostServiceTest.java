@@ -3,8 +3,9 @@ package com.goorm.clonestagram.post.service;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,19 +29,17 @@ public class PostServiceTest {
     private PostsRepository postsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private JpaUserExternalWriteRepository userRepository;
 
     @InjectMocks
     private PostService postService;
 
-    private Users testUser;
+    private UserEntity testUser;
     private Posts testPost;
 
     @BeforeEach
     void setUp() {
-        testUser = new Users();
-        testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser = new UserEntity(User.testMockUser(1L, "testUser"));
 
         testPost = new Posts();
         testPost.setId(1L);

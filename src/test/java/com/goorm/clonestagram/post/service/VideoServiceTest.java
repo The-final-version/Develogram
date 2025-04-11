@@ -13,9 +13,11 @@ import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
 import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.feed.service.FeedService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +40,7 @@ public class VideoServiceTest {
     private PostsRepository postsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserExternalQueryService userExternalQueryService;
 
     @Mock
     private HashTagRepository hashTagRepository;
@@ -55,7 +57,7 @@ public class VideoServiceTest {
     @InjectMocks
     private VideoService videoService;
 
-    private Users testUser;
+    private UserEntity testUser;
     private Posts testPost;
     private VideoUploadReqDto uploadReqDto;
     private VideoUpdateReqDto updateReqDto;
@@ -63,9 +65,7 @@ public class VideoServiceTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new Users();
-        testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser = new UserEntity(User.testMockUser(1L, "testUser"));
 
         testPost = new Posts();
         testPost.setId(1L);
@@ -91,7 +91,7 @@ public class VideoServiceTest {
     @Test
     void 비디오업로드_성공() {
         // given
-        when(userRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(testUser));
+        when(userExternalQueryService.findByIdAndDeletedIsFalse(anyLong())).thenReturn(testUser.toDomain());
         when(postsRepository.save(any(Posts.class))).thenReturn(testPost);
         when(hashTagRepository.findByTagContent(anyString())).thenReturn(Optional.empty());
         when(hashTagRepository.save(any(HashTags.class))).thenReturn(testHashTag);
@@ -110,7 +110,8 @@ public class VideoServiceTest {
     @Test
     void 비디오업로드_실패_유저없음() {
         // given
-        when(userRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(userExternalQueryService.findByIdAndDeletedIsFalse(anyLong()))
+            .thenThrow(new IllegalArgumentException("유저가 존재하지 않습니다."));
 
         // when & then
         assertThrows(IllegalArgumentException.class, () -> videoService.videoUpload(uploadReqDto, 1L));

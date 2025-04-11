@@ -11,7 +11,8 @@ import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.search.dto.HashtagSuggestionDto;
 import com.goorm.clonestagram.search.dto.SearchPostResDto;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ class HashTagSearchServiceTest {
     void init() {
         post = Posts.builder()
             .content("Sample post content")
-            .user(new Users())
+            .user(new UserEntity("111","111","111"))
             .build();
 
         hashtag = new HashTags(1L, "example");

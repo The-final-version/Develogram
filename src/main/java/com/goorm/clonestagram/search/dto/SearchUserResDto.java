@@ -1,9 +1,10 @@
 package com.goorm.clonestagram.search.dto;
 
-import com.goorm.clonestagram.user.dto.UserProfileDto;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
+
+import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
 
 /**
  * 유저 조회 응답 위한 DTO

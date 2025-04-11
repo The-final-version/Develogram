@@ -12,8 +12,6 @@ import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 import com.goorm.clonestagram.util.CustomTestLogger;
 
 import java.util.Arrays;
@@ -46,13 +47,13 @@ class CommentServiceTest {
 	private CommentRepository commentRepository;
 
 	@Mock
-	private UserRepository userRepository;
+	private JpaUserExternalWriteRepository userRepository;
 
 	@Mock
 	private PostsRepository postRepository;
 
 	@Mock
-	private UserService userService;
+	private UserExternalQueryService userService;
 
 	@Mock
 	private PostService postService;
@@ -62,19 +63,14 @@ class CommentServiceTest {
 	@InjectMocks
 	private CommentService commentService;
 
-	private Users mockUsers;
+	private UserEntity mockUsers;
 	private Comments testComment;
 	private Posts mockPost;
 	private Posts mockPost2;
 
 	@BeforeEach
 	void setUp() {
-		mockUsers = Users.builder()
-			.id(11L)
-			.username("mockuser")
-			.password("mockpassword")
-			.email("mock@domain.com")
-			.build();
+		mockUsers = new UserEntity(User.testMockUser(11L, "testUser"));
 
 		mockPost = Posts.builder()
 			.id(111L)
@@ -124,7 +120,7 @@ class CommentServiceTest {
 			// Given
 			CommentRequest request = new CommentRequest(11L, 111L, "Test Comment");
 
-			when(userService.findByIdAndDeletedIsFalse(11L)).thenReturn(mockUsers);
+			when(userService.findByIdAndDeletedIsFalse(11L)).thenReturn(mockUsers.toDomain());
 			when(postService.findByIdAndDeletedIsFalse(111L)).thenReturn(mockPost);
 
 			ArgumentCaptor<Comments> captor = ArgumentCaptor.forClass(Comments.class);
@@ -170,7 +166,7 @@ class CommentServiceTest {
 		void createComment_ShouldThrowException_WhenPostDoesNotExist() {
 			// Given: 특정 postId (mockComment의 postId)에 대해 false 반환 (게시글이 존재하지 않도록 설정)
 			CommentRequest request = new CommentRequest(11L, 111L, "Test Comment");
-			when(userService.findByIdAndDeletedIsFalse(anyLong())).thenReturn(mockUsers);
+			when(userService.findByIdAndDeletedIsFalse(anyLong())).thenReturn(mockUsers.toDomain());
 			when(postService.findByIdAndDeletedIsFalse(testComment.getPosts().getId()))
 				.thenThrow(new IllegalArgumentException("게시물이 없습니다."));
 
@@ -316,8 +312,8 @@ class CommentServiceTest {
 		@DisplayName("게시글 작성자가 댓글을 삭제하는 경우 (정상 삭제)")
 		void removeComment_ShouldDeleteComment_WhenRequesterIsPostOwner() {
 			// Given: 댓글과 게시글이 존재하고, 요청자가 게시글 작성자임
-			Users postWriter = Users.builder().id(5L).build();
-			Users commentWriter = Users.builder().id(11L).build();
+			UserEntity postWriter = UserEntity.builder().id(5L).build();
+			UserEntity commentWriter = UserEntity.builder().id(11L).build();
 			Posts testPost = Posts.builder().id(111L).user(postWriter).build();
 			Comments testComment = Comments.builder().id(1111L).users(commentWriter).posts(testPost).build();
 
@@ -335,8 +331,8 @@ class CommentServiceTest {
 		@DisplayName("권한이 없는 사용자가 삭제하려고 하면 예외 발생")
 		void removeComment_ShouldThrowException_WhenRequesterHasNoPermission(CapturedOutput output) {
 			// Given: 댓글과 게시글이 존재하지만 요청자가 댓글/게시글 작성자가 아님
-			Users postWriter = Users.builder().id(5L).build();
-			Users commentWriter = Users.builder().id(11L).build();
+			UserEntity postWriter = UserEntity.builder().id(5L).build();
+			UserEntity commentWriter = UserEntity.builder().id(11L).build();
 			Posts testPost = Posts.builder().id(111L).user(postWriter).build();
 			Comments testComment = Comments.builder().id(1111L).users(commentWriter).posts(testPost).build();
 

@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 
 import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.search.dto.SearchUserResDto;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,12 +31,12 @@ class FollowSearchServiceTest {
     @Mock
     FollowRepository followRepository;
 
-    Users user;
+    UserEntity user;
 
     @BeforeEach
     void init() {
-        user = Users.builder()
-            .username("example")
+        user = UserEntity.builder()
+            .name("example")
             .email("example@test.com")
             .build();
     }
@@ -48,14 +50,14 @@ class FollowSearchServiceTest {
         String keyword = "example";
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        Page<Users> mockPage = new PageImpl<>(List.of(user), pageRequest, 1);
+        Page<UserEntity> mockPage = new PageImpl<>(List.of(user), pageRequest, 1);
         when(followRepository.findFollowingByKeyword(userId, keyword, pageRequest)).thenReturn(mockPage);
 
         SearchUserResDto result = followSearchService.searchFollowingByKeyword(userId, keyword, pageRequest);
 
         assertEquals(1, result.getTotalCount());
         assertEquals(1, result.getUserList().getContent().size());
-        assertEquals("example", result.getUserList().getContent().getFirst().getUsername());
+        assertEquals("example", result.getUserList().getContent().getFirst().getName());
 
         verify(followRepository, times(1)).findFollowingByKeyword(userId, keyword, pageRequest);
     }
@@ -68,14 +70,14 @@ class FollowSearchServiceTest {
         String keyword = "example";
         PageRequest pageRequest = PageRequest.of(0, 10);
 
-        Page<Users> mockPage = new PageImpl<>(List.of(user), pageRequest, 1);
+        Page<UserEntity> mockPage = new PageImpl<>(List.of(user), pageRequest, 1);
         when(followRepository.findFollowerByKeyword(userId, keyword, pageRequest)).thenReturn(mockPage);
 
         SearchUserResDto result = followSearchService.searchFollowerByKeyword(userId, keyword, pageRequest);
 
         assertEquals(1, result.getTotalCount());
         assertEquals(1, result.getUserList().getContent().size());
-        assertEquals("example", result.getUserList().getContent().getFirst().getUsername());
+        assertEquals("example", result.getUserList().getContent().getFirst().getName());
 
         verify(followRepository, times(1)).findFollowerByKeyword(userId, keyword, pageRequest);
     }

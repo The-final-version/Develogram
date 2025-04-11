@@ -13,8 +13,10 @@ import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.repository.UserExternalReadRepository;
+import com.goorm.clonestagram.user.domain.repository.UserExternalWriteRepository;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 @Component
 public class IntegrationTestHelper {
 
-    private final UserRepository userRepository;
+    private final JpaUserExternalWriteRepository userRepository;
     private final PostsRepository postsRepository;
     private final CommentRepository commentRepository;
     private final FollowRepository followRepository;
@@ -39,7 +41,7 @@ public class IntegrationTestHelper {
     private final FeedService feedService;
 
     @Autowired
-    public IntegrationTestHelper(UserRepository userRepository,
+    public IntegrationTestHelper(JpaUserExternalWriteRepository userRepository,
                                  PostsRepository postsRepository,
                                  CommentRepository commentRepository,
                                  FollowRepository followRepository,
@@ -63,18 +65,19 @@ public class IntegrationTestHelper {
     /**
      * 임의의 유저를 생성합니다.
      */
-    public Users createUser(String baseUsername) {
+    public UserEntity createUser(String basename) {
 
-        String trimmedBase = baseUsername.length() > 12 ? baseUsername.substring(0, 12) : baseUsername;
+        String trimmedBase = basename.length() > 12 ? basename.substring(0, 12) : basename;
         String suffix = UUID.randomUUID().toString().substring(0, 5);
 
-        String uniqueUsername = trimmedBase + "_" + suffix;
+        String uniquename = trimmedBase + "_" + suffix;
 
-        Users user = Users.builder()
-                .username(uniqueUsername)
-                .password(bCryptPasswordEncoder.encode("password"))
-                .email(uniqueUsername + "@example.com")
+        UserEntity user = UserEntity.builder()
+                .name(uniquename)
+                .password(bCryptPasswordEncoder.encode("password!@123"))
+                .email(uniquename + "@example.com")
                 .build();
+        System.out.println("유저 생성 완료: " + user);
         return userRepository.save(user);
     }
 
@@ -82,7 +85,7 @@ public class IntegrationTestHelper {
      * 유저와 연관된 모든 post, comment 를 삭제한 후 유저를 삭제합니다.
      */
     @Transactional
-    public void deleteUserAndDependencies(Users user) {
+    public void deleteUserAndDependencies(UserEntity user) {
         Long userId = user.getId();
 
         List<Posts> posts = postsRepository.findAllByUserIdAndDeletedIsFalse(userId);
@@ -102,14 +105,14 @@ public class IntegrationTestHelper {
 
 
     @Transactional
-    public void deleteOnlyUser(Users user) {
+    public void deleteOnlyUser(UserEntity user) {
         userRepository.deleteById(user.getId());
     }
 
     /**
      * 테스트용 게시글을 생성합니다.
      */
-    public Posts createPost(Users user) {
+    public Posts createPost(UserEntity user) {
         Posts post = Posts.builder()
                 .user(user)
                 .content("테스트 게시물")
@@ -127,14 +130,14 @@ public class IntegrationTestHelper {
     }
 
 
-    public void follow(Users from, Users to) {
+    public void follow(UserEntity from, UserEntity to) {
         followService.toggleFollow(from.getId(), to.getId());
     }
 
     /**
      * 이미지 업로드용 요청 객체를 생성합니다.
      */
-    public Posts createImagePost(Users user, String fileUrl, String content, List<String> tags) {
+    public Posts createImagePost(UserEntity user, String fileUrl, String content, List<String> tags) {
         Posts post = Posts.builder()
                 .user(user)
                 .content(content != null ? content : "기본 이미지 내용")
@@ -147,7 +150,7 @@ public class IntegrationTestHelper {
     /**
      * 비디오 업로드용 요청 객체를 생성합니다.
      */
-    public Posts createVideoPost(Users user, String fileUrl, String content, List<String> tags) {
+    public Posts createVideoPost(UserEntity user, String fileUrl, String content, List<String> tags) {
         Posts post = Posts.builder()
                 .user(user)
                 .content(content != null ? content : "기본 비디오 내용")

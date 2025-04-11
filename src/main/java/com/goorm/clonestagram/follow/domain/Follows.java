@@ -1,11 +1,13 @@
 package com.goorm.clonestagram.follow.domain;
 
 
-import com.goorm.clonestagram.user.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 @Builder
 @Getter
@@ -21,11 +23,11 @@ public class Follows {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id")
-    private Users follower;
+    private UserEntity follower;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id")
-    private Users followed;
+    private UserEntity followed;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -35,9 +37,9 @@ public class Follows {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Follows(Users follower, Users followed) {
-        this.follower = follower;
-        this.followed = followed;
+    public Follows(User follower, User followed) {
+        this.follower = new UserEntity(follower);   // 유저 도메인 수정
+        this.followed = new UserEntity(followed);   // 유저 도메인 수정
         this.createdAt = LocalDateTime.now(); // 현재 시간 자동 저장
     }
 

@@ -7,8 +7,9 @@ import static org.mockito.Mockito.when;
 
 import com.goorm.clonestagram.search.dto.SearchUserResDto;
 import com.goorm.clonestagram.search.dto.UserSuggestionDto;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,19 +26,16 @@ import org.springframework.data.domain.PageRequest;
 class UserSearchServiceTest {
 
     @Mock
-    UserRepository userRepository;
+    UserExternalQueryService userRepository;
 
     @InjectMocks
     UserSearchService userSearchService;
 
-    Users user;
+    User user;
 
     @BeforeEach
     void init() {
-        user = Users.builder()
-            .username("johndoe")
-            .email("example@test.com")
-            .build();
+        user = User.testMockUser(1L, "johndoe");
     }
 
     @Test
@@ -47,8 +45,8 @@ class UserSearchServiceTest {
         String keyword = "john doe";
         PageRequest pageable = PageRequest.of(0, 10);
 
-        Page<Users> mockPage = new PageImpl<>(List.of(user), pageable, 1);
-        when(userRepository.searchUserByFullText("+john* +doe*", pageable)).thenReturn(mockPage);
+        Page<User> mockPage = new PageImpl<>(List.of(user), pageable, 1);
+        when(userRepository.searchUserByKeyword("+john* +doe*", pageable)).thenReturn(mockPage);
 
         // when
         SearchUserResDto result = userSearchService.searchUserByKeyword(keyword, pageable);
@@ -56,7 +54,7 @@ class UserSearchServiceTest {
         // then
         assertEquals(1, result.getTotalCount());
         assertEquals(1, result.getUserList().getContent().size());
-        assertEquals("johndoe", result.getUserList().getContent().getFirst().getUsername());
+        assertEquals("johndoe", result.getUserList().getContent().getFirst().getName());
     }
 
     @Test
@@ -65,16 +63,16 @@ class UserSearchServiceTest {
         // given
         String keyword = "johnd";
 
-        when(userRepository.findByUsernameContainingIgnoreCase(keyword)).thenReturn(List.of(user));
+        when(userRepository.findByNameContainingIgnoreCase(keyword)).thenReturn(List.of(user));
 
         // when
         List<UserSuggestionDto> result = userSearchService.findUsersByKeyword(keyword);
 
         // then
         assertEquals(1, result.size());
-        assertEquals("johndoe", result.getFirst().getUsername());
+        assertEquals("johndoe", result.getFirst().getName());
 
-        verify(userRepository, times(1)).findByUsernameContainingIgnoreCase(keyword);
+        verify(userRepository, times(1)).findByNameContainingIgnoreCase(keyword);
     }
 
 }

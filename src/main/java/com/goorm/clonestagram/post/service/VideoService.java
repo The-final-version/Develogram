@@ -14,8 +14,9 @@ import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
 import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ import java.util.Optional;
 public class VideoService {
 
     private final PostsRepository postsRepository;
-    private final UserRepository userRepository;
+    private final UserExternalQueryService userService;      // 유저 도메인 수정
     private final HashTagRepository hashTagRepository;
     private final PostHashTagRepository postHashTagRepository;
     private final SoftDeleteRepository softDeleteRepository;
@@ -52,8 +53,7 @@ public class VideoService {
      */
     public VideoUploadResDto videoUpload(VideoUploadReqDto videoUploadReqDto, Long userId) {
 
-        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+        User users = userService.findByIdAndDeletedIsFalse(userId);
 
         String fileUrl = videoUploadReqDto.getFile();
 

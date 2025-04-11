@@ -2,8 +2,11 @@ package com.goorm.clonestagram.search.service;
 
 import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.search.dto.SearchUserResDto;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
+import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,8 +33,8 @@ public class FollowSearchService {
     @Transactional(readOnly = true)
     public SearchUserResDto searchFollowingByKeyword(Long userId, @NotBlank String keyword,
                                                      Pageable pageable) {
-        Page<Users> follows = followRepository.findFollowingByKeyword(userId, keyword, pageable);
-        Page<UserProfileDto> userProfiles = follows.map(UserProfileDto::fromEntity);
+        Page<UserEntity> follows = followRepository.findFollowingByKeyword(userId, keyword, pageable);    // 유저 도메인 수정
+        Page<UserProfileDto> userProfiles = follows.map(UserAdapter::toUserProfileDto);             // 유저 도메인 수정
 
         return SearchUserResDto.of(follows.getTotalElements(), userProfiles);
     }
@@ -48,9 +51,9 @@ public class FollowSearchService {
     @Transactional(readOnly = true)
     public SearchUserResDto searchFollowerByKeyword(Long userId, @NotBlank String keyword,
                                                     Pageable pageable) {
-        Page<Users> follows = followRepository.findFollowerByKeyword(userId, keyword, pageable);
+        Page<UserEntity> follows = followRepository.findFollowerByKeyword(userId, keyword, pageable); // 유저 도메인 수정
 
-        Page<UserProfileDto> userProfiles = follows.map(UserProfileDto::fromEntity);
+        Page<UserProfileDto> userProfiles = follows.map(UserAdapter::toUserProfileDto);         // 유저 도메인 수정
 
         return SearchUserResDto.of(follows.getTotalElements(), userProfiles);
     }

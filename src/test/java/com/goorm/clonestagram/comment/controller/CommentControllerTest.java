@@ -28,7 +28,7 @@ import com.goorm.clonestagram.exception.PermissionDeniedException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentControllerTest {
@@ -47,8 +47,7 @@ public class CommentControllerTest {
 		@DisplayName("댓글 조회에 성공하면 정상적으로 객체가 반환된다.")
 		void success() {
 			// given
-			Users user = new Users();
-			user.setId(100L);
+			UserEntity user = new UserEntity(100L);
 
 			Posts post = new Posts();
 			post.setId(200L);
@@ -94,9 +93,7 @@ public class CommentControllerTest {
 		void success() {
 			// given
 			Long postId = 10L;
-
-			Users user = new Users();
-			user.setId(100L);
+			UserEntity user = new UserEntity(100L);
 
 			Posts post = new Posts();
 			post.setId(postId);
@@ -155,8 +152,7 @@ public class CommentControllerTest {
 			// given
 			CommentRequest request = new CommentRequest(1L, 2L, "댓글");
 
-			Users user = new Users();
-			user.setId(1L);
+			UserEntity user = new UserEntity(1L);
 
 			Posts post = new Posts();
 			post.setId(2L);

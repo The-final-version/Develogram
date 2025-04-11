@@ -7,16 +7,17 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostService {
 
-    private final UserService userService;
+    private final UserExternalQueryService userService; // 유저 도메인 수정
 
     private final PostsRepository postsRepository;
 
@@ -45,14 +46,14 @@ public class PostService {
 
     public PostResDto getMyPosts(Long userId, Pageable pageable) {
         //1. userId를 활용해 유저 객체 조회
-        Users users = userService.findByIdAndDeletedIsFalse(userId);
+        User users = userService.findByIdAndDeletedIsFalse(userId);
 
         //2. 해당 유저가 작성한 모든 피드 조회, 페이징 처리
         Page<Posts> myFeed = postsRepository.findAllByUserIdAndDeletedIsFalse(users.getId(), pageable);
 
         //3. 모든 작업이 완료도니 경우 응답 반환
         return PostResDto.builder()
-                .user(UserProfileDto.fromEntity(users))
+                .user(UserAdapter.toUserProfileDto(users))      // 유저 도메인 수정
                 .feed(myFeed.map(PostInfoDto::fromEntity))
                 .build();
     }
@@ -68,5 +69,15 @@ public class PostService {
 
     public Posts saveAndFlush(Posts postEntity) {
         return postsRepository.saveAndFlush(postEntity);
+    }
+
+    // 유저 도메인 수정
+    public void deleteAllUserPosts(Long userId) {
+        List<Posts> posts = findAllByUserIdAndDeletedIsFalse(userId);
+        for (Posts post : posts) {
+            post.setDeleted(true);
+            post.setDeletedAt(LocalDateTime.now());
+        }
+        postsRepository.saveAll(posts);
     }
 }

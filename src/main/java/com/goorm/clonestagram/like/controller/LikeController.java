@@ -2,7 +2,6 @@ package com.goorm.clonestagram.like.controller;
 
 import com.goorm.clonestagram.like.service.LikeService;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.service.UserService;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -2,8 +2,9 @@ package com.goorm.clonestagram.post.repository;
 
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +27,20 @@ class PostsRepositoryTest {
     private PostsRepository postsRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private JpaUserExternalWriteRepository userRepository;
 
-    private Users testUser;
+    private UserEntity testUser;
     private Posts testPost;
 
     @BeforeEach
     void setUp() {
-        testUser = new Users();
-        testUser.setUsername("testuser");
-        testUser.setEmail("test@example.com");
-        testUser.setPassword("testpassword");
-        testUser = userRepository.save(testUser);
+        testUser = UserEntity.builder()
+            .name("testuser")
+            .email("test111@example.com")
+            .password("testpassword")
+            .profileBio("test bio")
+            .profileImgUrl("test_url").build();
+        userRepository.save(testUser);
 
         testPost = Posts.builder()
                 .content("테스트 게시물")

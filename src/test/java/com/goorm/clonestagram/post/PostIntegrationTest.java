@@ -1,20 +1,25 @@
 package com.goorm.clonestagram.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goorm.clonestagram.common.exception.GlobalExceptionHandler;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.mock.web.MockMultipartFile;
 import java.util.Map;
@@ -35,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc // MockMvc 자동 구성
 @Transactional // 테스트 후 롤백
+@Import(GlobalExceptionHandler.class)
 class PostIntegrationTest {
 
     @Autowired
@@ -47,28 +53,20 @@ class PostIntegrationTest {
     private PostsRepository postsRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private JpaUserExternalWriteRepository userRepository;
 
-    private Users testUser;
-    private Users otherUser; // 다른 사용자 테스트용
+    private UserEntity testUser;
+    private UserEntity otherUser; // 다른 사용자 테스트용
     private Posts testPost;
 
     @BeforeEach
     void setUp() {
         // 테스트용 유저 생성 및 저장
-        testUser = Users.builder()
-                .username("integrationUser")
-                .password("password") // 실제로는 해싱된 비밀번호 사용
-                .email("integration@example.com")
-                .build();
+        testUser = new UserEntity(User.testMockUser("integrationUser"));
         testUser = userRepository.save(testUser);
 
         // 다른 테스트용 유저 생성 및 저장
-        otherUser = Users.builder()
-                .username("otherUser")
-                .password("password")
-                .email("other@example.com")
-                .build();
+        otherUser = new UserEntity(User.testMockUser("otherUser"));
         otherUser = userRepository.save(otherUser);
 
         // 테스트용 게시물 생성 및 저장 (testUser 소유)
@@ -141,7 +139,7 @@ class PostIntegrationTest {
                 .andExpect(jsonPath("$.id").value(postId))
                 .andExpect(jsonPath("$.content").value("통합 테스트 게시물 내용"))
                 .andExpect(jsonPath("$.mediaName").value("integration_test.jpg"))
-                .andExpect(jsonPath("$.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.name").value(testUser.getName()))
                 .andExpect(jsonPath("$.userId").value(testUser.getId()));
     }
 
@@ -205,9 +203,10 @@ class PostIntegrationTest {
         String url = "/image/" + postId; // ImageController 경로
 
         // when
-        ResultActions resultActions = mockMvc.perform(delete(url)
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete(url)
                 .with(user(new CustomUserDetails(testUser)))
-                .accept(MediaType.APPLICATION_JSON));
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultHandlers.print()); // 디버깅용
 
         // then
         resultActions
