@@ -17,13 +17,12 @@ public class LoginService {
     @Autowired
     private UserRepository userRepository;
 
-    public boolean login(String email, String password) {
-        // 사용자의 이메일로 사용자 조회
-        Users user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
-        }
-        // 비밀번호 비교
+
+    public boolean login(String username, String password) {
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+
         return bCryptPasswordEncoder.matches(password, user.getPassword());
     }
+
 }

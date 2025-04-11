@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<Users, Long> {
 
     Optional<Users> findByUsername(String username);
+//    Users findByUsername(String username); // 필요 시
 
     @Query(value = """
             SELECT * FROM users
@@ -42,6 +43,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     boolean existsByEmail(String email);
 
+//    Users findByUsername(String email);
 
     Users findByEmail(String email);
 

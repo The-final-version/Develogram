@@ -9,11 +9,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class LoginForm {
-    private String email;
+    private String username;
     private String password;
 
-    public LoginForm(String email, String password) {
-        this.email = email;
+    public LoginForm(String username, String password) {
+        this.username = username;
         this.password = password;
     }
 }

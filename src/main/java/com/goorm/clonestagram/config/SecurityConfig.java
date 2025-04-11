@@ -62,7 +62,7 @@ public class SecurityConfig {
 					"/swagger.html",
 					"/search/tag/suggestions",
 					"/search/tag",
-					"/me"
+					"/me", "/admin/export-users"
 				).permitAll()
 				.requestMatchers(HttpMethod.GET, "/comments/**").permitAll()
 				.anyRequest().authenticated()
