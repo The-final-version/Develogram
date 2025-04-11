@@ -8,20 +8,21 @@ import com.goorm.clonestagram.post.service.PostService;
 import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.util.IntegrationTestHelper;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.goorm.clonestagram.post.ContentType.IMAGE;
-import static com.goorm.clonestagram.post.ContentType.VIDEO;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")  // <- 이게 있어야 test 환경으로 바뀜
 @SpringBootTest
 @Transactional
+@Rollback
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LikeServiceIntegrationTest {
 
 	@Autowired
@@ -47,7 +50,18 @@ public class LikeServiceIntegrationTest {
 	private PostService postService;
 
 	@Autowired
+	IntegrationTestHelper testHelper;
+
+	@Autowired
+	@MockitoSpyBean
 	private LikeRepository likeRepository;
+
+	@BeforeEach
+	public void setUp() {
+		likeRepository.deleteAll();
+		postsRepository.deleteAll();
+		userRepository.deleteAll();
+	}
 
 	@Test
 	public void testToggleLike() {
@@ -117,44 +131,64 @@ public class LikeServiceIntegrationTest {
 		assertEquals(2L, likeService.getLikeCount(post.getId()), "좋아요 개수가 2이어야 합니다.");
 	}
 
-	// @Test
-	// public void testToggleLikeTwiceRapidly() throws InterruptedException {
-	// Todo
-	// Users user = new Users();
-	// user.setUsername("testUser");
-	// user.setEmail("test@example.com");
-	// user.setPassword("password");
-	// user.setDeleted(false);
-	// user = userRepository.save(user);
-	//
-	// Posts post = new Posts();
-	// post.setUser(user);
-	// post.setContent("Test Post");
-	// post.setContentType(IMAGE);  // contents_type 추가
-	// post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
-	// post.setDeleted(false);
-	// post = postsRepository.save(post);
-	//
-	// Long userId = user.getId();
-	// Long postId = post.getId();
-	//
-	// int threadCount = 1;
-	// ExecutorService executor = Executors.newFixedThreadPool(threadCount);
-	// CountDownLatch latch = new CountDownLatch(threadCount);
-	//
-	// for (int i = 0; i < threadCount; i++) {
-	// 	executor.submit(() -> {
-	// 		try {
-	// 			likeService.toggleLike(userId, postId);
-	// 		} finally {
-	// 			latch.countDown();
-	// 		}
-	// 	});
-	// }
-	//
-	// latch.await(); // 모든 쓰레드 종료 대기
-	//
-	// boolean liked = likeService.isPostLikedByLoginUser(userId, postId);
-	// System.out.println("최종 좋아요 상태: " + liked);
-	// }
+	@Test
+	public void testToggleLikeRapidly() throws InterruptedException {
+		Users user = testHelper.createUser("testUserForIntegrationTest");
+
+		// Users user = new Users();
+		// user.setUsername("testUser");
+		// user.setEmail("test@example.com");
+		// user.setPassword("password");
+		// user.setDeleted(false);
+		// user = userRepository.save(user);
+
+		Posts post = new Posts();
+		post.setUser(user);
+		post.setContent("Test Post");
+		post.setContentType(IMAGE);  // contents_type 추가
+		post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
+		post.setDeleted(false);
+		post = postsRepository.save(post);
+
+		Long userId = user.getId();
+		Long postId = post.getId();
+
+		// int threadCount = 11;
+		// ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+		// CountDownLatch latch = new CountDownLatch(threadCount);
+
+		// for (int i = 0; i < threadCount; i++) {
+		// 	executor.submit(() -> {
+		// 		try {
+		// 			likeService.toggleLike(userId, postId);
+		// 		} finally {
+		// 			latch.countDown();
+		// 		}
+		// 	});
+		// }
+
+		// latch.await(); // 모든 쓰레드 종료 대기
+		// Thread.sleep(1000);
+
+		int threadCount = 11; // 반복 횟수 (짝수일때 홀수일때에 따라 결과가 달라야 함)
+
+		for (int i = 0; i < threadCount; i++) {
+			likeService.toggleLike(userId, postId);
+		}
+
+		verify(likeRepository, times((threadCount + 1) / 2)).save(any(Like.class));
+		verify(likeRepository, times(threadCount / 2)).delete(any(Like.class));
+
+		boolean liked = likeService.isPostLikedByLoginUser(userId, postId);
+		assertThat(liked).isEqualTo(threadCount % 2 != 0);
+		assertThat(likeService.getLikeCount(postId)).isEqualTo(threadCount % 2 != 0 ? 1L : 0L);
+
+		// // ✅ 트랜잭션 분리된 서비스에서 상태 조회
+		// boolean liked = transactionalHelper.checkLiked(userId, postId);
+		// assertThat(liked).isEqualTo(threadCount % 2 != 0);
+		//
+		// long likeCount = transactionalHelper.getLikeCount(postId);
+		// assertThat(likeCount).isEqualTo(threadCount % 2 != 0 ? 1L : 0L);
+
+	}
 }

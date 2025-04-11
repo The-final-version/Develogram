@@ -76,7 +76,7 @@ public class LikeService {
 		Users user = userService.findByIdAndDeletedIsFalse(userId);
 		Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
-		return likeRepository.existsByUser_IdAndPost_Id(user.getId(), post.getId());
+		return likeRepository.existsByUser_IdAndPost_Id(userId, postId);
 	}
 
 }
