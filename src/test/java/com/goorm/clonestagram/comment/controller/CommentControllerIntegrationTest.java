@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -45,6 +46,7 @@ import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWrit
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
 @Import(GlobalExceptionHandler.class)
 @DisplayName("CommentController 통합 테스트")
 public class CommentControllerIntegrationTest {
@@ -71,12 +73,15 @@ public class CommentControllerIntegrationTest {
 	@BeforeEach
 	void setUp() {
 		userExternalWriteRepository.deleteAll();
-		userA = userExternalWriteRepository.save(UserEntity.from(User.testMockUser("userA")));
-		userB = userExternalWriteRepository.save(UserEntity.from(User.testMockUser("userB")));
-		userC = userExternalWriteRepository.save(UserEntity.from(User.testMockUser("userC")));
-		userD = userExternalWriteRepository.save(UserEntity.from(User.testMockUser("userD")));
+		userA = UserEntity.from(User.testMockUser("userA"));
+		userB = UserEntity.from(User.testMockUser("userB"));
+		userC = UserEntity.from(User.testMockUser("userC"));
+		userD = UserEntity.from(User.testMockUser("userD"));
 		postX = Posts.builder().user(userA).content("postX").mediaName("postX.jpg").build();
-
+		System.out.println("userA = " + userA);
+		System.out.println("userB = " + userB);
+		System.out.println("userC = " + userC);
+		System.out.println("userD = " + userD);
 		userExternalWriteRepository.saveAll(List.of(userA, userB, userC, userD));
 		postsRepository.save(postX);
 	}
@@ -258,6 +263,7 @@ public class CommentControllerIntegrationTest {
 			ResultActions deleteResult = mockMvc.perform(
 				MockMvcRequestBuilders.delete(BY_ID, commentB.getId())
 					.param("requesterId", userB.getId().toString())
+					.with(user(userB.getEmail()).roles("USER"))
 					.contentType(MediaType.APPLICATION_JSON)
 			);
 			// 204를 보내줌.
@@ -375,7 +381,7 @@ public class CommentControllerIntegrationTest {
 			//     포스트 ID로 조회하면 조회되는 리스트에 D의 댓글이 포함되어 있다.
 			mockMvc.perform(
 					MockMvcRequestBuilders.get(BY_POST_ID, postX.getId())
-						.with(user("testuser@example.com").roles("ROLE_USER"))
+						.with(user("testuser@example.com").roles("USER"))
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[*].content", contains("comment written by userD")));
@@ -404,7 +410,7 @@ public class CommentControllerIntegrationTest {
 			// 댓글 ID를 조회하면 D가 작성한 댓글이 나온다.
 			mockMvc.perform(
 					MockMvcRequestBuilders.get(BY_ID, commentD.getId())
-						.with(user("testuser@example.com").roles("ROLE_USER"))
+						.with(user("testuser@example.com").roles("USER"))
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").value("comment written by userD"));
@@ -412,7 +418,7 @@ public class CommentControllerIntegrationTest {
 			// 포스트 ID로 조회하면 조회되는 리스트에 D의 댓글이 포함되어 있다.
 			mockMvc.perform(
 					MockMvcRequestBuilders.get(BY_POST_ID, postX.getId())
-						.with(user("testuser@example.com").roles("ROLE_USER"))
+						.with(user("testuser@example.com").roles("USER"))
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[*].content", contains("comment written by userD")));

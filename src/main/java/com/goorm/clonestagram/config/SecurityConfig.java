@@ -81,7 +81,17 @@ public class SecurityConfig {
 				.maxSessionsPreventsLogin(true)
 			)
 
-			// [4] JWT 필터 적용
+			// ✅ [4-1] 인증 실패 시 401 반환
+			.exceptionHandling(exception -> exception
+				.authenticationEntryPoint((request, response, authException) -> {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+					response.setContentType("application/json");
+					response.getWriter().write("{\"title\":\"인증되지 않은 요청입니다.\",\"status\":401,\"detail\":\"로그인이 필요합니다.\"}");
+				})
+			)
+
+
+			// [4-2] JWT 필터 적용
 			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDeviceMap),
 				UsernamePasswordAuthenticationFilter.class)
 
