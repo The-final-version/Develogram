@@ -15,7 +15,9 @@ import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LikeService {
@@ -30,6 +32,7 @@ public class LikeService {
 		Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
 		// userId와 postId를 사용해 좋아요 여부 확인
+		// 락 걸고 조회
 		Optional<Like> existingLike = likeRepository.findByUser_IdAndPost_Id(userId, postId);
 
 		if (existingLike.isPresent()) {
@@ -40,7 +43,7 @@ public class LikeService {
 			} catch (DataIntegrityViolationException e) {
 				// 동시에 두 요청이 온 경우 하나는 성공하고 하나는 이곳으로 옴.
 				if (likeRepository.existsByUser_IdAndPost_Id(userId, postId)) {
-					throw e;
+					log.warn("중복 좋아요 요청 감지: userId={}, postId={}", userId, postId);
 				}
 			}
 		}
@@ -73,7 +76,7 @@ public class LikeService {
 		Users user = userService.findByIdAndDeletedIsFalse(userId);
 		Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
-		return likeRepository.existsByUser_IdAndPost_Id(user.getId(), post.getId());
+		return likeRepository.existsByUser_IdAndPost_Id(userId, postId);
 	}
 
 }
