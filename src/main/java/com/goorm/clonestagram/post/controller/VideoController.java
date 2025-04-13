@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 /**
  * 영상 업로드 요청을 처리하는 컨트롤러
@@ -29,7 +30,7 @@ public class VideoController {
 
     /**
      * 영상 업로드 (멱등성 적용)
-     * - 요청으로부터 파일을 받아 유효성 검사 후, 서비스 계층에 전달
+     * - 요청으로부터 영상 URL과 내용을 받아 서비스 계층에 전달
      *
      * @param videoUploadReqDto 업로드할 영상과 관련된 요청 DTO
      * @param userDetails 인증된 사용자 정보
@@ -40,23 +41,31 @@ public class VideoController {
     @PostMapping(value = "/upload")
     public ResponseEntity<VideoUploadResDto> videoUpload(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody VideoUploadReqDto videoUploadReqDto,
+            @Valid @RequestBody VideoUploadReqDto videoUploadReqDto,
             @RequestHeader("Idempotency-Key") String idempotencyKey) {
 
+        Long userId = null;
         try {
-            VideoUploadResDto result = videoService.videoUploadWithIdempotency(videoUploadReqDto, userDetails, idempotencyKey);
+            userId = userDetails.getId();
+            log.info("👉 [videoUpload] 진입 (UserId: {}, Idempotency Key: {})", userId, idempotencyKey);
+
+            VideoUploadResDto result = videoService.videoUploadWithIdempotency(videoUploadReqDto, userId, idempotencyKey);
+            log.info("✅ 비디오 업로드 완료 (UserId: {}, Idempotency Key: {}): {}", userId, idempotencyKey, result);
             return ResponseEntity.ok(result);
         } catch (IdempotencyService.IdempotencyProcessingException e) {
-            log.warn("Idempotency Processing Exception: {}", e.getMessage());
+            log.warn("🚫 Idempotency Processing Exception (Key: {}): {}", idempotencyKey, e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         } catch (IllegalArgumentException e) {
-            log.warn("Video upload validation failed: {}", e.getMessage());
+            String logUserId = (userId != null) ? userId.toString() : "N/A";
+            log.warn("🚫 Video upload validation failed (UserId: {}, Key: {}): {}", logUserId, idempotencyKey, e.getMessage());
             return ResponseEntity.badRequest().body(null);
         } catch (RuntimeException e) {
-            log.error("Video upload failed during operation: {}", e.getMessage(), e);
+            String logUserId = (userId != null) ? userId.toString() : "N/A";
+            log.error("❌ Video upload failed during operation (UserId: {}, Key: {}): {}", logUserId, idempotencyKey, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
-            log.error("Unexpected error during video upload: {}", e.getMessage(), e);
+            String logUserId = (userId != null) ? userId.toString() : "N/A";
+            log.error("❌ Unexpected error during video upload (UserId: {}, Key: {}): {}", logUserId, idempotencyKey, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -74,7 +83,7 @@ public class VideoController {
     @PutMapping(value = "/{postSeq}")
     public ResponseEntity<VideoUpdateResDto> videoUpdate(@PathVariable("postSeq") Long postSeq,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                                         @RequestBody VideoUpdateReqDto videoUpdateReqDto){
+                                                         @Valid @RequestBody VideoUpdateReqDto videoUpdateReqDto){
 
         Long userId = userDetails.getId();
 

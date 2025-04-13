@@ -1,5 +1,6 @@
 package com.goorm.clonestagram.post.service;
 
+import com.goorm.clonestagram.common.service.IdempotencyService;
 import com.goorm.clonestagram.feed.service.FeedService;
 import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
@@ -20,6 +21,7 @@ import com.goorm.clonestagram.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,7 @@ public class VideoService {
     private final SoftDeleteRepository softDeleteRepository;
     private final FeedService feedService;
     private final HashtagService hashtagService;
+    private final IdempotencyService idempotencyService;
 
     /**
      * 영상 업로드
@@ -118,20 +121,26 @@ public class VideoService {
         }
 
         //4. 해시태그 수정 여부 파악
-        if (videoUpdateReqDto.getHashTagList() != null && !videoUpdateReqDto.getHashTagList().isEmpty()) {
+        if (videoUpdateReqDto.getHashTagList() != null) {
             //4-1. 기존의 해시태그 리스트 삭제
             postHashTagRepository.deleteAllByPostsId(posts.getId());
 
             //4-2. 새롭게 해시 태그 리스트 저장
             for (String tagContent : Optional.ofNullable(videoUpdateReqDto.getHashTagList())
                 .orElse(Collections.emptyList())) {
-                //4-2. tagList에서 tag 내용 하나를 추출한 후 조회
-                HashTags tag = hashTagRepository.findByTagContent(tagContent)
-                    //4-2. tag가 저장되어 있지 않으면 새롭게 저장
-                    .orElseGet(() -> hashTagRepository.save(new HashTags(null, tagContent)));
-                //4-3. 추출된 태그의 id와 피드의 id를 관계테이블에 저장
-                postHashTagRepository.save(new PostHashTags(null, tag, posts));
+                // 유효성 검사 추가: null 또는 공백 문자열 필터링
+                if (tagContent != null && !tagContent.trim().isEmpty()) {
+                    //4-2. tagList에서 tag 내용 하나를 추출한 후 조회
+                    HashTags tag = hashTagRepository.findByTagContent(tagContent)
+                        //4-2. tag가 저장되어 있지 않으면 새롭게 저장
+                        .orElseGet(() -> hashTagRepository.save(new HashTags(null, tagContent)));
+                    //4-3. 추출된 태그의 id와 피드의 id를 관계테이블에 저장
+                    postHashTagRepository.save(new PostHashTags(null, tag, posts));
+                } // 유효성 검사 끝
             }
+            // 수정: 빈 리스트가 들어와도 updated=true가 될 수 있으므로, 실제 저장된 태그가 있는지 확인하거나 로직 수정 필요.
+            // 여기서는 일단 updated=true 유지. (개선 필요시 추가 논의)
+            updated = true;
         }
 
         Posts updatedPost;
@@ -172,5 +181,51 @@ public class VideoService {
         // 피드 삭제 로직 추가
         feedService.deleteFeedsByPostId(postSeq);
 
+    }
+
+    public VideoUploadResDto videoUploadWithIdempotency(VideoUploadReqDto videoUploadReqDto, Long userId, String idempotencyKey) {
+        Supplier<VideoUploadResDto> operation = () -> {
+            try {
+                return performVideoUpload(videoUploadReqDto, userId);
+            } catch (Exception e) {
+                throw new RuntimeException("비디오 업로드 처리 중 오류 발생", e);
+            }
+        };
+
+        return idempotencyService.executeWithIdempotency(
+            idempotencyKey,
+            operation,
+            VideoUploadResDto.class
+        );
+    }
+
+    private VideoUploadResDto performVideoUpload(VideoUploadReqDto videoUploadReqDto, Long userId) {
+        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+
+        String fileUrl = videoUploadReqDto.getFile();
+
+        if (fileUrl == null || fileUrl.isBlank()) {
+            throw new IllegalArgumentException("Cloudinary 이미지 URL이 필요합니다.");
+        }
+
+        //4. unique 파일명과 videoUploadReqDto의 값들을 활용해 Entity 객체 생성 후 저장
+        Posts postEntity = videoUploadReqDto.toEntity(fileUrl, users);
+        Posts post = postsRepository.save(postEntity);
+
+        //5. Dto에 있는 HashTagList를 저장
+        hashtagService.saveHashtags(post, videoUploadReqDto.getHashTagList());
+
+        //6. 모든 작업이 완료된 경우 응답 반환
+        // 피드 생성 로직 추가
+        feedService.createFeedForFollowers(post);
+
+        //5. 모든 작업이 완료된 경우 응답 반환
+        return VideoUploadResDto.builder()
+            .content(post.getContent())
+            .type(post.getContentType())
+            .createdAt(post.getCreatedAt())
+            .hashTagList(videoUploadReqDto.getHashTagList().stream().toList())
+            .build();
     }
 }

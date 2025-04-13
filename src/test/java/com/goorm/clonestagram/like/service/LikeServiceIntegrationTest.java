@@ -147,12 +147,13 @@ public class LikeServiceIntegrationTest {
 		// user.setDeleted(false);
 		// user = userRepository.save(user);
 
-		Posts post = new Posts();
-		post.setUser(user);
-		post.setContent("Test Post");
-		post.setContentType(IMAGE);  // contents_type 추가
-		post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
-		post.setDeleted(false);
+		Posts post = Posts.builder()
+				.user(user)
+				.content("Test Post")
+				.contentType(IMAGE)
+				.mediaName("test-url")
+				.deleted(false)
+				.build();
 		post = postsRepository.save(post);
 
 		Long userId = user.getId();

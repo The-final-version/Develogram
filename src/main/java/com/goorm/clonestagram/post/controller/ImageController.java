@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.Valid;
 
 /**
  * 이미지 업로드 요청을 처리하는 컨트롤러
@@ -29,8 +30,8 @@ public class ImageController {
     private final ImageService imageService;
 
     /**
-     * 이미지 업로드 (멱등성 적용)
-     * - 요청으로부터 이미지 URL과 내용을 받아 서비스 계층에 전달 (서비스에서 URL 사용 가정)
+     * 이미지 업로드
+     * - 요청으로부터 파일, 게시글 내용, 해시태그 목록을 받아 유효성 검사 후 서비스 계층에 넘김
      *
      * @param imageUploadReqDto 업로드할 이미지 URL, 내용, 해시태그 등을 포함한 DTO
      * @param userDetails 인증된 사용자 정보
@@ -42,26 +43,31 @@ public class ImageController {
     @PostMapping(value = "/upload", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ImageUploadResDto> imageUpload(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ImageUploadReqDto imageUploadReqDto,
+            @Valid @RequestBody ImageUploadReqDto imageUploadReqDto,
             @RequestHeader("Idempotency-Key") String idempotencyKey) {
+        Long userId = null;
         try {
-            log.info("👉 [imageUpload] 진입 (Idempotency Key: {})", idempotencyKey);
+            userId = userDetails.getId();
+            log.info("👉 [imageUpload] 진입 (UserId: {}, Idempotency Key: {})", userId, idempotencyKey);
 
-            ImageUploadResDto result = imageService.imageUploadWithIdempotency(imageUploadReqDto, userDetails, idempotencyKey);
-            log.info("✅ 이미지 업로드 완료 (Idempotency Key: {}): {}", idempotencyKey, result);
+            ImageUploadResDto result = imageService.imageUploadWithIdempotency(imageUploadReqDto, userId, idempotencyKey);
+            log.info("✅ 이미지 업로드 완료 (UserId: {}, Idempotency Key: {}): {}", userId, idempotencyKey, result);
             return ResponseEntity.ok(result);
 
         } catch (IdempotencyService.IdempotencyProcessingException e) {
             log.warn("🚫 Idempotency Processing Exception (Key: {}): {}", idempotencyKey, e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         } catch (IllegalArgumentException e) {
-            log.warn("🚫 Image upload validation failed (Key: {}): {}", idempotencyKey, e.getMessage());
+            String logUserId = (userId != null) ? userId.toString() : "N/A";
+            log.warn("🚫 Image upload validation failed (UserId: {}, Key: {}): {}", logUserId, idempotencyKey, e.getMessage());
             return ResponseEntity.badRequest().body(null);
         } catch (RuntimeException e) {
-            log.error("❌ Image upload failed during operation (Key: {}): {}", idempotencyKey, e.getMessage(), e);
+            String logUserId = (userId != null) ? userId.toString() : "N/A";
+            log.error("❌ Image upload failed during operation (UserId: {}, Key: {}): {}", logUserId, idempotencyKey, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
-            log.error("❌ Unexpected error during image upload (Key: {}): {}", idempotencyKey, e.getMessage(), e);
+            String logUserId = (userId != null) ? userId.toString() : "N/A";
+            log.error("❌ Unexpected error during image upload (UserId: {}, Key: {}): {}", logUserId, idempotencyKey, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -80,7 +86,7 @@ public class ImageController {
     @PutMapping(value = "/{postSeq}")
     public ResponseEntity<ImageUpdateResDto> imageUpdate(@PathVariable("postSeq") Long postSeq,
                                                          @AuthenticationPrincipal CustomUserDetails userDetails,
-                                                         @RequestBody ImageUpdateReqDto imageUpdateReqDto){
+                                                         @Valid @RequestBody ImageUpdateReqDto imageUpdateReqDto){
         Long userId = userDetails.getId();
 
         ImageUpdateResDto result = imageService.imageUpdate(postSeq, imageUpdateReqDto, userId);

@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.goorm.clonestagram.exception.PostNotFoundException;
+
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
 
@@ -98,7 +100,7 @@ public class PostServiceTest {
         when(postsRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> postService.findByIdAndDeletedIsFalse(1L));
+        assertThrows(PostNotFoundException.class, () -> postService.findByIdAndDeletedIsFalse(1L));
     }
 
     @Test
@@ -123,10 +125,9 @@ public class PostServiceTest {
         when(postsRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        PostNotFoundException exception = assertThrows(PostNotFoundException.class,
                 () -> postService.findByIdAndDeletedIsFalse(1L, from));
-        assertTrue(exception.getMessage().contains("댓글이 속한 게시글이 존재하지 않습니다."));
-        assertTrue(exception.getMessage().contains("from: " + from));
+        assertTrue(exception.getMessage().contains("존재하지 않는 게시글입니다. ID: 1"));
         verify(postsRepository).findByIdAndDeletedIsFalse(1L);
     }
 

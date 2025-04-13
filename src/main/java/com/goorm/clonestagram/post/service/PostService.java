@@ -21,6 +21,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+import com.goorm.clonestagram.exception.PostNotFoundException;
+
 @Slf4j
 @Service
 @Transactional
@@ -38,12 +40,12 @@ public class PostService {
 
     public Posts findByIdAndDeletedIsFalse(Long postId) {
         return postsRepository.findByIdAndDeletedIsFalse(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
+                .orElseThrow(() -> new PostNotFoundException(postId));
     }
 
     public Posts findByIdAndDeletedIsFalse(Long postId, String from) {
         return postsRepository.findByIdAndDeletedIsFalse(postId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글이 속한 게시글이 존재하지 않습니다. postId: "+postId+", from: "+from ));
+                .orElseThrow(() -> new PostNotFoundException(postId));
     }
 
     public PostResDto getMyPosts(Long userId, Pageable pageable) {
