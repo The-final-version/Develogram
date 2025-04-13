@@ -35,7 +35,7 @@ public class PostController {
         return ResponseEntity.ok(postService.getMyPosts(userId, pageable));
     }
 
-    @GetMapping("/api/posts/{postId}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<PostInfoDto> getPostById(@PathVariable Long postId) {
         Posts post = postService.findByIdAndDeletedIsFalse(postId);
         return ResponseEntity.ok(PostInfoDto.fromEntity(post));

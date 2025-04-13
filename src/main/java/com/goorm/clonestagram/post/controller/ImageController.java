@@ -1,5 +1,6 @@
 package com.goorm.clonestagram.post.controller;
 
+import com.goorm.clonestagram.common.service.IdempotencyService;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import com.goorm.clonestagram.post.dto.update.ImageUpdateReqDto;
 import com.goorm.clonestagram.post.dto.update.ImageUpdateResDto;
@@ -8,6 +9,7 @@ import com.goorm.clonestagram.post.dto.upload.ImageUploadResDto;
 import com.goorm.clonestagram.post.service.ImageService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,41 +23,46 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/posts/images")
 public class ImageController {
 
     private final ImageService imageService;
 
     /**
-     * 이미지 업로드
+     * 이미지 업로드 (멱등성 적용)
      * - 요청으로부터 이미지 URL과 내용을 받아 서비스 계층에 전달 (서비스에서 URL 사용 가정)
      *
      * @param imageUploadReqDto 업로드할 이미지 URL, 내용, 해시태그 등을 포함한 DTO
+     * @param userDetails 인증된 사용자 정보
+     * @param idempotencyKey 멱등성 키 (HTTP 헤더)
      * @return 업로드 성공 시 ImageUploadResDto 반환
      * @throws Exception 업로드 도중 발생할 수 있는 예외
      */
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping(value = "/image", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/upload", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ImageUploadResDto> imageUpload(
-            @AuthenticationPrincipal CustomUserDetails userDetail,
-            @RequestBody ImageUploadReqDto imageUploadReqDto
-    ) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody ImageUploadReqDto imageUploadReqDto,
+            @RequestHeader("Idempotency-Key") String idempotencyKey) {
         try {
-            log.info("👉 [imageUpload] 진입");
+            log.info("👉 [imageUpload] 진입 (Idempotency Key: {})", idempotencyKey);
 
-            if (userDetail == null) {
-                log.warn("🚫 인증된 사용자 정보가 없습니다.");
-                return ResponseEntity.status(403).build();
-            }
-            Long userId = userDetail.getId();
-            log.info("✅ 인증된 사용자 ID: {}", userId);
-
-            ImageUploadResDto result = imageService.imageUpload(imageUploadReqDto, userId);
-            log.info("✅ 이미지 업로드 완료: {}", result);
+            ImageUploadResDto result = imageService.imageUploadWithIdempotency(imageUploadReqDto, userDetails, idempotencyKey);
+            log.info("✅ 이미지 업로드 완료 (Idempotency Key: {}): {}", idempotencyKey, result);
             return ResponseEntity.ok(result);
 
+        } catch (IdempotencyService.IdempotencyProcessingException e) {
+            log.warn("🚫 Idempotency Processing Exception (Key: {}): {}", idempotencyKey, e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        } catch (IllegalArgumentException e) {
+            log.warn("🚫 Image upload validation failed (Key: {}): {}", idempotencyKey, e.getMessage());
+            return ResponseEntity.badRequest().body(null);
+        } catch (RuntimeException e) {
+            log.error("❌ Image upload failed during operation (Key: {}): {}", idempotencyKey, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
-            log.error("❌ 이미지 업로드 중 오류 발생", e);
-            return ResponseEntity.status(500).build();
+            log.error("❌ Unexpected error during image upload (Key: {}): {}", idempotencyKey, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -67,15 +74,17 @@ public class ImageController {
      *
      * @param postSeq 게시글의 고유 번호
      * @param imageUpdateReqDto
+     * @param userDetails 인증된 사용자 정보
      * @return
      */
-    @PutMapping(value = "/image/{postSeq}")
+    @PutMapping(value = "/{postSeq}")
     public ResponseEntity<ImageUpdateResDto> imageUpdate(@PathVariable("postSeq") Long postSeq,
-                                                         @AuthenticationPrincipal CustomUserDetails userDetail,
+                                                         @AuthenticationPrincipal CustomUserDetails userDetails,
                                                          @RequestBody ImageUpdateReqDto imageUpdateReqDto){
-        Long userId = userDetail.getId();
+        Long userId = userDetails.getId();
 
-        return ResponseEntity.ok(imageService.imageUpdate(postSeq, imageUpdateReqDto, userId));
+        ImageUpdateResDto result = imageService.imageUpdate(postSeq, imageUpdateReqDto, userId);
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -83,12 +92,14 @@ public class ImageController {
      * - 삭제를 원하는 게시글의 식별자를 받아 서비스 계층에 넘김
      *
      * @param postSeq 삭제할 게시글 식별자
+     * @param userDetails 인증된 사용자 정보
      * @return ResponseEntity
      */
-    @DeleteMapping("/image/{postSeq}")
-    public ResponseEntity<?> imageDelete(@PathVariable Long postSeq, @AuthenticationPrincipal CustomUserDetails userDetail){
+    @DeleteMapping("/{postSeq}")
+    public ResponseEntity<?> imageDelete(@PathVariable Long postSeq,
+                                       @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        Long userId = userDetail.getId();
+        Long userId = userDetails.getId();
 
         imageService.imageDelete(postSeq, userId);
 

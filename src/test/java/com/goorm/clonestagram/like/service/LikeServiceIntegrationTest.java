@@ -52,19 +52,21 @@ public class LikeServiceIntegrationTest {
 	@Test
 	public void testToggleLike() {
 		// Given: 테스트용 사용자와 게시물 생성
-		Users user = new Users();
-		user.setUsername("testUser");
-		user.setEmail("test@example.com");
-		user.setPassword("password");
-		user.setDeleted(false);
+		Users user = Users.builder()
+				.username("testUser")
+				.email("test@example.com")
+				.password("password")
+				.deleted(false)
+				.build();
 		user = userRepository.save(user);
 
-		Posts post = new Posts();
-		post.setUser(user);
-		post.setContent("Test Post");
-		post.setContentType(IMAGE);  // contents_type 추가
-		post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
-		post.setDeleted(false);
+		Posts post = Posts.builder()
+				.user(user)
+				.content("Test Post")
+				.contentType(IMAGE)
+				.mediaName("test-url")
+				.deleted(false)
+				.build();
 		post = postsRepository.save(post);
 
 		// When: 좋아요 토글 (첫 번째 좋아요)
@@ -87,26 +89,29 @@ public class LikeServiceIntegrationTest {
 	@Test
 	public void testGetLikeCount() {
 		// Given: 테스트용 사용자와 게시물, 다중 좋아요 생성
-		Users user1 = new Users();
-		user1.setUsername("user1");
-		user1.setEmail("user1@example.com");
-		user1.setPassword("password1");
-		user1.setDeleted(false);
+		Users user1 = Users.builder()
+				.username("user1")
+				.email("user1@example.com")
+				.password("password1")
+				.deleted(false)
+				.build();
 		user1 = userRepository.save(user1);
 
-		Users user2 = new Users();
-		user2.setUsername("user2");
-		user2.setEmail("user2@example.com");
-		user2.setPassword("password2");
-		user2.setDeleted(false);
+		Users user2 = Users.builder()
+				.username("user2")
+				.email("user2@example.com")
+				.password("password2")
+				.deleted(false)
+				.build();
 		user2 = userRepository.save(user2);
 
-		Posts post = new Posts();
-		post.setUser(user1);
-		post.setContent("Test Post1");
-		post.setContentType(IMAGE);  // contents_type 추가
-		post.setMediaName("test-url");   // media_url 추가 (nullable=false일 경우)
-		post.setDeleted(false);
+		Posts post = Posts.builder()
+				.user(user1)
+				.content("Test Post1")
+				.contentType(IMAGE)
+				.mediaName("test-url")
+				.deleted(false)
+				.build();
 		post = postsRepository.save(post);
 
 		// When: 두 사용자가 좋아요
