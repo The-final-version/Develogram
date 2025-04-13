@@ -3,6 +3,7 @@ package com.goorm.clonestagram.post.dto.upload;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.user.domain.Users;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +24,7 @@ public class ImageUploadReqDto {
 
     private String file;
     private String content;
-    private List<String> hashTagList;
+    private Set<String> hashTagList;
 
     public Posts toEntity(String imageName, Users user) {
         return Posts.builder()
