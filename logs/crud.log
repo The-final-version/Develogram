@@ -1,0 +1,356 @@
+2025-04-13 00:41:42 [FeedWorker-6] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=83, followerCount=99731
+2025-04-13 00:41:42 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=82, followerCount=99675
+2025-04-13 00:41:42 [FeedWorker-5] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=81, followerCount=99709
+2025-04-13 00:41:42 [FeedWorker-1] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=84, followerCount=99725
+2025-04-13 00:41:42 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=80, followerCount=99677
+2025-04-13 00:41:42 [FeedWorker-2] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=85, followerCount=99690
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3145ms, postId=85
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3150ms, postId=80
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3150ms, postId=82
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3152ms, postId=80
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3153ms, postId=82
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3160ms, postId=83
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3161ms, postId=85
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3168ms, postId=80
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3172ms, postId=80
+2025-04-13 00:41:45 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3172ms, postId=85
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3167ms, postId=80
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3179ms, postId=85
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3178ms, postId=82
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3179ms, postId=83
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3191ms, postId=82
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3194ms, postId=80
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3190ms, postId=85
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3190ms, postId=80
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3197ms, postId=85
+2025-04-13 00:41:48 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=3202ms, postId=80
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2277ms, postId=85
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2271ms, postId=83
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2294ms, postId=80
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2296ms, postId=82
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2259ms, postId=80
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2288ms, postId=80
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2294ms, postId=82
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2277ms, postId=80
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2296ms, postId=85
+2025-04-13 00:41:50 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2290ms, postId=85
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2024ms, postId=83
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2037ms, postId=85
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2009ms, postId=85
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2033ms, postId=82
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2048ms, postId=80
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2033ms, postId=80
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2031ms, postId=80
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2044ms, postId=80
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2043ms, postId=82
+2025-04-13 00:41:52 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2027ms, postId=85
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2478ms, postId=85
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2495ms, postId=83
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2486ms, postId=85
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2490ms, postId=82
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2479ms, postId=80
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2485ms, postId=80
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2493ms, postId=80
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2474ms, postId=82
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2471ms, postId=85
+2025-04-13 00:41:55 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2491ms, postId=80
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2716ms, postId=83
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2735ms, postId=85
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2727ms, postId=85
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2716ms, postId=85
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2725ms, postId=80
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2725ms, postId=80
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2726ms, postId=80
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2717ms, postId=80
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2735ms, postId=82
+2025-04-13 00:41:57 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2744ms, postId=82
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2096ms, postId=83
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2095ms, postId=85
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2113ms, postId=85
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2118ms, postId=85
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2113ms, postId=80
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2115ms, postId=80
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2124ms, postId=80
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2119ms, postId=82
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2123ms, postId=80
+2025-04-13 00:42:00 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2121ms, postId=82
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2127ms, postId=85
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2134ms, postId=83
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2155ms, postId=85
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2158ms, postId=80
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2182ms, postId=85
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2180ms, postId=80
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2185ms, postId=80
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2180ms, postId=80
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2172ms, postId=82
+2025-04-13 00:42:02 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2204ms, postId=82
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2203ms, postId=83
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2211ms, postId=85
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2149ms, postId=85
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2164ms, postId=80
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2145ms, postId=85
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2137ms, postId=82
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2163ms, postId=80
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2136ms, postId=82
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2165ms, postId=80
+2025-04-13 00:42:04 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2170ms, postId=80
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2072ms, postId=83
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2073ms, postId=85
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2071ms, postId=85
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2064ms, postId=80
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2068ms, postId=85
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2062ms, postId=80
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2080ms, postId=82
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2072ms, postId=82
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2094ms, postId=80
+2025-04-13 00:42:06 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2100ms, postId=80
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2204ms, postId=85
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2205ms, postId=85
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2224ms, postId=83
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2227ms, postId=80
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2195ms, postId=82
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2227ms, postId=85
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2218ms, postId=82
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2225ms, postId=80
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2201ms, postId=80
+2025-04-13 00:42:08 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2222ms, postId=80
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2436ms, postId=85
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2435ms, postId=85
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2428ms, postId=83
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2417ms, postId=82
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2430ms, postId=80
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2429ms, postId=85
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2435ms, postId=82
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2445ms, postId=80
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2435ms, postId=80
+2025-04-13 00:42:11 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2430ms, postId=80
+2025-04-13 00:42:12 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=1677, duration=1822ms, postId=80
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2156ms, postId=85
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2165ms, postId=85
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2165ms, postId=83
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2154ms, postId=80
+2025-04-13 00:42:13 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=31604ms, postId=80
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2169ms, postId=82
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2173ms, postId=85
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2169ms, postId=82
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2157ms, postId=83
+2025-04-13 00:42:13 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2149ms, postId=82
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2426ms, postId=84
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2393ms, postId=85
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2427ms, postId=85
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2422ms, postId=83
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2403ms, postId=82
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2414ms, postId=84
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2409ms, postId=85
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2408ms, postId=82
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2411ms, postId=83
+2025-04-13 00:42:15 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2423ms, postId=82
+2025-04-13 00:42:17 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2345ms, postId=84
+2025-04-13 00:42:17 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2336ms, postId=85
+2025-04-13 00:42:17 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2321ms, postId=83
+2025-04-13 00:42:17 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2317ms, postId=84
+2025-04-13 00:42:17 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2334ms, postId=85
+2025-04-13 00:42:18 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2341ms, postId=82
+2025-04-13 00:42:18 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2359ms, postId=85
+2025-04-13 00:42:18 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2360ms, postId=83
+2025-04-13 00:42:18 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2370ms, postId=82
+2025-04-13 00:42:18 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2363ms, postId=82
+2025-04-13 00:42:19 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2219ms, postId=84
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2193ms, postId=85
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2182ms, postId=84
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2194ms, postId=83
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2192ms, postId=85
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2184ms, postId=82
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2163ms, postId=83
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2194ms, postId=85
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2175ms, postId=82
+2025-04-13 00:42:20 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2174ms, postId=82
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=1690, duration=1909ms, postId=85
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2202ms, postId=84
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2224ms, postId=85
+2025-04-13 00:42:22 [FeedWorker-2] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99690, totalDuration=40729ms, postId=85
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2205ms, postId=83
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2217ms, postId=84
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2198ms, postId=82
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2226ms, postId=83
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2212ms, postId=82
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2232ms, postId=82
+2025-04-13 00:42:22 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2227ms, postId=82
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2093ms, postId=83
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2136ms, postId=84
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2123ms, postId=83
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2128ms, postId=83
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2135ms, postId=84
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2140ms, postId=82
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2107ms, postId=82
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2123ms, postId=83
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2123ms, postId=82
+2025-04-13 00:42:24 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2113ms, postId=82
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2044ms, postId=83
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2037ms, postId=84
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2045ms, postId=83
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2041ms, postId=83
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2031ms, postId=84
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2038ms, postId=82
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2017ms, postId=82
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2024ms, postId=82
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2043ms, postId=83
+2025-04-13 00:42:26 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2032ms, postId=82
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2022ms, postId=83
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=1675, duration=1672ms, postId=82
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1990ms, postId=84
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1981ms, postId=83
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1984ms, postId=84
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1991ms, postId=83
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1988ms, postId=82
+2025-04-13 00:42:28 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99675, totalDuration=46905ms, postId=82
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1999ms, postId=83
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1981ms, postId=83
+2025-04-13 00:42:28 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1978ms, postId=81
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2084ms, postId=83
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2079ms, postId=84
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2104ms, postId=84
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2187ms, postId=83
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2188ms, postId=83
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2196ms, postId=84
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2192ms, postId=83
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2192ms, postId=83
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2200ms, postId=83
+2025-04-13 00:42:30 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2206ms, postId=81
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2877ms, postId=83
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2875ms, postId=84
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2827ms, postId=84
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2754ms, postId=83
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2768ms, postId=83
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2780ms, postId=84
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2765ms, postId=83
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2773ms, postId=83
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2789ms, postId=83
+2025-04-13 00:42:33 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2760ms, postId=81
+2025-04-13 00:42:35 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2433ms, postId=83
+2025-04-13 00:42:35 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2428ms, postId=84
+2025-04-13 00:42:35 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=1731, duration=2180ms, postId=83
+2025-04-13 00:42:35 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2440ms, postId=84
+2025-04-13 00:42:35 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2468ms, postId=83
+2025-04-13 00:42:35 [FeedWorker-6] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99731, totalDuration=54297ms, postId=83
+2025-04-13 00:42:35 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2458ms, postId=84
+2025-04-13 00:42:35 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2489ms, postId=84
+2025-04-13 00:42:36 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2448ms, postId=84
+2025-04-13 00:42:36 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2464ms, postId=84
+2025-04-13 00:42:36 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2466ms, postId=81
+2025-04-13 00:42:37 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2054ms, postId=81
+2025-04-13 00:42:37 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2052ms, postId=84
+2025-04-13 00:42:37 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2076ms, postId=81
+2025-04-13 00:42:37 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2049ms, postId=84
+2025-04-13 00:42:38 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2126ms, postId=84
+2025-04-13 00:42:38 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2143ms, postId=84
+2025-04-13 00:42:38 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2154ms, postId=84
+2025-04-13 00:42:38 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2174ms, postId=84
+2025-04-13 00:42:38 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2176ms, postId=84
+2025-04-13 00:42:38 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2165ms, postId=81
+2025-04-13 00:42:39 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2299ms, postId=81
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2295ms, postId=84
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2284ms, postId=84
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2289ms, postId=81
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2190ms, postId=84
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2180ms, postId=84
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2166ms, postId=84
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2139ms, postId=84
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2156ms, postId=81
+2025-04-13 00:42:40 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2169ms, postId=84
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2011ms, postId=84
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2032ms, postId=81
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2024ms, postId=81
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2042ms, postId=84
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2024ms, postId=84
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2030ms, postId=84
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2035ms, postId=84
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2027ms, postId=84
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2023ms, postId=81
+2025-04-13 00:42:42 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2025ms, postId=84
+2025-04-13 00:42:43 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1963ms, postId=84
+2025-04-13 00:42:43 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1956ms, postId=81
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=1725, duration=1718ms, postId=84
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1976ms, postId=81
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1977ms, postId=84
+2025-04-13 00:42:44 [FeedWorker-1] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99725, totalDuration=62394ms, postId=84
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1980ms, postId=81
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1991ms, postId=81
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1982ms, postId=81
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1981ms, postId=81
+2025-04-13 00:42:44 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1977ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2338ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2334ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2345ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2342ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2338ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2355ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2347ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2367ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2370ms, postId=81
+2025-04-13 00:42:46 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2364ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2009ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2008ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2001ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2011ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2004ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1979ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1962ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1963ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1975ms, postId=81
+2025-04-13 00:42:48 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1986ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-10] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2039ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-2] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2048ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-3] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2027ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-6] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2042ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-5] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=2045ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-1] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=1709, duration=1744ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-4] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1947ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-8] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1944ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-7] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1918ms, postId=81
+2025-04-13 00:42:50 [ForkJoinPool.commonPool-worker-9] INFO  com.goorm.clonestagram.audit - 🟢 [BATCH DONE] inserted=2000, duration=1887ms, postId=81
+2025-04-13 00:42:50 [FeedWorker-5] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99709, totalDuration=68971ms, postId=81
+2025-04-13 01:21:05 [FeedWorker-5] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=87, followerCount=99725
+2025-04-13 01:21:05 [FeedWorker-1] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=86, followerCount=99709
+2025-04-13 01:21:05 [FeedWorker-2] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=88, followerCount=99731
+2025-04-13 01:21:05 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=90, followerCount=99690
+2025-04-13 01:21:05 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=89, followerCount=99675
+2025-04-13 01:21:05 [FeedWorker-6] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=91, followerCount=99677
+2025-04-13 01:21:26 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99675, totalDuration=21493ms, postId=89
+2025-04-13 01:21:45 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99690, totalDuration=40536ms, postId=90
+2025-04-13 01:21:51 [FeedWorker-5] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99725, totalDuration=46112ms, postId=87
+2025-04-13 01:22:00 [FeedWorker-2] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99731, totalDuration=55638ms, postId=88
+2025-04-13 01:22:00 [FeedWorker-6] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=55891ms, postId=91
+2025-04-13 01:22:05 [FeedWorker-1] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99709, totalDuration=60014ms, postId=86
+2025-04-13 01:40:23 [FeedWorker-10] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=92, followerCount=99725
+2025-04-13 01:40:23 [FeedWorker-9] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=93, followerCount=99690
+2025-04-13 01:40:23 [FeedWorker-7] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=96, followerCount=99731
+2025-04-13 01:40:23 [FeedWorker-8] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=97, followerCount=99709
+2025-04-13 01:40:23 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=94, followerCount=99677
+2025-04-13 01:40:23 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=95, followerCount=99675
+2025-04-13 01:40:48 [FeedWorker-7] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99731, totalDuration=25715ms, postId=96
+2025-04-13 01:40:48 [FeedWorker-10] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99725, totalDuration=25718ms, postId=92
+2025-04-13 01:41:11 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99675, totalDuration=47941ms, postId=95
+2025-04-13 01:41:11 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=47956ms, postId=94
+2025-04-13 01:41:19 [FeedWorker-8] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99709, totalDuration=55795ms, postId=97
+2025-04-13 01:41:19 [FeedWorker-9] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99690, totalDuration=56171ms, postId=93
+2025-04-13 01:55:58 [FeedWorker-8] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=106, followerCount=99677
+2025-04-13 01:55:58 [FeedWorker-7] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=98, followerCount=99709
+2025-04-13 01:55:58 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=105, followerCount=99677
+2025-04-13 01:55:58 [FeedWorker-5] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=100, followerCount=99675
+2025-04-13 01:55:58 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=104, followerCount=99677
+2025-04-13 01:55:58 [FeedWorker-6] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=103, followerCount=99731
+2025-04-13 01:55:58 [FeedWorker-9] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=107, followerCount=99677
+2025-04-13 01:55:58 [FeedWorker-10] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=99, followerCount=99690
+2025-04-13 01:55:58 [FeedWorker-2] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=101, followerCount=99725
+2025-04-13 01:55:58 [FeedWorker-1] INFO  com.goorm.clonestagram.audit - 🔵 [START] 피드 생성 시작 - postId=102, followerCount=99677
+2025-04-13 01:56:44 [FeedWorker-5] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99675, totalDuration=46276ms, postId=100
+2025-04-13 01:56:45 [FeedWorker-10] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99690, totalDuration=47644ms, postId=99
+2025-04-13 01:57:01 [FeedWorker-1] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=63402ms, postId=102
+2025-04-13 01:57:06 [FeedWorker-2] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99725, totalDuration=68461ms, postId=101
+2025-04-13 01:57:13 [FeedWorker-8] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=75298ms, postId=106
+2025-04-13 01:57:13 [FeedWorker-4] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=75399ms, postId=104
+2025-04-13 01:57:17 [FeedWorker-3] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=79133ms, postId=105
+2025-04-13 01:57:18 [FeedWorker-6] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99731, totalDuration=80417ms, postId=103
+2025-04-13 01:57:21 [FeedWorker-9] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99677, totalDuration=83495ms, postId=107
+2025-04-13 01:57:27 [FeedWorker-7] INFO  com.goorm.clonestagram.audit - ✅ [ALL DONE] 피드 생성 완료 - totalFollower=99709, totalDuration=89329ms, postId=98

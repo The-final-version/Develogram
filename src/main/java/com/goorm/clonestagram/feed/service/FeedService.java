@@ -17,17 +17,24 @@ import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class FeedService {
+
+    private static final Logger auditLog = LoggerFactory.getLogger("com.goorm.clonestagram.audit");
 
     private final FeedRepository feedRepository;
     private final FollowService followService;
@@ -127,29 +134,49 @@ public class FeedService {
 
 
     //A의 게시물이 업로드될 때: A 팔로워들의 피드 생성
+    @Async("feedTaskExecutor")
     public void createFeedForFollowers(Posts post) {
+        long start = System.currentTimeMillis();
         List<Long> followerIds = followService.findFollowerIdsByFollowedId(post.getUser().getId());
-        log.info("🟡 게시물 업로드 유저 ID: {}, 팔로워 수: {}", post.getUser().getId(), followerIds.size());
-        log.info("🟨 피드 저장 대상 팔로워들: {}", followerIds);
+
+        auditLog.info("🔵 [START] 피드 생성 시작 - postId={}, followerCount={}", post.getId(), followerIds.size());
+
         if (followerIds.isEmpty()) {
-            log.info("⚠️ 팔로워가 없어 피드 생성 스킵됨");
+            auditLog.info("⚠️ [SKIP] 팔로워 없음 - postId={}", post.getId());
             return;
         }
 
-        List<Feeds> feeds = followerIds.stream()
-                .map(followerId -> {
-                    Feeds f = Feeds.builder()
-                            .user(Users.builder().id(followerId).build())  // ✅ 피드를 보는 유저
-                            .post(post)
-                            .build();
-                    log.info("📥 피드 생성 대상 유저ID={}, postID={}", followerId, post.getId());
-                    return f;
-                })
+        int batchSize = 2000;
+        List<List<Long>> partitions = partitionList(followerIds, batchSize);
+
+        List<CompletableFuture<Void>> tasks = partitions.stream()
+                .map(batch -> CompletableFuture.runAsync(() -> {
+                    long batchStart = System.currentTimeMillis();
+
+                    List<Feeds> feeds = batch.stream()
+                            .map(followerId -> Feeds.builder()
+                                    .user(Users.builder().id(followerId).build())
+                                    .post(post)
+                                    .build())
+                            .toList();
+
+                    feedRepository.saveAll(feeds);
+
+                    long batchEnd = System.currentTimeMillis();
+                    log.info("🟢 [BATCH DONE] inserted={}, duration={}ms, postId={}",
+                            feeds.size(), (batchEnd - batchStart), post.getId());
+                }))
                 .toList();
 
-        feedRepository.saveAll(feeds);
-        log.info("✅ 피드 생성 완료 - 생성된 피드 수: {}", feeds.size());
+        // 모든 작업 완료 대기
+        tasks.forEach(CompletableFuture::join);
+
+        long end = System.currentTimeMillis();
+        auditLog.info("✅ [ALL DONE] 피드 생성 완료 - totalFollower={}, totalDuration={}ms, postId={}",
+                followerIds.size(), (end - start), post.getId());
     }
+
+
 
 
 
@@ -168,6 +195,14 @@ public class FeedService {
             throw new IllegalArgumentException("postId는 null일 수 없습니다.");
         }
         feedRepository.deleteByPostId(postId);
+    }
+
+    public <T> List<List<T>> partitionList(List<T> list, int size) {
+        List<List<T>> partitions = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            partitions.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+        return partitions;
     }
 
 }
