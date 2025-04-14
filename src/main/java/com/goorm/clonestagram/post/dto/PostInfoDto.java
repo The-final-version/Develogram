@@ -2,6 +2,7 @@ package com.goorm.clonestagram.post.dto;
 
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
+
 import lombok.Builder;
 import lombok.Getter;
 

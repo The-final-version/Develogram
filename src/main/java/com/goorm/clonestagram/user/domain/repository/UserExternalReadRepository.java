@@ -17,14 +17,9 @@ import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
  */
 public interface UserExternalReadRepository {
 	Page<User> searchUserByFullText(@Param("keyword") String keyword, Pageable pageable);
-
 	List<Long> findFollowingUserIdsByFollowerId(@Param("userId") Long userId);
-
 	List<User> findByNameContainingIgnoreCase(String keyword);
-
 	Optional<User> findByIdAndDeletedIsFalse(Long id);
-
 	boolean existsByIdAndDeletedIsFalse(Long id);
-
 	Optional<User> findByEmail(String email);
 }

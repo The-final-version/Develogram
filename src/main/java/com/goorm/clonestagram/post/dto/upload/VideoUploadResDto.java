@@ -1,11 +1,12 @@
 package com.goorm.clonestagram.post.dto.upload;
 
-import com.goorm.clonestagram.post.ContentType;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.goorm.clonestagram.post.ContentType;
 
 /**
  * 이미지 업로드 응답을 위한 DTO

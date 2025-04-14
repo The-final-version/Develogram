@@ -8,10 +8,6 @@ import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
  */
 public interface UserInternalWriteRepository {
 	User save(User user);
-
 	UserEntity saveEntity(UserEntity user);
-
-
-
 	void deleteById(Long id);
 }

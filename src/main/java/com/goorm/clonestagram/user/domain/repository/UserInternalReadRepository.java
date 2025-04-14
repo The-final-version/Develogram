@@ -10,9 +10,7 @@ import com.goorm.clonestagram.user.domain.vo.UserEmail;
  */
 public interface UserInternalReadRepository {
 	Optional<Long> findByName(String name);
-
 	User findByEmail(String email);
-
 	boolean existsByIdAndDeletedIsFalse(Long id);
 	boolean existsByEmail(UserEmail email);
 	Optional<User> findByIdAndDeletedIsFalse(Long id);

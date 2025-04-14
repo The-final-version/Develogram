@@ -23,16 +23,13 @@ public class UserExternalQueryService {
 	public Page<User> searchUserByKeyword(String keyword, Pageable pageable) {
 		return userReadRepository.searchUserByFullText(keyword, pageable);
 	}
-
 	public List<User> findByNameContainingIgnoreCase(String keyword) {
 		return userReadRepository.findByNameContainingIgnoreCase(keyword);
 	}
-
 	public User findByIdAndDeletedIsFalse(Long userId) {
 		return userReadRepository.findByIdAndDeletedIsFalse(userId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 	}
-
 	public boolean existsByIdAndDeletedIsFalse(Long userId) {
 		return userReadRepository.existsByIdAndDeletedIsFalse(userId);
 	}
