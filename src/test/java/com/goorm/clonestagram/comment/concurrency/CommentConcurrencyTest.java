@@ -1,6 +1,7 @@
 package com.goorm.clonestagram.comment.concurrency;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
@@ -40,8 +42,10 @@ public class CommentConcurrencyTest {
 	@Autowired
 	CommentRepository commentRepository;
 	@Autowired
+	@MockitoSpyBean
 	LikeService likeService;
 	@Autowired
+	@MockitoSpyBean
 	LikeRepository likeRepository;
 	@Autowired
 	UserRepository userRepository;
@@ -118,8 +122,12 @@ public class CommentConcurrencyTest {
 
 		latch.await();
 
+		verify(likeService, times(THREAD_COUNT)).toggleLike(likeUserId, postId);
+
 		boolean liked = likeService.isPostLikedByLoginUser(postId, likeUserId);
 		Assertions.assertEquals(THREAD_COUNT % 2 != 0, liked);
+		verify(likeRepository, times((THREAD_COUNT + 1) / 2)).save(any());
+		verify(likeRepository, times(THREAD_COUNT / 2)).delete(any());
 
 		long likeCount = likeRepository.countByPost_Id(postId);
 		Assertions.assertEquals(THREAD_COUNT % 2 != 0 ? 1L : 0L, likeCount);
@@ -144,8 +152,8 @@ public class CommentConcurrencyTest {
 
 		latch.await();
 
-		// long likeCount = likeRepository.countByPost_Id(postId);
-		long likeCount = likeService.getLikeCount(postId);
+		// long likeCount = likeRepository.countByPost_Id(postId); // 좋아요 테이블에서 직접 카운트 - 느림
+		long likeCount = likeService.getLikeCount(postId); // 좋아요-카운트 테이블에서 간접 카운트 - 빠름
 		Assertions.assertEquals(THREAD_COUNT, likeCount);
 	}
 

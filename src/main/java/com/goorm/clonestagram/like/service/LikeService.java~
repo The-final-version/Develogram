@@ -74,8 +74,8 @@ public class LikeService {
 	}
 
 	public boolean isPostLikedByLoginUser(Long postId, Long userId) {
-		userService.findByIdAndDeletedIsFalse(userId);
-		postService.findByIdAndDeletedIsFalse(postId);
+		Users user = userService.findByIdAndDeletedIsFalse(userId);
+		Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
 		return likeRepository.existsByUser_IdAndPost_Id(userId, postId);
 	}
