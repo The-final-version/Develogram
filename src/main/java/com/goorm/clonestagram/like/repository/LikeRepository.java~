@@ -43,4 +43,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 	@Query("INSERT INTO LikeCount(postId, likeCount) VALUES (:postId, :likeCount)")
 	void saveLikeCount(@Param("postId") Long postId, @Param("likeCount") Long likeCount);
 
+	@Modifying
+	@Query("DELETE FROM Like l WHERE l.user.id = :userId AND l.post.id = :postId")
+	int deleteByUser_IdAndPost_Id(@Param("userId") Long userId, @Param("postId") Long postId);
 }
