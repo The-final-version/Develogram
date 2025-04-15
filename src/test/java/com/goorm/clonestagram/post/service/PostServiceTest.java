@@ -127,7 +127,7 @@ public class PostServiceTest {
         // when & then
         PostNotFoundException exception = assertThrows(PostNotFoundException.class,
                 () -> postService.findByIdAndDeletedIsFalse(1L, from));
-        assertTrue(exception.getMessage().contains("존재하지 않는 게시글입니다. ID: 1"));
+        assertTrue(exception.getMessage().contains("댓글이 속한 게시글이 존재하지 않습니다. postId: 1, from: " + from));
         verify(postsRepository).findByIdAndDeletedIsFalse(1L);
     }
 

@@ -40,13 +40,13 @@ public class PostService {
 
 	public Posts findByIdAndDeletedIsFalse(Long postId) {
 		return postsRepository.findByIdAndDeletedIsFalse(postId)
-			.orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
+			.orElseThrow(() -> new PostNotFoundException("게시물이 없습니다. postId: " + postId));
 	}
 
 	public Posts findByIdAndDeletedIsFalse(Long postId, String from) {
 		return postsRepository.findByIdAndDeletedIsFalse(postId)
 			.orElseThrow(
-				() -> new IllegalArgumentException("댓글이 속한 게시글이 존재하지 않습니다. postId: " + postId + ", from: " + from));
+				() -> new PostNotFoundException("댓글이 속한 게시글이 존재하지 않습니다. postId: " + postId + ", from: " + from));
 	}
 
 	public PostResDto getMyPosts(Long userId, Pageable pageable) {
@@ -77,6 +77,6 @@ public class PostService {
 
 	public Posts findByIdWithPessimisticLock(Long id) {
 		return postsRepository.findByIdWithPessimisticLock(id)
-			.orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
+			.orElseThrow(() -> new PostNotFoundException("게시물이 없습니다. postId: " + id));
 	}
 }
