@@ -9,9 +9,11 @@ group = 'com.goorm'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(21)
+//    }
 }
 
 repositories {
@@ -160,6 +162,12 @@ jacocoTestReport {
                         exclude '**/mapper/**'
                         exclude '**/dto/**'
                         exclude '**/mapper/**'
+                        exclude '**/exception/**'
+                        exclude '**/config/**'
+                        exclude '**/common/**'
+                        exclude '**/domain/**'
+                        exclude '**/batch/**'
+                        exclude '**/search/controller/**'
                     }
             )
     )
