@@ -25,6 +25,9 @@ configurations {
 }
 
 dependencies {
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
     //JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     //Thymeleaf
@@ -32,34 +35,49 @@ dependencies {
     //Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    testCompileOnly 'org.projectlombok:lombok:1.18.30'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     //swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
     //mysql
     runtimeOnly 'com.mysql:mysql-connector-j'
     //security
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // H2 Database (Runtime)
+    runtimeOnly 'com.h2database:h2'
+
     //MariaDB
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     //mockito
     testImplementation 'org.mockito:mockito-inline:5.2.0'
-    //spring security test
-    testImplementation 'org.springframework.security:spring-security-test'
     //validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     //batch
     implementation 'org.springframework.batch:spring-batch-core'
 
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
-    // H2 데이터베이스 의존성
-    runtimeOnly 'com.h2database:h2'
+    // Spring Data Redis (추가)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // Redisson (추가)
+    implementation 'org.redisson:redisson-spring-boot-starter:3.27.2' // 버전 확인 필요
+
+    // Cloudinary
+    implementation 'com.cloudinary:cloudinary-http44:1.38.0'
+    implementation 'com.cloudinary:cloudinary-taglib:1.38.0'
+
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Test Hamcrest (추가)
+    testImplementation 'org.hamcrest:hamcrest-library:2.2' // 버전은 최신 버전 확인 후 조정 가능
 }
 
 jacoco {
@@ -69,6 +87,9 @@ jacoco {
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
+
+    // Mockito 에이전트 사용을 위한 JVM 인수 추가
+    jvmArgs "-javaagent:${classpath.find { it.name.contains('byte-buddy-agent') }.absolutePath}"
 
     testLogging {
         events "passed", "failed", "skipped"
@@ -83,8 +104,7 @@ jacocoTestCoverageVerification {
     classDirectories.setFrom(
             files(
                     fileTree("$buildDir/classes/java/main") {
-                        include 'com/goorm/clonestagram/feed/**'
-//                        include 'com/goorm/clonestagram/follow/**'
+                        include 'com/goorm/clonestagram/**'
                         exclude '**/dto/**'
                         exclude '**/config/**'
                         exclude '**/mapper/**'
@@ -129,8 +149,7 @@ jacocoTestReport {
     classDirectories.setFrom(
             files(
                     fileTree("$buildDir/classes/java/main") {
-                        include 'com/goorm/clonestagram/feed/**'
-//                        include 'com/goorm/clonestagram/follow/**'
+                        include 'com/goorm/clonestagram/'
                         exclude '**/mapper/**'
                         exclude '**/dto/**'
                         exclude '**/mapper/**'

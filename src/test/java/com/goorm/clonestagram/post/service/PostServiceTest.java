@@ -11,6 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -21,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.goorm.clonestagram.exception.PostNotFoundException;
+
 @ExtendWith(MockitoExtension.class)
 public class PostServiceTest {
 
@@ -30,6 +36,9 @@ public class PostServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private com.goorm.clonestagram.user.service.UserService userService;
+
     @InjectMocks
     private PostService postService;
 
@@ -38,18 +47,20 @@ public class PostServiceTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new Users();
-        testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser = Users.builder()
+                .id(1L)
+                .username("testuser")
+                .build();
 
-        testPost = new Posts();
-        testPost.setId(1L);
-        testPost.setContent("테스트 게시물");
-        testPost.setUser(testUser);
-        testPost.setContentType(ContentType.IMAGE);
-        testPost.setMediaName("test-image.jpg");
-        testPost.setCreatedAt(LocalDateTime.now());
-        testPost.setUpdatedAt(LocalDateTime.now());
+        testPost = Posts.builder()
+                .id(1L)
+                .content("테스트 게시물")
+                .user(testUser)
+                .contentType(ContentType.IMAGE)
+                .mediaName("test-image.jpg")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
@@ -89,7 +100,35 @@ public class PostServiceTest {
         when(postsRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> postService.findByIdAndDeletedIsFalse(1L));
+        assertThrows(PostNotFoundException.class, () -> postService.findByIdAndDeletedIsFalse(1L));
+    }
+
+    @Test
+    void 게시물_조회_성공_from포함() {
+        // given
+        String from = "testSource";
+        when(postsRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(testPost));
+
+        // when
+        Posts result = postService.findByIdAndDeletedIsFalse(1L, from);
+
+        // then
+        assertNotNull(result);
+        assertEquals(testPost.getContent(), result.getContent());
+        verify(postsRepository).findByIdAndDeletedIsFalse(1L);
+    }
+
+    @Test
+    void 게시물_조회_실패_from포함_게시물없음() {
+        // given
+        String from = "testSource";
+        when(postsRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+
+        // when & then
+        PostNotFoundException exception = assertThrows(PostNotFoundException.class,
+                () -> postService.findByIdAndDeletedIsFalse(1L, from));
+        assertTrue(exception.getMessage().contains("존재하지 않는 게시글입니다. ID: 1"));
+        verify(postsRepository).findByIdAndDeletedIsFalse(1L);
     }
 
     @Test
@@ -147,5 +186,61 @@ public class PostServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
         verify(postsRepository).findAllByUserIdAndDeletedIsFalse(1L);
+    }
+
+    @Test
+    void 내_게시물_목록_조회_성공() {
+        // given
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Posts> postList = Arrays.asList(testPost);
+        Page<Posts> postPage = new PageImpl<>(postList, pageable, postList.size());
+
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(testUser);
+        when(postsRepository.findAllByUserIdAndDeletedIsFalse(userId, pageable)).thenReturn(postPage);
+
+        // when
+        com.goorm.clonestagram.post.dto.PostResDto result = postService.getMyPosts(userId, pageable);
+
+        // then
+        assertNotNull(result);
+        assertNotNull(result.getUser());
+        assertEquals(testUser.getUsername(), result.getUser().getUsername());
+        assertNotNull(result.getFeed());
+        assertEquals(1, result.getFeed().getTotalElements());
+        assertEquals(testPost.getContent(), result.getFeed().getContent().get(0).getContent());
+
+        verify(userService).findByIdAndDeletedIsFalse(userId);
+        verify(postsRepository).findAllByUserIdAndDeletedIsFalse(userId, pageable);
+    }
+
+    @Test
+    void 내_게시물_목록_조회_실패_사용자없음() {
+        // given
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenThrow(new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+
+        // when & then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> postService.getMyPosts(userId, pageable));
+
+        assertEquals("해당 유저를 찾을 수 없습니다.", exception.getMessage());
+        verify(userService).findByIdAndDeletedIsFalse(userId);
+        verify(postsRepository, never()).findAllByUserIdAndDeletedIsFalse(anyLong(), any(Pageable.class));
+    }
+
+    @Test
+    void saveAndFlush_성공() {
+        // given
+        when(postsRepository.saveAndFlush(any(Posts.class))).thenReturn(testPost);
+
+        // when
+        Posts result = postService.saveAndFlush(testPost);
+
+        // then
+        assertNotNull(result);
+        assertEquals(testPost.getId(), result.getId());
+        verify(postsRepository).saveAndFlush(testPost);
     }
 } 

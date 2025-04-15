@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -33,11 +34,25 @@ class PostsRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new Users();
-        testUser.setUsername("testuser");
-        testUser.setEmail("test@example.com");
-        testUser.setPassword("testpassword");
-        testUser = userRepository.save(testUser);
+        testUser = Users.builder()
+                .username("testuser")
+                .email("test@example.com")
+                .password("password")
+                .build();
+        userRepository.save(testUser);
+
+        Posts deletedPost = Posts.builder()
+                .user(testUser)
+                .content("Deleted Content")
+                .mediaName("deleted.jpg")
+                .contentType(ContentType.IMAGE)
+                .deleted(true)
+                .build();
+        postsRepository.save(deletedPost);
+
+        Optional<Posts> foundDeleted = postsRepository.findById(deletedPost.getId());
+        assertThat(foundDeleted).isPresent();
+        assertThat(foundDeleted.get().isDeleted()).isTrue();
 
         testPost = Posts.builder()
                 .content("테스트 게시물")
@@ -63,9 +78,13 @@ class PostsRepositoryTest {
 
         // then
         assertNotNull(savedPost.getId());
-        assertEquals("새로운 게시물", savedPost.getContent());
-        assertEquals(testUser.getId(), savedPost.getUser().getId());
-        assertFalse(savedPost.getDeleted());
+        assertThat(savedPost.getUser()).isEqualTo(testUser);
+        assertThat(savedPost.getContent()).isEqualTo("새로운 게시물");
+        assertThat(savedPost.getMediaName()).isEqualTo("new-image.jpg");
+        assertThat(savedPost.getContentType()).isEqualTo(ContentType.IMAGE);
+        assertFalse(savedPost.isDeleted());
+        assertThat(savedPost.getCreatedAt()).isNotNull();
+        assertThat(savedPost.getVersion()).isNotNull();
     }
 
     @Test
@@ -76,7 +95,7 @@ class PostsRepositoryTest {
         // then
         assertTrue(found.isPresent());
         assertEquals(testPost.getContent(), found.get().getContent());
-        assertFalse(found.get().getDeleted());
+        assertFalse(found.get().isDeleted());
     }
 
     @Test
@@ -100,7 +119,7 @@ class PostsRepositoryTest {
         assertNotNull(postsPage);
         assertFalse(postsPage.getContent().isEmpty());
         assertEquals(testPost.getContent(), postsPage.getContent().get(0).getContent());
-        assertFalse(postsPage.getContent().get(0).getDeleted());
+        assertFalse(postsPage.getContent().get(0).isDeleted());
     }
 
     @Test
@@ -112,7 +131,7 @@ class PostsRepositoryTest {
         assertNotNull(posts);
         assertFalse(posts.isEmpty());
         assertEquals(testPost.getContent(), posts.get(0).getContent());
-        assertFalse(posts.get(0).getDeleted());
+        assertFalse(posts.get(0).isDeleted());
     }
 
     @Test
@@ -138,6 +157,6 @@ class PostsRepositoryTest {
         assertNotNull(postsPage);
         assertFalse(postsPage.getContent().isEmpty());
         assertEquals(testPost.getContent(), postsPage.getContent().get(0).getContent());
-        assertFalse(postsPage.getContent().get(0).getDeleted());
+        assertFalse(postsPage.getContent().get(0).isDeleted());
     }
 } 

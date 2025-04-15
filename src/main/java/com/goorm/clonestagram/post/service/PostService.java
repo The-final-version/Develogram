@@ -13,14 +13,18 @@ import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+import com.goorm.clonestagram.exception.PostNotFoundException;
+
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor

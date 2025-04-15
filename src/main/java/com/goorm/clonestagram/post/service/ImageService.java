@@ -1,5 +1,6 @@
 package com.goorm.clonestagram.post.service;
 
+import com.goorm.clonestagram.common.service.IdempotencyService;
 import com.goorm.clonestagram.feed.service.FeedService;
 import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
@@ -17,6 +18,7 @@ import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
 import com.goorm.clonestagram.user.domain.Users;
 import com.goorm.clonestagram.user.service.UserService;
 import java.time.LocalDateTime;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class ImageService {
     private final SoftDeleteRepository softDeleteRepository;
     private final FeedService feedService;
     private final UserService userService;
+    private final IdempotencyService idempotencyService;
 
     /**
      * 이미지 업로드
@@ -82,11 +85,11 @@ public class ImageService {
             .content(post.getContent())
             .type(post.getContentType())
             .createdAt(post.getCreatedAt())
+            .postId(post.getId())
             .hashTagList(imageUploadReqDto.getHashTagList().stream().toList())
             .mediaName(post.getMediaName()) // URL 그대로
             .build();
     }
-
 
     /**
      * @param postSeq           게시글 ID
@@ -207,5 +210,54 @@ public class ImageService {
 
         // 피드 삭제 로직 추가
         feedService.deleteFeedsByPostId(postSeq);
+    }
+
+    public ImageUploadResDto imageUploadWithIdempotency(ImageUploadReqDto imageUploadReqDto, Long userId, String idempotencyKey) {
+        Supplier<ImageUploadResDto> operation = () -> {
+            try {
+                return performImageUpload(imageUploadReqDto, userId);
+            } catch (Exception e) {
+                throw new RuntimeException("이미지 업로드 처리 중 오류 발생", e);
+            }
+        };
+
+        return idempotencyService.executeWithIdempotency(
+            idempotencyKey,
+            operation,
+            ImageUploadResDto.class
+        );
+    }
+
+    private ImageUploadResDto performImageUpload(ImageUploadReqDto imageUploadReqDto, Long userId) throws Exception {
+        Users users = userService.findByIdAndDeletedIsFalse(userId);
+        if (users == null) {
+            throw new IllegalArgumentException("해당 유저를 찾을 수 없습니다.");
+        }
+
+        String fileUrl = imageUploadReqDto.getFile();
+
+        if (fileUrl == null || fileUrl.isBlank()) {
+            throw new IllegalArgumentException("Cloudinary 이미지 URL이 필요합니다.");
+        }
+
+        Posts postEntity = imageUploadReqDto.toEntity(fileUrl, users);
+        Posts post = postService.save(postEntity);
+
+        if (post == null) {
+            throw new IllegalArgumentException("게시물 생성에 실패했습니다.");
+        }
+
+        feedService.createFeedForFollowers(post);
+
+        hashtagService.saveHashtags(post, imageUploadReqDto.getHashTagList());
+
+        return ImageUploadResDto.builder()
+            .content(post.getContent())
+            .type(post.getContentType())
+            .createdAt(post.getCreatedAt())
+            .postId(post.getId())
+            .hashTagList(imageUploadReqDto.getHashTagList().stream().toList())
+            .mediaName(post.getMediaName())
+            .build();
     }
 }

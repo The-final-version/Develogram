@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
 import com.goorm.clonestagram.comment.dto.CommentResponse;
+import com.goorm.clonestagram.common.service.IdempotencyService;
 import com.goorm.clonestagram.comment.service.CommentService;
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.InvalidCommentException;
@@ -35,6 +36,9 @@ public class CommentControllerTest {
 	@Mock
 	private CommentService commentService;
 
+	@Mock
+	private IdempotencyService idempotencyService;
+
 	@InjectMocks
 	CommentController commentController;
 
@@ -47,18 +51,17 @@ public class CommentControllerTest {
 		@DisplayName("댓글 조회에 성공하면 정상적으로 객체가 반환된다.")
 		void success() {
 			// given
-			Users user = new Users();
-			user.setId(100L);
+			Users user = Users.builder().id(100L).build();
 
-			Posts post = new Posts();
-			post.setId(200L);
+			Posts post = Posts.builder().id(200L).user(user).build();
 
-			Comments comment = new Comments();
-			comment.setId(1L);
-			comment.setUsers(user);
-			comment.setPosts(post);
-			comment.setContent("댓글 내용");
-			comment.setCreatedAt(LocalDateTime.now());
+			Comments comment = Comments.builder()
+					.id(1L)
+					.users(user)
+					.posts(post)
+					.content("댓글 내용")
+					.createdAt(LocalDateTime.now())
+					.build();
 
 			when(commentService.getCommentById(1L)).thenReturn(comment);
 
@@ -95,18 +98,17 @@ public class CommentControllerTest {
 			// given
 			Long postId = 10L;
 
-			Users user = new Users();
-			user.setId(100L);
+			Users user = Users.builder().id(100L).build();
 
-			Posts post = new Posts();
-			post.setId(postId);
+			Posts post = Posts.builder().id(postId).user(user).build();
 
-			Comments comment = new Comments();
-			comment.setId(1L);
-			comment.setUsers(user);
-			comment.setPosts(post);
-			comment.setContent("내용");
-			comment.setCreatedAt(LocalDateTime.now());
+			Comments comment = Comments.builder()
+					.id(1L)
+					.users(user)
+					.posts(post)
+					.content("내용")
+					.createdAt(LocalDateTime.now())
+					.build();
 
 			when(commentService.getCommentsByPostId(postId)).thenReturn(List.of(comment));
 
@@ -153,25 +155,26 @@ public class CommentControllerTest {
 		@DisplayName("댓글 저장에 성공하면 정상적으로 객체가 반환된다.")
 		void success() throws Exception {
 			// given
+			String testIdempotencyKey = "test-key-create-success";
 			CommentRequest request = new CommentRequest(1L, 2L, "댓글");
 
-			Users user = new Users();
-			user.setId(1L);
+			Users user = Users.builder().id(1L).build();
 
-			Posts post = new Posts();
-			post.setId(2L);
+			Posts post = Posts.builder().id(2L).user(user).build();
 
-			Comments saved = new Comments();
-			saved.setId(10L);
-			saved.setUsers(user);
-			saved.setPosts(post);
-			saved.setContent("댓글");
-			saved.setCreatedAt(LocalDateTime.now());
+			Comments saved = Comments.builder()
+					.id(10L)
+					.users(user)
+					.posts(post)
+					.content("댓글")
+					.createdAt(LocalDateTime.now())
+					.build();
 
-			when(commentService.createComment(request)).thenReturn(saved);
+			when(idempotencyService.executeWithIdempotency(eq(testIdempotencyKey), any(), eq(Comments.class)))
+					.thenReturn(saved);
 
 			// when
-			ResponseEntity<CommentResponse> responseEntity = commentController.create(request);
+			ResponseEntity<CommentResponse> responseEntity = commentController.create(testIdempotencyKey, request);
 			CommentResponse response = responseEntity.getBody();
 
 			// then
@@ -183,17 +186,18 @@ public class CommentControllerTest {
 			assertEquals("댓글", response.getContent());
 			assertEquals(1L, response.getUserId());
 			assertEquals(2L, response.getPostId());
-
 		}
 
 		@Test
 		@DisplayName("없는 사용자인 경우 예외 발생")
 		void fail_user_not_found() throws Exception {
+			String testIdempotencyKey = "test-key-user-not-found";
 			CommentRequest request = new CommentRequest(999L, 2L, "내용");
-			when(commentService.createComment(request)).thenThrow(new UserNotFoundException(999L));
+			when(idempotencyService.executeWithIdempotency(eq(testIdempotencyKey), any(), eq(Comments.class)))
+					.thenThrow(new UserNotFoundException(999L));
 
 			assertThrows(UserNotFoundException.class, () -> {
-				commentController.create(request);
+				commentController.create(testIdempotencyKey, request);
 			});
 		}
 
@@ -201,10 +205,12 @@ public class CommentControllerTest {
 		@DisplayName("없는 포스트인 경우 예외 발생")
 		void fail_post_not_found() {
 			CommentRequest request = new CommentRequest(1L, 999L, "내용");
-			when(commentService.createComment(request)).thenThrow(new PostNotFoundException(999L));
+			String testIdempotencyKey = "test-key-post-not-found";
+			when(idempotencyService.executeWithIdempotency(eq(testIdempotencyKey), any(), eq(Comments.class)))
+					.thenThrow(new PostNotFoundException(999L));
 
 			assertThrows(PostNotFoundException.class, () -> {
-				commentController.create(request);
+				commentController.create(testIdempotencyKey, request);
 			});
 		}
 
@@ -212,11 +218,12 @@ public class CommentControllerTest {
 		@DisplayName("내용이 없는 댓글인 경우 예외 발생")
 		void fail_no_contents() {
 			CommentRequest request = new CommentRequest(1L, 2L, ""); // or null
-
-			when(commentService.createComment(request)).thenThrow(new InvalidCommentException("내용이 없습니다"));
+			String testIdempotencyKey = "test-key-no-contents";
+			when(idempotencyService.executeWithIdempotency(eq(testIdempotencyKey), any(), eq(Comments.class)))
+					.thenThrow(new InvalidCommentException("내용이 없습니다"));
 
 			assertThrows(InvalidCommentException.class, () -> {
-				commentController.create(request);
+				commentController.create(testIdempotencyKey, request);
 			});
 		}
 	}

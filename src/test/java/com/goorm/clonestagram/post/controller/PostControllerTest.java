@@ -46,18 +46,20 @@ public class PostControllerTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new Users();
-        testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser = Users.builder()
+                .id(1L)
+                .username("testuser")
+                .build();
 
-        testPost = new Posts();
-        testPost.setId(1L);
-        testPost.setContent("테스트 게시물");
-        testPost.setUser(testUser);
-        testPost.setContentType(ContentType.IMAGE);
-        testPost.setMediaName("test-image.jpg");
-        testPost.setCreatedAt(LocalDateTime.now());
-        testPost.setUpdatedAt(LocalDateTime.now());
+        testPost = Posts.builder()
+                .id(1L)
+                .content("테스트 게시물")
+                .user(testUser)
+                .contentType(ContentType.IMAGE)
+                .mediaName("test-image.jpg")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
 
         pageRequest = PageRequest.of(0, 10);
     }
