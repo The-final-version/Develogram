@@ -4,6 +4,7 @@ import com.goorm.clonestagram.comment.dto.CommentRequest;
 import com.goorm.clonestagram.comment.dto.CommentResponse;
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.service.CommentService;
+import com.goorm.clonestagram.common.service.IdempotencyService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.util.StringUtils;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/comments")
 public class CommentController {
 	private final CommentService commentService;
+	private final IdempotencyService idempotencyService;
 
 	@GetMapping("/{id}")
 	public CommentResponse getCommentById(@PathVariable("id") Long id) {
@@ -58,15 +61,25 @@ public class CommentController {
 	}
 
 	@PostMapping
-	public ResponseEntity<CommentResponse> create(@RequestBody CommentRequest request) throws Exception {
-		Comments entity = commentService.createComment(request);
+	public ResponseEntity<CommentResponse> create(
+			@RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+			@RequestBody CommentRequest request
+	) throws Exception {
+		// 멱등성 키를 사용하여 서비스 호출
+		Comments entity;
+		if (StringUtils.hasText(idempotencyKey)) { // 멱등성 키가 있는 경우
+			entity = idempotencyService.executeWithIdempotency(idempotencyKey,
+					() -> commentService.createComment(request),
+					Comments.class);
+		} else { // 멱등성 키가 없는 경우
+			entity = commentService.createComment(request); // 직접 서비스 호출
+		}
 
 		CommentResponse response = CommentResponse.builder()
 			.id(entity.getId())
 			.userId(entity.getUsers().getId())
 			.name(entity.getUsers().getName()) 	// 유저 도메인 수정
 			.postId(entity.getPosts().getId())
-			.content(entity.getContent())
 			.content(entity.getContent())
 			.createdAt(entity.getCreatedAt())
 			.build();

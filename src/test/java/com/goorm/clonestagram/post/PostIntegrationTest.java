@@ -28,26 +28,45 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import com.goorm.clonestagram.util.CustomUserDetails;
 import java.util.Base64;
 import java.util.List;
+import java.util.HashSet;
 
 import com.goorm.clonestagram.post.dto.update.ImageUpdateReqDto;
 import com.goorm.clonestagram.post.dto.upload.ImageUploadReqDto;
 import com.goorm.clonestagram.post.dto.upload.VideoUploadReqDto;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.OptimisticLockingFailureException;
+import java.time.LocalDateTime;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import com.goorm.clonestagram.post.service.PostService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.goorm.clonestagram.post.service.ImageService;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import org.junit.jupiter.api.Disabled;
+import java.util.Collections;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest
-@AutoConfigureMockMvc // MockMvc 자동 구성
-@Transactional // 테스트 후 롤백
-@Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Slf4j
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class PostIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc; // Controller 테스트용
+    private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper; // JSON 직렬화/역직렬화용
+    private ObjectMapper objectMapper;
 
     @Autowired
     private PostsRepository postsRepository;
@@ -55,22 +74,35 @@ class PostIntegrationTest {
     @Autowired
     private JpaUserExternalWriteRepository userRepository;
 
-    private UserEntity testUser;
-    private UserEntity otherUser; // 다른 사용자 테스트용
-    private Posts testPost;
+    @Autowired
+    private com.goorm.clonestagram.hashtag.repository.PostHashTagRepository postHashTagsRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private ImageService imageService;
+
+	private UserEntity testUser;
+	private UserEntity otherUser;
+	private Posts testPost;
 
     @BeforeEach
     void setUp() {
-        // 테스트용 유저 생성 및 저장
-        testUser = new UserEntity(User.testMockUser("integrationUser"));
-        testUser = userRepository.save(testUser);
+        postHashTagsRepository.deleteAllInBatch();
+        postsRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
 
-        // 다른 테스트용 유저 생성 및 저장
-        otherUser = new UserEntity(User.testMockUser("otherUser"));
-        otherUser = userRepository.save(otherUser);
+		testUser = new UserEntity(User.testMockUser("integrationUser"));
+		testUser = userRepository.save(testUser);
 
-        // 테스트용 게시물 생성 및 저장 (testUser 소유)
-        testPost = Posts.builder()
+		otherUser = new UserEntity(User.testMockUser("otherUser"));
+		otherUser = userRepository.save(otherUser);
+
+		testPost = Posts.builder()
                 .user(testUser)
                 .content("통합 테스트 게시물 내용")
                 .mediaName("integration_test.jpg")
@@ -80,60 +112,49 @@ class PostIntegrationTest {
         testPost = postsRepository.save(testPost);
     }
 
-    // --- 기존 테스트 케이스 ---
-
     @Test
     @DisplayName("C: 이미지 게시물 생성 성공")
+    @Transactional
     void createImagePost_Success() throws Exception {
-        // given
-        String url = "/image"; // ImageController 경로 확인
+        String url = "/posts/images/upload";
         String content = "새 이미지 게시물 내용";
-        String imageUrl = "http://example.com/test-image.jpg"; // 클라이언트에서 업로드된 URL 가정
-        java.util.List<String> hashTags = java.util.List.of("테스트", "이미지");
-
-        // ImageUploadReqDto 객체 생성
+        String imageUrl = "http://example.com/test-image.jpg";
+        List<String> hashTags = List.of("테스트", "이미지");
         ImageUploadReqDto uploadDto = new ImageUploadReqDto();
         uploadDto.setContent(content);
         uploadDto.setFile(imageUrl);
-        uploadDto.setHashTagList(hashTags);
-
+        uploadDto.setHashTagList(new HashSet<>(hashTags));
         String requestBody = objectMapper.writeValueAsString(uploadDto);
 
-        // when
-        // 요청 방식을 다시 post() 및 application/json으로 변경
         ResultActions resultActions = mockMvc.perform(post(url)
-                 .contentType(MediaType.APPLICATION_JSON) // JSON 타입 명시
-                 .content(requestBody) // JSON 본문 설정
-                 .with(user(new CustomUserDetails(testUser))) // 인증된 사용자 추가
+                 .contentType(MediaType.APPLICATION_JSON)
+                 .content(requestBody)
+                 .header("Idempotency-Key", UUID.randomUUID().toString())
+                 .with(user(new CustomUserDetails(testUser)))
                  .accept(MediaType.APPLICATION_JSON));
 
-        // then
-        // 실제 서비스 로직을 호출하므로, 정상 응답 기대 (200 OK)
         resultActions
                 .andExpect(status().isOk())
-                // 실제 ImageService.imageUpload가 반환하는 DTO 검증
-                // .andExpect(jsonPath("$.id").exists()) // 응답 DTO에 id 필드 없음
                 .andExpect(jsonPath("$.content").value(content))
                 .andExpect(jsonPath("$.mediaName").value(imageUrl))
+                .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.IMAGE.toString()))
                 .andExpect(jsonPath("$.hashTagList").isArray())
-                .andExpect(jsonPath("$.hashTagList[0]").value("테스트"))
-                .andExpect(jsonPath("$.hashTagList[1]").value("이미지"));
+                .andExpect(jsonPath("$.hashTagList", hasSize(2)))
+                .andExpect(jsonPath("$.postId").exists())
+                .andExpect(jsonPath("$.hashTagList[*]", containsInAnyOrder("테스트", "이미지")));
     }
 
-    // 단건 조회 테스트 복원 및 수정
     @Test
     @DisplayName("R: 게시물 단건 조회 성공")
+    @Transactional
     void getPostById_Success() throws Exception {
-        // given
         Long postId = testPost.getId();
-        String url = "/api/posts/" + postId;
+        String url = "/posts/" + postId;
 
-        // when
         ResultActions resultActions = mockMvc.perform(get(url)
                 .with(user(new CustomUserDetails(testUser)))
                 .accept(MediaType.APPLICATION_JSON));
 
-        // then
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(postId))
@@ -144,119 +165,129 @@ class PostIntegrationTest {
     }
 
     @Test
-    @DisplayName("R: 존재하지 않는 게시물 단건 조회 실패 (400 - Bad Request)")
+    @DisplayName("R: 존재하지 않는 게시물 단건 조회 실패 (404 - Not Found)")
+    @Transactional
     void getPostById_NotFound() throws Exception {
-        // given
         Long nonExistentPostId = 9999L;
-        String url = "/api/posts/" + nonExistentPostId;
+        String url = "/posts/" + nonExistentPostId;
 
-        // when
         ResultActions resultActions = mockMvc.perform(get(url)
                 .with(user(new CustomUserDetails(testUser)))
                 .accept(MediaType.APPLICATION_JSON));
 
-        // then
         resultActions
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
-
 
     @Test
     @DisplayName("U: 게시물 내용 수정 성공")
+    @Transactional
     void updatePostContent_Success() throws Exception {
-        // given
         Long postId = testPost.getId();
-        String url = "/image/" + postId; // ImageController 경로
+        String url = "/posts/images/" + postId;
         String updatedContent = "수정된 게시물 내용";
 
-        // ImageUpdateReqDto 객체 생성
+        List<String> hashTags = List.of("#updated", "#test");
         ImageUpdateReqDto updateDto = new ImageUpdateReqDto();
         updateDto.setContent(updatedContent);
-        // 파일, 해시태그는 수정하지 않음
+        updateDto.setHashTagList(hashTags);
 
         String requestBody = objectMapper.writeValueAsString(updateDto);
 
-        // when
         ResultActions resultActions = mockMvc.perform(put(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
-                .with(user(new CustomUserDetails(testUser))) // 인증된 사용자 추가
+                .with(user(new CustomUserDetails(testUser)))
                 .accept(MediaType.APPLICATION_JSON));
 
-        // then
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value(updatedContent))
-                .andExpect(jsonPath("$.type").exists()) // 실제 응답 DTO 필드 확인 필요
-                .andExpect(jsonPath("$.updatedAt").exists()); // 실제 응답 DTO 필드 확인 필요
+                .andExpect(jsonPath("$.type").exists())
+                .andExpect(jsonPath("$.updatedAt").exists());
 
-        // DB에서 직접 확인하여 검증 강화
         Posts updatedPostDb = postsRepository.findById(postId).orElseThrow();
         assertThat(updatedPostDb.getContent()).isEqualTo(updatedContent);
     }
 
     @Test
-    @DisplayName("D: 게시물 삭제 성공")
-    void deletePost_Success() throws Exception {
-        // given
+    @DisplayName("게시물 수정 실패 - 동시성 문제 (400 - Bad Request)")
+    @Transactional
+    void updatePost_ConcurrencyFailure() throws Exception {
         Long postId = testPost.getId();
-        String url = "/image/" + postId; // ImageController 경로
+        jdbcTemplate.update("UPDATE posts SET version = version + 1, content = 'Concurrent update' WHERE id = ?", postId);
 
-        // when
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.delete(url)
+        String url = "/posts/images/" + postId;
+        ImageUpdateReqDto updateDto = new ImageUpdateReqDto();
+        updateDto.setContent("My Conflicting Update");
+        updateDto.setHashTagList(Collections.emptyList());
+        String requestBody = objectMapper.writeValueAsString(updateDto);
+
+        ResultActions resultActions = mockMvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .with(user(new CustomUserDetails(testUser)))
+                .accept(MediaType.APPLICATION_JSON));
+
+        resultActions
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("D: 게시물 삭제 성공")
+    @Transactional
+    void deletePost_Success() throws Exception {
+        Long postId = testPost.getId();
+        String url = "/posts/images/" + postId;
+
+        ResultActions resultActions = mockMvc.perform(delete(url)
                 .with(user(new CustomUserDetails(testUser)))
                 .accept(MediaType.APPLICATION_JSON))
             .andDo(MockMvcResultHandlers.print()); // 디버깅용
 
-        // then
         resultActions
-                .andExpect(status().isOk()); // ImageService에서 삭제 성공 시 200 OK 반환 가정
+                .andExpect(status().isOk());
 
-        // DB에서 삭제(deleted 플래그 변경) 확인
         Posts deletedPost = postsRepository.findById(postId).orElseThrow();
-        assertThat(deletedPost.getDeleted()).isTrue();
+        assertThat(deletedPost.isDeleted()).isTrue();
     }
-
-    // --- TODO 테스트 케이스 ---
 
     @Test
     @DisplayName("C: 비디오 게시물 생성 성공")
+    @Transactional
     void createVideoPost_Success() throws Exception {
-        // given
-        String url = "/video"; // VideoController 경로 가정
+        String url = "/posts/videos/upload";
         String content = "새 비디오 게시물 내용";
-        String videoUrl = "http://example.com/test-video.mp4"; // 클라이언트에서 업로드된 URL 가정
-        java.util.List<String> hashTags = java.util.List.of("테스트", "비디오");
+        String videoUrl = "http://example.com/test-video.mp4";
+        List<String> hashTags = List.of("테스트", "비디오");
 
-        // VideoUploadReqDto 객체 생성 (실제 DTO 구조에 맞게 수정 필요)
         VideoUploadReqDto uploadDto = new VideoUploadReqDto();
         uploadDto.setContent(content);
         uploadDto.setFile(videoUrl);
-        uploadDto.setHashTagList(hashTags);
+        uploadDto.setHashTagList(new HashSet<>(hashTags));
 
         String requestBody = objectMapper.writeValueAsString(uploadDto);
 
-        // when
         ResultActions resultActions = mockMvc.perform(post(url)
                  .contentType(MediaType.APPLICATION_JSON)
                  .content(requestBody)
+                 .header("Idempotency-Key", UUID.randomUUID().toString())
                  .with(user(new CustomUserDetails(testUser)))
                  .accept(MediaType.APPLICATION_JSON));
 
-        // then
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value(content))
-                .andExpect(jsonPath("$.type").value("VIDEO"))
+                .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
                 .andExpect(jsonPath("$.hashTagList").isArray())
-                .andExpect(jsonPath("$.hashTagList[0]").value("테스트"))
-                .andExpect(jsonPath("$.hashTagList[1]").value("비디오"));
+                .andExpect(jsonPath("$.hashTagList", hasSize(2)))
+                .andExpect(jsonPath("$.postId").exists())
+                .andExpect(jsonPath("$.hashTagList[*]", containsInAnyOrder("테스트", "비디오")));
     }
 
     @Test
     @DisplayName("R: 특정 사용자 게시물 목록 조회 성공")
     void getUserPosts_Success() throws Exception {
-        // given
         Posts anotherPost = Posts.builder()
                 .user(testUser)
                 .content("다른 테스트 게시물")
@@ -266,48 +297,43 @@ class PostIntegrationTest {
                 .build();
         postsRepository.save(anotherPost);
 
-        // 실제 컨트롤러 경로 확인 필요 (예: "/posts", "/api/posts", 등)
-        String url = "/posts"; // 현재 가정된 경로
+        String url = "/feeds/user?userId=" + testUser.getId();
 
-        // when
         ResultActions resultActions = mockMvc.perform(get(url)
-                .param("userId", String.valueOf(testUser.getId()))
                 .with(user(new CustomUserDetails(testUser)))
                 .accept(MediaType.APPLICATION_JSON));
 
-        // then
-        // resultActions
-        //         .andExpect(status().isOk())
-        //         .andExpect(jsonPath("$").isArray())
-        //         .andExpect(jsonPath("$.length()").value(2))
-        //         .andExpect(jsonPath("$[0].userId").value(testUser.getId()))
-        //         .andExpect(jsonPath("$[1].userId").value(testUser.getId()));
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.id").value(testUser.getId()))
+                .andExpect(jsonPath("$.feed.content").isArray())
+                .andExpect(jsonPath("$.feed.content", hasSize(2)))
+                .andExpect(jsonPath("$.feed.content[?(@.content == '통합 테스트 게시물 내용')]").exists())
+                .andExpect(jsonPath("$.feed.content[?(@.content == '다른 테스트 게시물')]").exists());
     }
 
-     @Test
+    @Test
     @DisplayName("Auth: 다른 사용자의 게시물 수정 시도 실패 (400 Bad Request)")
     void updatePost_ForbiddenForOtherUser() throws Exception {
-        // given
-        Long postId = testPost.getId(); // testUser의 게시물 ID
-        String url = "/image/" + postId; // ImageController 수정 경로
+        Long postId = testPost.getId();
+        String url = "/posts/images/" + postId;
         String updatedContent = "다른 사용자가 수정 시도";
 
+        List<String> hashTags = List.of("#updated", "#test");
         ImageUpdateReqDto updateDto = new ImageUpdateReqDto();
         updateDto.setContent(updatedContent);
+        updateDto.setHashTagList(hashTags);
         String requestBody = objectMapper.writeValueAsString(updateDto);
 
-        // when
         ResultActions resultActions = mockMvc.perform(put(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody)
-                .with(user(new CustomUserDetails(otherUser))) // otherUser로 인증 시도
+                .with(user(new CustomUserDetails(otherUser)))
                 .accept(MediaType.APPLICATION_JSON));
 
-        // then
         resultActions
                 .andExpect(status().isBadRequest());
 
-        // DB에서 내용이 변경되지 않았는지 확인
         Posts postDb = postsRepository.findById(postId).orElseThrow();
         assertThat(postDb.getContent()).isNotEqualTo(updatedContent);
         assertThat(postDb.getContent()).isEqualTo("통합 테스트 게시물 내용");
@@ -316,81 +342,160 @@ class PostIntegrationTest {
     @Test
     @DisplayName("Auth: 다른 사용자의 게시물 삭제 시도 실패 (400 Bad Request)")
     void deletePost_ForbiddenForOtherUser() throws Exception {
-        // given
         Long postId = testPost.getId();
-        String url = "/image/" + postId;
+        String url = "/posts/images/" + postId;
 
-        // when
         ResultActions resultActions = mockMvc.perform(delete(url)
                 .with(user(new CustomUserDetails(otherUser)))
                 .accept(MediaType.APPLICATION_JSON));
 
-        // then
         resultActions
                 .andExpect(status().isBadRequest());
 
-        // DB에서 삭제(deleted 플래그 변경)되지 않았는지 확인
         Posts postDb = postsRepository.findById(postId).orElseThrow();
-        assertThat(postDb.getDeleted()).isFalse(); // 삭제되지 않음 (deleted=false)
+        assertThat(postDb.isDeleted()).isFalse();
     }
 
     @Test
     @DisplayName("Validation: 게시물 생성 시 내용 누락 실패 (400 Bad Request - 실제 코드 수정 필요)")
     void createImagePost_FailMissingContent() throws Exception {
-        // given
-        String url = "/image";
-        String imageUrl = "http://example.com/invalid-post.jpg";
-        java.util.List<String> hashTags = java.util.List.of("유효성", "실패");
-
-        // 내용(content)이 없는 DTO 생성
+        String url = "/posts/images/upload";
+        String imageUrl = "http://example.com/no-content.jpg";
+        List<String> hashTags = List.of("유효성", "실패");
         ImageUploadReqDto uploadDto = new ImageUploadReqDto();
-        // uploadDto.setContent(null); // content 설정 안 함
+        uploadDto.setContent(null);
         uploadDto.setFile(imageUrl);
-        uploadDto.setHashTagList(hashTags);
-
+        uploadDto.setHashTagList(new HashSet<>(hashTags));
         String requestBody = objectMapper.writeValueAsString(uploadDto);
 
-        // when
         ResultActions resultActions = mockMvc.perform(post(url)
                  .contentType(MediaType.APPLICATION_JSON)
                  .content(requestBody)
+                 .header("Idempotency-Key", UUID.randomUUID().toString())
                  .with(user(new CustomUserDetails(testUser)))
                  .accept(MediaType.APPLICATION_JSON));
 
-        // then
-        // 에러 수정: 실제 코드(@Valid, @NotBlank 등) 수정 전까지 임시 주석 처리
-        // Controller 또는 DTO에 유효성 검사 로직 추가 필요
-        // resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(status().isBadRequest());
     }
 
-     @Test
-    @DisplayName("Validation: 게시물 생성 시 파일 URL 누락 실패 (400 Bad Request - 실제 코드 수정 필요)")
+    @Test
+    @DisplayName("Validation: 게시물 생성 시 파일 URL 누락 실패 (400 Bad Request)")
     void createImagePost_FailMissingFileUrl() throws Exception {
-        // given
-        String url = "/image";
+        String url = "/posts/images/upload";
         String content = "파일 없는 게시물";
-        java.util.List<String> hashTags = java.util.List.of("유효성", "실패");
-
-        // 파일 URL(file)이 없는 DTO 생성
+        List<String> hashTags = List.of("유효성", "실패");
         ImageUploadReqDto uploadDto = new ImageUploadReqDto();
         uploadDto.setContent(content);
-        // uploadDto.setFile(null); // file 설정 안 함
-        uploadDto.setHashTagList(hashTags);
-
+        uploadDto.setHashTagList(new HashSet<>(hashTags));
         String requestBody = objectMapper.writeValueAsString(uploadDto);
 
-        // when
         ResultActions resultActions = mockMvc.perform(post(url)
                  .contentType(MediaType.APPLICATION_JSON)
                  .content(requestBody)
+                 .header("Idempotency-Key", UUID.randomUUID().toString())
                  .with(user(new CustomUserDetails(testUser)))
                  .accept(MediaType.APPLICATION_JSON));
 
-        // then
-        // 에러 수정: 실제 코드(@Valid, @NotBlank 등) 수정 전까지 임시 주석 처리
-        // Controller 또는 DTO에 유효성 검사 로직 추가 필요
-        // resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("C: 이미지 게시물 생성 멱등성 보장")
+    void createImagePost_Idempotency() throws Exception {
+        String url = "/posts/images/upload";
+        String content = "멱등성 테스트 이미지 게시물";
+        String imageUrl = "http://example.com/idempotency-image.jpg";
+        List<String> hashTags = List.of("#test", "#integration");
+        String idempotencyKey = UUID.randomUUID().toString();
+
+        ImageUploadReqDto uploadDto = new ImageUploadReqDto();
+        uploadDto.setContent(content);
+        uploadDto.setFile(imageUrl);
+        uploadDto.setHashTagList(new HashSet<>(hashTags));
+        String requestBody = objectMapper.writeValueAsString(uploadDto);
+
+        ResultActions firstResultActions = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .header("Idempotency-Key", idempotencyKey)
+                .with(user(new CustomUserDetails(testUser)))
+                .accept(MediaType.APPLICATION_JSON));
+
+        String firstResponseContent = firstResultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value(content))
+                .andExpect(jsonPath("$.mediaName").value(imageUrl))
+                .andExpect(jsonPath("$.postId").exists())
+                .andReturn().getResponse().getContentAsString();
+
+        long initialCount = postsRepository.count();
+
+        ResultActions secondResultActions = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .header("Idempotency-Key", idempotencyKey)
+                .with(user(new CustomUserDetails(testUser)))
+                .accept(MediaType.APPLICATION_JSON));
+
+        secondResultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postId").exists())
+                .andExpect(content().json(firstResponseContent));
+
+        long finalCount = postsRepository.count();
+        assertThat(finalCount).isEqualTo(initialCount);
+    }
+
+    @Test
+    @DisplayName("C: 비디오 게시물 생성 멱등성 보장")
+    void createVideoPost_Idempotency() throws Exception {
+        String url = "/posts/videos/upload";
+        String content = "멱등성 테스트 비디오 게시물";
+        String videoUrl = "http://example.com/idempotency-video.mp4";
+        List<String> hashTags = List.of("멱등성", "비디오");
+        String idempotencyKey = UUID.randomUUID().toString(); // 고유 멱등성 키 생성
+
+        VideoUploadReqDto uploadDto = new VideoUploadReqDto();
+        uploadDto.setContent(content);
+        uploadDto.setFile(videoUrl);
+        uploadDto.setHashTagList(new HashSet<>(hashTags));
+        String requestBody = objectMapper.writeValueAsString(uploadDto);
+
+        // when: 첫 번째 요청
+        ResultActions firstResultActions = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
+                .with(user(new CustomUserDetails(testUser)))
+                .accept(MediaType.APPLICATION_JSON));
+
+        // then: 첫 번째 응답 검증
+        String firstResponseContent = firstResultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value(content))
+                .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
+                .andExpect(jsonPath("$.postId").exists())
+                .andReturn().getResponse().getContentAsString();
+
+        long initialCount = postsRepository.count();
+
+        // when: 두 번째 요청 (동일한 내용, 동일한 키)
+        ResultActions secondResultActions = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody)
+                .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
+                .with(user(new CustomUserDetails(testUser)))
+                .accept(MediaType.APPLICATION_JSON));
+
+        // then: 두 번째 응답 검증
+        secondResultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postId").exists())
+                .andExpect(content().json(firstResponseContent));
+
+        // DB 카운트 확인
+        long finalCount = postsRepository.count();
+        assertThat(finalCount).isEqualTo(initialCount);
+    }
 
 } 

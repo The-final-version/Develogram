@@ -2,6 +2,9 @@ package com.goorm.clonestagram.post.dto.upload;
 
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
+import com.goorm.clonestagram.user.domain.Users;
+import jakarta.validation.constraints.NotBlank;
+import java.util.Set;
 import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
@@ -21,9 +24,10 @@ import java.util.List;
 @NoArgsConstructor
 public class VideoUploadReqDto {
 
+    @NotBlank(message = "파일 URL은 필수입니다.")
     private String file;
     private String content;
-    private List<String> hashTagList;
+    private Set<String> hashTagList;
 
 
     // ↓ 유저 도메인 수정

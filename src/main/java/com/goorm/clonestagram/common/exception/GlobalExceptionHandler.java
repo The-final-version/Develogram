@@ -23,6 +23,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,13 +42,13 @@ public class GlobalExceptionHandler {
 	 * IllegalArgumentException 처리 (400 Bad Request)
 	 */
 	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException ex) {
-		ErrorResponseDto errorResponse = new ErrorResponseDto(ex.getMessage());
-		return ResponseEntity
-			.status(HttpStatus.BAD_REQUEST)
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(errorResponse);
+	public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException e) {
+		log.warn("잘못된 인자 예외 발생: {}", e.getMessage());
+		return ResponseEntity.badRequest().body(
+			ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+		);
 	}
+
 	/**
 	 * RuntimeException 처리 (500 Internal Server Error)
 	 * ※ IllegalArgumentException 등 구체적 예외는 위에서 먼저 처리되므로 여기는 최종 catch-all 용
@@ -54,6 +56,16 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<ErrorResponseDto> handleRuntimeException(RuntimeException e) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+			ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
+		);
+	}
+
+	/**
+	 * DTO Validation 실패 시 처리 (400 Bad Request)
+	 */
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException e) {
+		return ResponseEntity.badRequest().body(
 			ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
 		);
 	}
@@ -96,6 +108,28 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 	}
 
+	/**
+	 * 낙관적 락 충돌 예외 처리 핸들러
+	 * @param ex ConcurrencyFailureException (Spring의 예외)
+	 * @return 400 Bad Request 응답과 에러 메시지 (테스트 코드 호환성을 위해 변경)
+	 */
+	@ExceptionHandler(ConcurrencyFailureException.class)
+	public ResponseEntity<ErrorResponseDto> handleConcurrencyFailure(ConcurrencyFailureException ex) {
+		log.warn("동시성 충돌 발생: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(ErrorResponseDto.builder().errorMessage(ex.getMessage()).build());
+	}
+
+	/**
+	 * 그 외 모든 예상치 못한 예외 처리
+	 * @param ex Exception
+	 * @return 500 Internal Server Error 응답과 에러 메시지
+	 */
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<String> handleGeneralException(Exception ex) {
+		log.error("예상치 못한 오류 발생", ex);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류가 발생했습니다.");
+	}
 	// /////////////////////////////////////////////////////////////////////////
 	// /**
 	//  * 1. BindException Handler

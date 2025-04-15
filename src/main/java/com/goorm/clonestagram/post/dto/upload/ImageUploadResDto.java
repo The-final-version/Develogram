@@ -18,6 +18,7 @@ public class ImageUploadResDto {
     private String content;
     private ContentType type;
     private LocalDateTime createdAt;
+    private Long postId;
     private List<String> hashTagList = new ArrayList<>();;
     private String mediaName;
 }

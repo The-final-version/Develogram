@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -100,6 +101,8 @@ public class CommentControllerIntegrationTest {
 
 			ResultActions createResult = mockMvc.perform(
 				MockMvcRequestBuilders.post(BASE)
+					.with(user(userB.getEmail()).roles("USER"))
+					.header("Idempotency-Key", "test-key-" + UUID.randomUUID())
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(request))
 			);
@@ -228,6 +231,68 @@ public class CommentControllerIntegrationTest {
 				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("$.title").value("게시글을 찾을 수 없습니다"))
 				.andExpect(jsonPath("$.detail").value(containsString("존재하지 않는 게시글입니다. ID: " + Long.toString(789456L))));
+		}
+	}
+
+	@Nested
+	@DisplayName("댓글 생성 테스트")
+	class CommentCreateTest {
+
+		@Test
+		@DisplayName("10. 멱등성 키를 사용하여 댓글 생성 성공")
+		void createCommentWithIdempotencyKey() throws Exception {
+			String idempotencyKey = UUID.randomUUID().toString();
+			CommentRequest request = new CommentRequest(userC.getId(), postX.getId(), "멱등성 테스트 댓글");
+
+			// 첫 번째 요청
+			ResultActions firstResult = mockMvc.perform(
+					MockMvcRequestBuilders.post(BASE)
+							.with(user(userC.getEmail()).roles("USER"))
+							.header("Idempotency-Key", idempotencyKey)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(request))
+			);
+
+			// 첫 번째 요청은 201 Created 반환
+			firstResult.andExpect(status().isCreated())
+					.andExpect(jsonPath("$.content").value("멱등성 테스트 댓글"));
+
+			String firstResponseBody = firstResult.andReturn().getResponse().getContentAsString();
+			long firstCommentId = objectMapper.readTree(firstResponseBody).get("id").asLong();
+
+			// 동일한 멱등성 키로 두 번째 요청
+			ResultActions secondResult = mockMvc.perform(
+					MockMvcRequestBuilders.post(BASE)
+							.with(user(userC.getEmail()).roles("USER"))
+							.header("Idempotency-Key", idempotencyKey)
+							.contentType(MediaType.APPLICATION_JSON)
+							.content(objectMapper.writeValueAsString(request))
+			);
+
+			// 두 번째 요청도 컨트롤러 로직상 201 Created를 반환하지만, 내용은 첫 번째 응답과 동일해야 함.
+			// IdempotencyService가 캐시된 결과를 반환해도 Controller는 항상 .created() 로 응답하기 때문.
+			secondResult.andExpect(status().isCreated())
+					.andExpect(content().json(firstResponseBody));
+
+			// DB에 댓글이 하나만 생성되었는지 확인
+			List<Comments> comments = commentRepository.findByPosts_Id(postX.getId());
+			long count = comments.stream().filter(c -> c.getContent().equals("멱등성 테스트 댓글")).count();
+			assertThat(count).isEqualTo(1);
+			assertThat(comments.get(comments.size()-1).getId()).isEqualTo(firstCommentId);
+		}
+
+		@Test
+		@DisplayName("11. 멱등성 키 없이 댓글 생성 성공")
+		void createCommentWithoutIdempotencyKey() throws Exception {
+			CommentRequest request = new CommentRequest(userD.getId(), postX.getId(), "멱등성 키 없는 댓글");
+
+			mockMvc.perform(
+							MockMvcRequestBuilders.post(BASE)
+									.with(user(userD.getEmail()).roles("USER"))
+									.contentType(MediaType.APPLICATION_JSON)
+									.content(objectMapper.writeValueAsString(request)))
+					.andExpect(status().isCreated())
+					.andExpect(jsonPath("$.content").value("멱등성 키 없는 댓글"));
 		}
 	}
 
@@ -381,7 +446,6 @@ public class CommentControllerIntegrationTest {
 			//     포스트 ID로 조회하면 조회되는 리스트에 D의 댓글이 포함되어 있다.
 			mockMvc.perform(
 					MockMvcRequestBuilders.get(BY_POST_ID, postX.getId())
-						.with(user("testuser@example.com").roles("USER"))
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[*].content", contains("comment written by userD")));
@@ -410,7 +474,6 @@ public class CommentControllerIntegrationTest {
 			// 댓글 ID를 조회하면 D가 작성한 댓글이 나온다.
 			mockMvc.perform(
 					MockMvcRequestBuilders.get(BY_ID, commentD.getId())
-						.with(user("testuser@example.com").roles("USER"))
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content").value("comment written by userD"));
@@ -418,7 +481,6 @@ public class CommentControllerIntegrationTest {
 			// 포스트 ID로 조회하면 조회되는 리스트에 D의 댓글이 포함되어 있다.
 			mockMvc.perform(
 					MockMvcRequestBuilders.get(BY_POST_ID, postX.getId())
-						.with(user("testuser@example.com").roles("USER"))
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[*].content", contains("comment written by userD")));

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.goorm.clonestagram.like.domain.Like;
+
+import jakarta.persistence.LockModeType;
 
 @Repository
 public interface LikeRepository extends JpaRepository<Like, Long> {
@@ -20,6 +23,8 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
 	Long countByPost_Id(Long postId); // 좋아요 개수 확인
 
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT l FROM Like l WHERE l.user.id = :userId AND l.post.id = :postsId")
 	Optional<Like> findByUser_IdAndPost_Id(Long userId, Long postsId);
 
 	@Query("SELECT lc.likeCount FROM LikeCount lc WHERE lc.postId = :postId")
@@ -37,4 +42,5 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 	@Transactional
 	@Query("INSERT INTO LikeCount(postId, likeCount) VALUES (:postId, :likeCount)")
 	void saveLikeCount(@Param("postId") Long postId, @Param("likeCount") Long likeCount);
+
 }

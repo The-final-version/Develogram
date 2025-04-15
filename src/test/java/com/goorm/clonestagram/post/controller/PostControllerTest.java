@@ -48,15 +48,17 @@ public class PostControllerTest {
 
     @BeforeEach
     void setUp() {
-        testUser = new UserEntity(User.testMockUser(1L, "testUser"));
-        testPost = new Posts();
-        testPost.setId(1L);
-        testPost.setContent("테스트 게시물");
-        testPost.setUser(testUser);
-        testPost.setContentType(ContentType.IMAGE);
-        testPost.setMediaName("test-image.jpg");
-        testPost.setCreatedAt(LocalDateTime.now());
-        testPost.setUpdatedAt(LocalDateTime.now());
+		testUser = new UserEntity(User.testMockUser(1L, "testUser"));
+
+		testPost = Posts.builder()
+                .id(1L)
+                .content("테스트 게시물")
+                .user(testUser)
+                .contentType(ContentType.IMAGE)
+                .mediaName("test-image.jpg")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
 
         pageRequest = PageRequest.of(0, 10);
     }

@@ -197,7 +197,7 @@ public class FollowIntegrationTest {
         Long invalidId = -1L;
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "/follow/" + invalidId,
+                "/follow/" + userA.getId() + "/profile/" + invalidId,
                 HttpMethod.POST,
                 new HttpEntity<>(headers),
                 String.class
@@ -212,7 +212,7 @@ public class FollowIntegrationTest {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "/follow/followers/-1",
+                "/follow/-1/profile/followers",
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 String.class
@@ -226,7 +226,7 @@ public class FollowIntegrationTest {
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
         ResponseEntity<String> response = restTemplate.exchange(
-                "/follow/followings/-1",
+                "/follow/-1/profile/following",
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
                 String.class

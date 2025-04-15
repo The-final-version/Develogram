@@ -1,7 +1,12 @@
 package com.goorm.clonestagram.post.service;
 
+import com.goorm.clonestagram.common.service.IdempotencyService;
 import com.goorm.clonestagram.feed.service.FeedService;
+import com.goorm.clonestagram.hashtag.entity.HashTags;
+import com.goorm.clonestagram.hashtag.entity.PostHashTags;
+import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
+import com.goorm.clonestagram.hashtag.service.HashtagService;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.EntityType;
 import com.goorm.clonestagram.post.domain.Posts;
@@ -16,29 +21,43 @@ import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalReadRepository;
+import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.util.CustomUserDetails;
+import jakarta.persistence.OptimisticLockException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
 
 //Todo 로그인 구현 완료 후 유저를 포함하여 테스트 필요
-@ActiveProfiles("test")  // <- 이게 있어야 test 환경으로 바뀜
+@ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
 
 
@@ -65,217 +84,225 @@ class ImageServiceTest {
 
     @Mock
     private UserExternalQueryService userService;
+    // --- Mock 객체 선언 ---
+    @Mock private PostService postService;
+    @Mock private UserService userService;
+    @Mock private HashTagRepository hashTagRepository;
+    @Mock private PostHashTagRepository postHashTagRepository;
+    @Mock private FeedService feedService;
+    @Mock private SoftDeleteRepository softDeleteRepository;
+    @Mock private IdempotencyService idempotencyService;
+    @Mock private HashtagService hashtagService;
 
     @InjectMocks
     private ImageService imageService;
 
+    // --- 테스트 데이터 ---
+    private Users testUser;
+    private CustomUserDetails testUserDetails;
+    private Posts testPost;
+    private ImageUploadReqDto imageUploadReqDto;
+    private ImageUpdateReqDto imageUpdateReqDto;
+    private String idempotencyKey;
+
     @BeforeEach
     void setUp(){
-        MockitoAnnotations.openMocks(this);
-        imageUploadReqDto = new ImageUploadReqDto();
-        imageUpdateReqDto = new ImageUpdateReqDto();
-    }
+		UserEntity testUser = new UserEntity(User.testMockUser(1L, "testuser"));
+        testUserDetails = new CustomUserDetails(testUser);
 
-    /**
-     * imageUpload()가 동작하는지 테스트
-     */
-    @Test
-    public void 파일업로드() throws Exception{
-        // given: Mock 파일과 유저 설정 및 Stubbing
-        /**
-         * - 가상 파일 생성
-         * - Dto에 관련 데이터 셋팅
-         * - 가상 User 생성
-         * - findById : 가상 유저 ID로 실행시 가상 유저 객체 반환
-         * - save : Posts 객체 저장 시 Posts 객체 반환
-         */
-        String mockMultipartFile = ".jpg";
-
-        imageUploadReqDto.setFile(mockMultipartFile);
-        imageUploadReqDto.setContent("테스트 내용");
-
-        UserEntity testUser = new UserEntity(User.testMockUser(100L, "testuser"));
-
-        Posts savedPost = Posts.builder()
-                .id(100L)
-                .content("테스트 내용")
-                .contentType(ContentType.IMAGE)
-                .user(testUser)
-                .build();
-
-        when(userService.findByIdAndDeletedIsFalse(100L)).thenReturn(testUser.toDomain());
-        when(postService.save(any(Posts.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        // when: 이미지 업로드 서비스 실행
-        ImageUploadResDto imageUploadResDto = imageService.imageUpload(imageUploadReqDto, testUser.getId());
-
-        // then: 응답 및 호출 검증
-        /**
-         * - Dto가 null이 아닌지 확인
-         * - userRepository.findById()가 실행되었는지 확인
-         * - postsRepository.save()가 실행되었는지 확인
-         */
-        assertNotNull(imageUploadResDto);
-        verify(userService).findByIdAndDeletedIsFalse(testUser.getId());
-        verify(postService).save(any(Posts.class));
-        verify(feedService).createFeedForFollowers(any(Posts.class)); // ✅ feedService 호출 확인
-    }
-
-    /**
-     * imageUpdate()가 동작하는지 테스트
-     */
-    @Test
-    public void 파일업데이트(){
-        //given : 가상 데이터 생성, stubbing
-        /**
-         * - 가상 파일 생성(old, new)
-         * - 가상 유저 생성
-         * - 가상 게시글 생성
-         * - findById : ID가 1L와 같으면 가상 게시글 반환
-         * - save : Posts객체를 저장하면 Posts객체 반환
-         */
-        MockMultipartFile oldFile = new MockMultipartFile(
-                "file", "old-image.jpg","image/jpeg","dummy image content".getBytes()
-        );
-
-        UserEntity testUser = new UserEntity(User.testMockUser(1L, "testuser"));
-
-        Posts tempPost = Posts.builder()
+        testPost = Posts.builder()
                 .id(1L)
-                .content("수정전 내용")
-                .mediaName(oldFile.getOriginalFilename())
-                .contentType(ContentType.IMAGE)
+                .content("테스트 내용 #해시태그")
+                .mediaName("image.jpg")
                 .user(testUser)
+                .version(0L) // 초기 버전
+                .createdAt(LocalDateTime.now())
                 .build();
 
-        String newFile = "new-image.jpg";
-        ImageUpdateReqDto reqDto = new ImageUpdateReqDto();
-        reqDto.setFile(newFile);
-        reqDto.setContent("수정된 내용");
+        imageUploadReqDto = new ImageUploadReqDto();
+        imageUploadReqDto.setFile("http://example.com/image.jpg"); // URL 방식으로 변경 가정
+        imageUploadReqDto.setContent("테스트 내용 #해시태그");
+        imageUploadReqDto.setHashTagList(new HashSet<>(Arrays.asList("해시태그")));
 
-        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(tempPost);
-        when(postService.save(any(Posts.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        imageUpdateReqDto = new ImageUpdateReqDto();
+        imageUpdateReqDto.setFile("http://example.com/new-image.jpg");
+        imageUpdateReqDto.setContent("수정된 내용 #수정태그");
+        imageUpdateReqDto.setHashTagList(Arrays.asList("수정태그"));
 
-        //when : imageUpdate() 실행
-        ImageUpdateResDto imageUpdateResDto = imageService.imageUpdate(tempPost.getId(), reqDto, testUser.getId());
+        idempotencyKey = UUID.randomUUID().toString();
+    }
 
-        //then : 응답 데이터 검증
-        /**
-         * - Dto가 null이 아닌지 확인
-         * - content가 수정되었는지 확인
-         * - findById가 실행되었는지 확인
-         * - save가 실행되었는지 확인
-         */
-        assertNotNull(imageUpdateResDto);
-        assertEquals("수정된 내용", imageUpdateResDto.getContent());
-        verify(postService).findByIdAndDeletedIsFalse(tempPost.getId());
+    @Test
+    @DisplayName("이미지 업로드 성공 (멱등성 적용)")
+    void 파일업로드() {
+        when(idempotencyService.executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(ImageUploadResDto.class)))
+            .thenAnswer(invocation -> ((Supplier<ImageUploadResDto>)invocation.getArgument(1)).get());
+        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser);
+        when(postService.save(any(Posts.class))).thenReturn(testPost);
+        doNothing().when(hashtagService).saveHashtags(eq(testPost), eq(imageUploadReqDto.getHashTagList()));
+        doNothing().when(feedService).createFeedForFollowers(any(Posts.class));
+
+        ImageUploadResDto result = imageService.imageUploadWithIdempotency(imageUploadReqDto, testUserDetails.getId(), idempotencyKey);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEqualTo(testPost.getContent());
+        assertThat(result.getMediaName()).isEqualTo(testPost.getMediaName());
+        assertThat(result.getPostId()).isNotNull();
+        assertThat(result.getHashTagList()).containsExactlyInAnyOrderElementsOf(imageUploadReqDto.getHashTagList());
+        verify(idempotencyService).executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(ImageUploadResDto.class));
+        verify(userService).findByIdAndDeletedIsFalse(eq(1L));
+        verify(postService).save(any(Posts.class));
+        verify(hashtagService).saveHashtags(eq(testPost), eq(imageUploadReqDto.getHashTagList()));
+        verify(feedService).createFeedForFollowers(eq(testPost));
+    }
+
+    @Test
+    @DisplayName("이미지 업로드 성공 (멱등성 미적용)")
+    void 이미지_업로드_성공_멱등성_미적용() throws Exception {
+        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser);
+        when(postService.save(any(Posts.class))).thenReturn(testPost);
+        doNothing().when(hashtagService).saveHashtags(eq(testPost), eq(imageUploadReqDto.getHashTagList()));
+        doNothing().when(feedService).createFeedForFollowers(any(Posts.class));
+
+        ImageUploadResDto result = imageService.imageUpload(imageUploadReqDto, 1L);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEqualTo(testPost.getContent());
+        assertThat(result.getMediaName()).isEqualTo(testPost.getMediaName());
+        assertThat(result.getPostId()).isNotNull();
+        assertThat(result.getHashTagList()).isEqualTo(new ArrayList<>(imageUploadReqDto.getHashTagList()));
+
+        verify(userService).findByIdAndDeletedIsFalse(1L);
+        verify(postService).save(any(Posts.class));
+        verify(hashtagService).saveHashtags(eq(testPost), eq(imageUploadReqDto.getHashTagList()));
+        verify(feedService).createFeedForFollowers(any(Posts.class));
+    }
+
+    @Test
+    @DisplayName("이미지 업로드 실패 - 유저 없음 (멱등성 적용)")
+    void 해당_유저를_찾을_수_없습니다() {
+        IllegalArgumentException expectedException = new IllegalArgumentException("해당 유저를 찾을 수 없습니다.");
+        when(idempotencyService.executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(ImageUploadResDto.class)))
+            .thenAnswer(invocation -> {
+                when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(null);
+                return ((Supplier<ImageUploadResDto>)invocation.getArgument(1)).get();
+            });
+        assertThrows(RuntimeException.class, () -> imageService.imageUploadWithIdempotency(imageUploadReqDto, testUserDetails.getId(), idempotencyKey), "해당 유저를 찾을 수 없습니다.");
+        verify(idempotencyService).executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(ImageUploadResDto.class));
+        verify(userService).findByIdAndDeletedIsFalse(eq(1L));
+        verify(postService, never()).save(any(Posts.class));
+    }
+
+    @Test
+    @DisplayName("이미지 정보 수정 성공")
+    void 파일업데이트() {
+        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testPost);
+        doNothing().when(postHashTagRepository).deleteAllByPostsId(eq(1L));
+        when(hashTagRepository.findByTagContent(anyString())).thenReturn(Optional.empty());
+        when(hashTagRepository.save(any(HashTags.class))).thenReturn(new HashTags(2L, "수정태그"));
+        when(postHashTagRepository.save(any(PostHashTags.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doAnswer(invocation -> {
+            Posts postArg = invocation.getArgument(0);
+            ReflectionTestUtils.setField(postArg, "updatedAt", LocalDateTime.now());
+            return postArg;
+        }).when(postService).saveAndFlush(any(Posts.class));
+
+        ImageUpdateResDto result = imageService.imageUpdate(1L, imageUpdateReqDto, 1L);
+
+        verify(postService).findByIdAndDeletedIsFalse(eq(1L));
+        verify(postHashTagRepository).deleteAllByPostsId(eq(1L));
+        verify(hashTagRepository, times(imageUpdateReqDto.getHashTagList().size())).findByTagContent(anyString());
+        verify(hashTagRepository, times(1)).save(any(HashTags.class));
+        verify(postHashTagRepository, times(imageUpdateReqDto.getHashTagList().size())).save(any(PostHashTags.class));
+        verify(postService).saveAndFlush(any(Posts.class));
+
+        assertThat(result.getContent()).isEqualTo(imageUpdateReqDto.getContent());
+        assertThat(result.getHashTagList()).isEqualTo(imageUpdateReqDto.getHashTagList());
+        assertThat(result.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("이미지 수정 실패 - 게시물 없음")
+    void 게시물을_찾을_수_없습니다_수정시() {
+        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () -> imageService.imageUpdate(1L, imageUpdateReqDto, 1L));
+        verify(postService).findByIdAndDeletedIsFalse(eq(1L));
+    }
+
+    @Test
+    @DisplayName("이미지 수정 실패 - 권한 없음")
+    void 이미지수정_실패_권한없음() {
+        Users otherUser = Users.builder().id(2L).build();
+        testPost.setUser(otherUser);
+        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testPost);
+
+        assertThrows(IllegalArgumentException.class, () -> imageService.imageUpdate(1L, imageUpdateReqDto, 1L), "권한이 없는 유저입니다");
+        verify(postService).findByIdAndDeletedIsFalse(eq(1L));
+        verify(postService, never()).saveAndFlush(any(Posts.class));
+    }
+
+    @Test
+    @DisplayName("이미지 수정 실패 - 버전 충돌 (낙관적 락)")
+    void 이미지수정_실패_버전충돌() {
+        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testPost);
+        doNothing().when(postHashTagRepository).deleteAllByPostsId(eq(1L));
+        when(hashTagRepository.findByTagContent(anyString())).thenReturn(Optional.empty());
+        when(hashTagRepository.save(any(HashTags.class))).thenReturn(new HashTags(2L, "수정태그"));
+        when(postHashTagRepository.save(any(PostHashTags.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doThrow(new OptimisticLockingFailureException("버전 충돌")).when(postService).saveAndFlush(any(Posts.class));
+
+        assertThrows(OptimisticLockingFailureException.class,
+                () -> imageService.imageUpdate(1L, imageUpdateReqDto, 1L));
+
+        verify(postService).findByIdAndDeletedIsFalse(eq(1L));
+        verify(postHashTagRepository).deleteAllByPostsId(eq(1L));
+        verify(hashTagRepository, atLeastOnce()).findByTagContent(anyString());
         verify(postService).saveAndFlush(any(Posts.class));
     }
 
-    /**
-     * imageDelete()가 동작하는지 테스트
-     */
     @Test
-    public void 파일삭제(){
-        //given : 가상 데이터 생성, stubbing
-        /**
-         * - 가상 파일 생성
-         * - 가상 유저 생성
-         * - 가상 게시글 생성
-         * - findById : ID가 1L와 같으면 가상 게시글 반환
-         */
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(
-                "file", "image.jpg","image/jpeg","dummy image content".getBytes()
-        );
-
-        UserEntity testUser = UserEntity.builder()
-            .id(1L)
-            .name("testuser")
-            .email("testuser@example.com")
-            .password("1234")
-            .build();
-
-        Posts tempPost = Posts.builder()
-                .id(1L)
-                .content("수정전 내용")
-                .mediaName(mockMultipartFile.getOriginalFilename())
-                .contentType(ContentType.IMAGE)
-                .user(testUser)
-                .build();
-
-        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(tempPost);
+    @DisplayName("이미지 삭제 성공")
+    void 파일삭제() {
+        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testPost);
         when(softDeleteRepository.save(any(SoftDelete.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        doNothing().when(postHashTagRepository).deleteAllByPostsId(eq(1L));
+        doNothing().when(postHashTagRepository).deleteAllByPostsId(anyLong());
+        doNothing().when(feedService).deleteFeedsByPostId(anyLong());
 
-        //when : imageDelete 실행
-        imageService.imageDelete(tempPost.getId(), testUser.getId());
+        imageService.imageDelete(1L, 1L);
 
-        //then : 응답 데이터 검증
-        /**
-         * - findById가 실행되었는지 확인
-         * - delete가 실행되었는지 확인
-         */
-        verify(postService).findByIdAndDeletedIsFalse(tempPost.getId());
-        verify(postHashTagRepository).deleteAllByPostsId(tempPost.getId());
+        verify(postService).findByIdAndDeletedIsFalse(eq(1L));
+        assertThat(testPost.isDeleted()).isTrue();
+        assertThat(testPost.getDeletedAt()).isNotNull();
         verify(softDeleteRepository).save(any(SoftDelete.class));
-        verify(feedService).deleteFeedsByPostId(tempPost.getId()); // ✅ feedService 호출 확인
+        verify(postHashTagRepository).deleteAllByPostsId(eq(1L));
+        verify(feedService).deleteFeedsByPostId(eq(1L));
     }
 
-    /**
-     * 유저가 존재하지 않을시 발생하는 에러 테스트
-     */
     @Test
-    public void 해당_유저를_찾을_수_없습니다(){
-        //given : 가상 데이터 생성, stubbing
-        /**
-         * 가상 파일 생성
-         * 가상 데이터 셋팅
-         * findById : 유저의 Id가 1L과 같으면 빈 객체 반환
-         */
-        String mockMultipartFile = "image.jpg";
-
-        imageUploadReqDto.setFile(mockMultipartFile);
-        imageUploadReqDto.setContent("파일생성");
-
-        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(null);
-
-        //when : imageUpload() 실행
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> imageService.imageUpload(imageUploadReqDto, 1L));
-
-        //then : 응답 데이터 검증
-        /**
-         * - "해당 유저를 찾을 수 없습니다." 에러 메세지 반환 확인
-         * - findById 동작 확인
-         */
-        assertEquals("해당 유저를 찾을 수 없습니다.", exception.getMessage());
-        verify(userService).findByIdAndDeletedIsFalse(1L);
-    }
-
-    /**
-     * 게시글이 존재하지 않을시 발생하는 에러 테스트
-     */
-    @Test
-    public void 게시물을_찾을_수_없습니다(){
-        //given : stubbing
+    @DisplayName("이미지 삭제 실패 - 게시물 없음")
+    void 게시물을_찾을_수_없습니다_삭제시() {
         when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(null);
 
-        //when : imageUpdate(),imageDelete() 실행
-        IllegalArgumentException updateException = assertThrows(IllegalArgumentException.class,
-                () -> imageService.imageUpdate(1L, imageUpdateReqDto, 1L));
+        assertThrows(IllegalArgumentException.class, () -> imageService.imageDelete(1L, 1L));
+        verify(postService).findByIdAndDeletedIsFalse(eq(1L));
+        verify(softDeleteRepository, never()).save(any(SoftDelete.class));
+        verify(postHashTagRepository, never()).deleteAllByPostsId(anyLong());
+        verify(feedService, never()).deleteFeedsByPostId(anyLong());
+    }
 
-        IllegalArgumentException deleteException = assertThrows(IllegalArgumentException.class,
-                () -> imageService.imageDelete(1L, 1L));
+    @Test
+    @DisplayName("이미지 삭제 실패 - 권한 없음")
+    void 이미지삭제_실패_권한없음() {
+        Users otherUser = Users.builder().id(2L).build();
+        testPost.setUser(otherUser);
+        when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testPost);
 
-        //then : 응답 데이터 검증
-        /**
-         * - "게시물을 찾을 수 없습니다" 에러 메세지 반환 확인
-         * - "해당 게시물이 없습니다" 에러 메세지 반환 확인
-         * - findById가 2번 실행되었는지 확인
-         */
-        assertEquals("게시물을 찾을 수 없습니다", updateException.getMessage());
-        assertEquals("해당 게시물이 없습니다", deleteException.getMessage());
-        verify(postService, times(2)).findByIdAndDeletedIsFalse(1L);
+        assertThrows(IllegalArgumentException.class, () -> imageService.imageDelete(1L, 1L), "권한이 없는 유저입니다");
+        verify(postService).findByIdAndDeletedIsFalse(eq(1L));
+        verify(softDeleteRepository, never()).save(any(SoftDelete.class));
+        verify(postHashTagRepository, never()).deleteAllByPostsId(anyLong());
+        verify(feedService, never()).deleteFeedsByPostId(anyLong());
     }
 }
 

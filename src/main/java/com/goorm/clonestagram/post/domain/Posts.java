@@ -22,9 +22,9 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "posts")
 public class Posts {
 
@@ -49,14 +49,14 @@ public class Posts {
 	 * 게시물 내용
 	 * - 이미지에 대한 설명 또는 글 내용
 	 */
-	@Column(name = "content")
+	@Column(name = "content", columnDefinition = "TEXT")
 	private String content;
 
 	/**
 	 * 미디어 파일명
 	 * - unique한 파일명이기에 select시 사용 가능
 	 */
-	@Column(name = "media_url", nullable = false)
+	@Column(name = "media_name")
 	private String mediaName;
 
 	/**
@@ -73,7 +73,7 @@ public class Posts {
 	 * - imageUploadReqDto.toEntity()에서 셋팅
 	 */
 	@CreationTimestamp
-	@Column(name = "created_at", nullable = false)
+	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
 	/**
@@ -85,8 +85,8 @@ public class Posts {
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 
-	@Column(name = "deleted")
-	private Boolean deleted = false;
+	@Column(name = "deleted_yn", nullable = false)
+	private boolean deleted = false;
 
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
@@ -97,11 +97,17 @@ public class Posts {
 	@OneToMany(mappedBy = "posts", cascade = CascadeType.REMOVE)
 	private List<Comments> comments;
 
+	@Version
+	private Long version;
+
 	@PrePersist
 	protected void onCreate() {
-		if (this.deleted == null) {
-			this.deleted = false;
-		}
+		createdAt = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
 	}
 
 }

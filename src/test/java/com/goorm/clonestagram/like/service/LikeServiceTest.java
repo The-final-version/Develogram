@@ -56,12 +56,15 @@ public class LikeServiceTest {
 		MockitoAnnotations.openMocks(this);
 
 		// Test user
+
 		user = new UserEntity(User.testMockUser(1L, "user1"));
 
 		// Test posts
-		post = new Posts();
-		post.setId(100L);
-		post.setContent("Test Post");
+		post = Posts.builder()
+				.id(100L)
+				.content("Test Post")
+				.user(user)
+				.build();
 	}
 
 	@Test
