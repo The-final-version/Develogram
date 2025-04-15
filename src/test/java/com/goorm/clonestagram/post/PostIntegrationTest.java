@@ -463,39 +463,38 @@ class PostIntegrationTest {
 
         // when: 첫 번째 요청
         ResultActions firstResultActions = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
-                .with(user(new CustomUserDetails(testUser)))
-                .accept(MediaType.APPLICATION_JSON));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody)
+            .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
+            .with(user(new CustomUserDetails(testUser)))
+            .accept(MediaType.APPLICATION_JSON));
 
         // then: 첫 번째 응답 검증
         String firstResponseContent = firstResultActions
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value(content))
-                .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
-                .andExpect(jsonPath("$.postId").exists())
-                .andReturn().getResponse().getContentAsString();
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").value(content))
+            .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
+            .andExpect(jsonPath("$.postId").exists())
+            .andReturn().getResponse().getContentAsString();
 
         long initialCount = postsRepository.count();
 
         // when: 두 번째 요청 (동일한 내용, 동일한 키)
         ResultActions secondResultActions = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
-                .with(user(new CustomUserDetails(testUser)))
-                .accept(MediaType.APPLICATION_JSON));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody)
+            .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
+            .with(user(new CustomUserDetails(testUser)))
+            .accept(MediaType.APPLICATION_JSON));
 
         // then: 두 번째 응답 검증
         secondResultActions
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.postId").exists())
-                .andExpect(content().json(firstResponseContent));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.postId").exists())
+            .andExpect(content().json(firstResponseContent));
 
         // DB 카운트 확인
         long finalCount = postsRepository.count();
         assertThat(finalCount).isEqualTo(initialCount);
     }
-
 } 

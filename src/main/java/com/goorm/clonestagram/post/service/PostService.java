@@ -7,10 +7,6 @@ import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
 
 import com.goorm.clonestagram.user.application.adapter.UserAdapter;
 import com.goorm.clonestagram.user.domain.entity.User;
@@ -35,7 +31,6 @@ import com.goorm.clonestagram.exception.PostNotFoundException;
 @RequiredArgsConstructor
 public class PostService {
 
-	private final UserService userService;
     private final UserExternalQueryService userService; // 유저 도메인 수정
 
 	private final PostsRepository postsRepository;
@@ -46,7 +41,7 @@ public class PostService {
 
 	public Posts findByIdAndDeletedIsFalse(Long postId) {
 		return postsRepository.findByIdAndDeletedIsFalse(postId)
-			.orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
+			.orElseThrow(() -> new PostNotFoundException(postId));
 	}
 
 	public Posts findByIdAndDeletedIsFalse(Long postId, String from) {
@@ -55,9 +50,7 @@ public class PostService {
 				() -> new IllegalArgumentException("댓글이 속한 게시글이 존재하지 않습니다. postId: " + postId + ", from: " + from));
 	}
 
-	public PostResDto getMyPosts(Long userId, Pageable pageable) {
-		//1. userId를 활용해 유저 객체 조회
-		Users users = userService.findByIdAndDeletedIsFalse(userId);
+
     public PostResDto getMyPosts(Long userId, Pageable pageable) {
         //1. userId를 활용해 유저 객체 조회
         User users = userService.findByIdAndDeletedIsFalse(userId);
@@ -67,16 +60,11 @@ public class PostService {
 
 		//3. 모든 작업이 완료도니 경우 응답 반환
 		return PostResDto.builder()
-			.user(UserProfileDto.fromEntity(users))
+			.user(UserAdapter.toUserProfileDto(users))
 			.feed(myFeed.map(PostInfoDto::fromEntity))
 			.build();
 	}
-        //3. 모든 작업이 완료도니 경우 응답 반환
-        return PostResDto.builder()
-                .user(UserAdapter.toUserProfileDto(users))      // 유저 도메인 수정
-                .feed(myFeed.map(PostInfoDto::fromEntity))
-                .build();
-    }
+
 
 	public List<Posts> findAllByUserIdAndDeletedIsFalse(Long userId) {
 		return postsRepository.findAllByUserIdAndDeletedIsFalse(userId);
@@ -86,13 +74,9 @@ public class PostService {
 		return postsRepository.save(postEntity);
 	}
 
-	public Posts saveAndFlush(Posts postEntity) {
-		return postsRepository.saveAndFlush(postEntity);
-	}
-
 	public Posts findByIdWithPessimisticLock(Long id) {
 		return postsRepository.findByIdWithPessimisticLock(id)
-			.orElseThrow(() -> new IllegalArgumentException("게시물이 없습니다."));
+			.orElseThrow(() -> new PostNotFoundException(id));
 	}
     public Posts saveAndFlush(Posts postEntity) {
         return postsRepository.saveAndFlush(postEntity);

@@ -17,13 +17,8 @@ import com.goorm.clonestagram.post.dto.upload.ImageUploadReqDto;
 import com.goorm.clonestagram.post.dto.upload.ImageUploadResDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
-import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalReadRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
 import com.goorm.clonestagram.util.CustomUserDetails;
 import jakarta.persistence.OptimisticLockException;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,33 +55,9 @@ import static org.mockito.Mockito.doAnswer;
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
 
-
-    private ImageUploadReqDto imageUploadReqDto;
-    private ImageUpdateReqDto imageUpdateReqDto;
-
-    @Mock
-    private PostsRepository postsRepository;
-
-    @Mock
-    private JpaUserExternalReadRepository userRepository;
-
-    @Mock
-    private FeedService feedService;
-
-    @Mock
-    private SoftDeleteRepository softDeleteRepository;
-
-    @Mock
-    private PostHashTagRepository postHashTagRepository;
-
-    @Mock
-    private PostService postService;
-
-    @Mock
-    private UserExternalQueryService userService;
     // --- Mock 객체 선언 ---
     @Mock private PostService postService;
-    @Mock private UserService userService;
+    @Mock private UserExternalQueryService userService;
     @Mock private HashTagRepository hashTagRepository;
     @Mock private PostHashTagRepository postHashTagRepository;
     @Mock private FeedService feedService;
@@ -98,7 +69,7 @@ class ImageServiceTest {
     private ImageService imageService;
 
     // --- 테스트 데이터 ---
-    private Users testUser;
+    private UserEntity testUser;
     private CustomUserDetails testUserDetails;
     private Posts testPost;
     private ImageUploadReqDto imageUploadReqDto;
@@ -107,17 +78,22 @@ class ImageServiceTest {
 
     @BeforeEach
     void setUp(){
-		UserEntity testUser = new UserEntity(User.testMockUser(1L, "testuser"));
+        testUser = UserEntity.builder()
+            .id(1L)
+            .name("testuser")
+            .email("testuser@example.com")
+            .password("1234")
+            .build();
         testUserDetails = new CustomUserDetails(testUser);
 
         testPost = Posts.builder()
-                .id(1L)
-                .content("테스트 내용 #해시태그")
-                .mediaName("image.jpg")
-                .user(testUser)
-                .version(0L) // 초기 버전
-                .createdAt(LocalDateTime.now())
-                .build();
+            .id(1L)
+            .content("테스트 내용 #해시태그")
+            .mediaName("image.jpg")
+            .user(testUser)
+            .version(0L) // 초기 버전
+            .createdAt(LocalDateTime.now())
+            .build();
 
         imageUploadReqDto = new ImageUploadReqDto();
         imageUploadReqDto.setFile("http://example.com/image.jpg"); // URL 방식으로 변경 가정
@@ -137,7 +113,7 @@ class ImageServiceTest {
     void 파일업로드() {
         when(idempotencyService.executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(ImageUploadResDto.class)))
             .thenAnswer(invocation -> ((Supplier<ImageUploadResDto>)invocation.getArgument(1)).get());
-        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser);
+        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser.toDomain());
         when(postService.save(any(Posts.class))).thenReturn(testPost);
         doNothing().when(hashtagService).saveHashtags(eq(testPost), eq(imageUploadReqDto.getHashTagList()));
         doNothing().when(feedService).createFeedForFollowers(any(Posts.class));
@@ -159,7 +135,8 @@ class ImageServiceTest {
     @Test
     @DisplayName("이미지 업로드 성공 (멱등성 미적용)")
     void 이미지_업로드_성공_멱등성_미적용() throws Exception {
-        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser);
+        System.out.println("imageUploadReqDto = " + imageUploadReqDto);
+        when(userService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testUser.toDomain());
         when(postService.save(any(Posts.class))).thenReturn(testPost);
         doNothing().when(hashtagService).saveHashtags(eq(testPost), eq(imageUploadReqDto.getHashTagList()));
         doNothing().when(feedService).createFeedForFollowers(any(Posts.class));
@@ -233,7 +210,7 @@ class ImageServiceTest {
     @Test
     @DisplayName("이미지 수정 실패 - 권한 없음")
     void 이미지수정_실패_권한없음() {
-        Users otherUser = Users.builder().id(2L).build();
+        UserEntity otherUser = UserEntity.builder().id(2L).build();
         testPost.setUser(otherUser);
         when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testPost);
 
@@ -253,7 +230,7 @@ class ImageServiceTest {
         doThrow(new OptimisticLockingFailureException("버전 충돌")).when(postService).saveAndFlush(any(Posts.class));
 
         assertThrows(OptimisticLockingFailureException.class,
-                () -> imageService.imageUpdate(1L, imageUpdateReqDto, 1L));
+            () -> imageService.imageUpdate(1L, imageUpdateReqDto, 1L));
 
         verify(postService).findByIdAndDeletedIsFalse(eq(1L));
         verify(postHashTagRepository).deleteAllByPostsId(eq(1L));
@@ -294,7 +271,7 @@ class ImageServiceTest {
     @Test
     @DisplayName("이미지 삭제 실패 - 권한 없음")
     void 이미지삭제_실패_권한없음() {
-        Users otherUser = Users.builder().id(2L).build();
+        UserEntity otherUser = UserEntity.builder().id(2L).build();
         testPost.setUser(otherUser);
         when(postService.findByIdAndDeletedIsFalse(eq(1L))).thenReturn(testPost);
 
@@ -305,4 +282,3 @@ class ImageServiceTest {
         verify(feedService, never()).deleteFeedsByPostId(anyLong());
     }
 }
-

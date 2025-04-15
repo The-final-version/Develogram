@@ -2,7 +2,6 @@ package com.goorm.clonestagram.post.dto.upload;
 
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Set;
 import com.goorm.clonestagram.user.domain.entity.User;

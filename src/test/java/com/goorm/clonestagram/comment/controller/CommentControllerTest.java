@@ -154,6 +154,8 @@ public class CommentControllerTest {
 		@DisplayName("댓글 저장에 성공하면 정상적으로 객체가 반환된다.")
 		void success() throws Exception {
 			// given
+			// given
+			String testIdempotencyKey = "test-key-create-success";
 			CommentRequest request = new CommentRequest(1L, 2L, "댓글");
 
 			UserEntity user = new UserEntity(1L);

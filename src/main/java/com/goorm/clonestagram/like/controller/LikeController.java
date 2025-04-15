@@ -35,7 +35,7 @@ public class LikeController {
 
     @GetMapping("/posts/{postId}/liked")
     public ResponseEntity<Boolean> checkIfLiked(@PathVariable Long postId,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
         boolean liked = likeService.isPostLikedByLoginUser(postId, userDetails.getId());
         return ResponseEntity.ok(liked);
     }

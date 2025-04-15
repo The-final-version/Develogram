@@ -7,4 +7,5 @@ import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 @Repository
 public interface JpaUserExternalWriteRepository extends JpaRepository<UserEntity, Long> {
+	Object findByIdAndDeletedIsFalse(long eq);
 }

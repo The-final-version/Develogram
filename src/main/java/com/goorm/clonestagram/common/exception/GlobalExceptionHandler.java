@@ -61,16 +61,6 @@ public class GlobalExceptionHandler {
 	}
 
 	/**
-	 * DTO Validation 실패 시 처리 (400 Bad Request)
-	 */
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException e) {
-		return ResponseEntity.badRequest().body(
-			ErrorResponseDto.builder().errorMessage(e.getMessage()).build()
-		);
-	}
-
-	/**
 	 * 댓글 없음 예외 처리 (404 Not Found)
 	 */
 	@ExceptionHandler(CommentNotFoundException.class)

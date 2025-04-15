@@ -5,14 +5,10 @@ import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
-import com.goorm.clonestagram.util.IntegrationTestHelper;
-import com.goorm.clonestagram.user.domain.entity.User;
 import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
+import com.goorm.clonestagram.util.IntegrationTestHelper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,16 +66,20 @@ public class LikeServiceIntegrationTest {
 	@Test
 	public void testToggleLike() {
 		// Given: 테스트용 사용자와 게시물 생성
-		UserEntity user = new UserEntity(User.testMockUser("testUser"));
+		UserEntity user = UserEntity.builder()
+			.name("testUser")
+			.email("test@example.com")
+			.password("password")
+			.build();
 		user = userRepository.save(user);
 
 		Posts post = Posts.builder()
-				.user(user)
-				.content("Test Post")
-				.contentType(IMAGE)
-				.mediaName("test-url")
-				.deleted(false)
-				.build();
+			.user(user)
+			.content("Test Post")
+			.contentType(IMAGE)
+			.mediaName("test-url")
+			.deleted(false)
+			.build();
 		post = postsRepository.save(post);
 
 		// When: 좋아요 토글 (첫 번째 좋아요)
@@ -102,20 +102,27 @@ public class LikeServiceIntegrationTest {
 	@Test
 	public void testGetLikeCount() {
 		// Given: 테스트용 사용자와 게시물, 다중 좋아요 생성
-
-		UserEntity user1 = new UserEntity(User.testMockUser("user1"));
-		UserEntity user2 = new UserEntity(User.testMockUser("user2"));
-
+		UserEntity user1 = UserEntity.builder()
+			.name("user1")
+			.email("user1@example.com")
+			.password("password1")
+			.build();
 		user1 = userRepository.save(user1);
+
+		UserEntity user2 = UserEntity.builder()
+			.name("user2")
+			.email("user2@example.com")
+			.password("password2")
+			.build();
 		user2 = userRepository.save(user2);
 
 		Posts post = Posts.builder()
-				.user(user1)
-				.content("Test Post1")
-				.contentType(IMAGE)
-				.mediaName("test-url")
-				.deleted(false)
-				.build();
+			.user(user1)
+			.content("Test Post1")
+			.contentType(IMAGE)
+			.mediaName("test-url")
+			.deleted(false)
+			.build();
 		post = postsRepository.save(post);
 
 		// When: 두 사용자가 좋아요
@@ -128,9 +135,9 @@ public class LikeServiceIntegrationTest {
 
 	@Test
 	public void testToggleLikeRapidly() throws InterruptedException {
-		Users user = testHelper.createUser("testUserForIntegrationTest");
+		UserEntity user = testHelper.createUser("testUserForIntegrationTest");
 
-		// Users user = new Users();
+		// UserEntity user = new UserEntity();
 		// user.setUsername("testUser");
 		// user.setEmail("test@example.com");
 		// user.setPassword("password");
@@ -138,12 +145,12 @@ public class LikeServiceIntegrationTest {
 		// user = userRepository.save(user);
 
 		Posts post = Posts.builder()
-				.user(user)
-				.content("Test Post")
-				.contentType(IMAGE)
-				.mediaName("test-url")
-				.deleted(false)
-				.build();
+			.user(user)
+			.content("Test Post")
+			.contentType(IMAGE)
+			.mediaName("test-url")
+			.deleted(false)
+			.build();
 		post = postsRepository.save(post);
 
 		Long userId = user.getId();

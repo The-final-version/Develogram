@@ -16,8 +16,6 @@ import com.goorm.clonestagram.post.dto.upload.VideoUploadReqDto;
 import com.goorm.clonestagram.post.dto.upload.VideoUploadResDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
 import com.goorm.clonestagram.hashtag.entity.HashTags;
 import com.goorm.clonestagram.hashtag.entity.PostHashTags;
 import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
@@ -210,9 +208,7 @@ public class VideoService {
     }
 
     private VideoUploadResDto performVideoUpload(VideoUploadReqDto videoUploadReqDto, Long userId) {
-        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
-
+        User users = userService.findByIdAndDeletedIsFalse(userId);
         String fileUrl = videoUploadReqDto.getFile();
 
         if (fileUrl == null || fileUrl.isBlank()) {

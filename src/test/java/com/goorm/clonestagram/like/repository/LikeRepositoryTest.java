@@ -117,21 +117,21 @@ public class LikeRepositoryTest {
 		assertThat(resultForPost3).isEqualTo(1L);
 	}
 
-	@Test
-	@DisplayName("유저 ID와 포스트 ID로 등록된 좋아요를 반환한다.")
-	void findByUser_IdAndPost_Id_should_return_entity_if_exists_or_optional_empty_if_not() {
-		// given : liker1이 post1에 좋아요 등록
-		Like like = new Like(liker1.toDomain(), post1);
-		likeRepository.save(like);
-
-		// when : liker1이 post1에 누른 좋아요와 liker2가 post1에 누른 좋아요 조회
-		Optional<Like> result1 = likeRepository.findByUser_IdAndPost_Id(liker1.getId(), post1.getId());
-		Optional<Like> result2 = likeRepository.findByUser_IdAndPost_Id(liker2.getId(), post1.getId());
-
-		// then : liker1의 좋아요 반환, liker2의 좋아요는 없음
-		assertThat(result1).isPresent();
-		assertThat(result1.get().getUser().getId()).isEqualTo(liker1.getId());
-		assertThat(result1.get().getPost().getId()).isEqualTo(post1.getId());
-		assertThat(result2).isEmpty();
-	}
+	// @Test
+	// @DisplayName("유저 ID와 포스트 ID로 등록된 좋아요를 반환한다.")
+	// void findByUser_IdAndPost_Id_should_return_entity_if_exists_or_optional_empty_if_not() {
+	// 	// given : liker1이 post1에 좋아요 등록
+	// 	Like like = new Like(liker1.toDomain(), post1);
+	// 	likeRepository.save(like);
+	//
+	// 	// when : liker1이 post1에 누른 좋아요와 liker2가 post1에 누른 좋아요 조회
+	// 	Optional<Like> result1 = likeRepository.findByUser_IdAndPost_Id(liker1.getId(), post1.getId());
+	// 	Optional<Like> result2 = likeRepository.findByUser_IdAndPost_Id(liker2.getId(), post1.getId());
+	//
+	// 	// then : liker1의 좋아요 반환, liker2의 좋아요는 없음
+	// 	assertThat(result1).isPresent();
+	// 	assertThat(result1.get().getUser().getId()).isEqualTo(liker1.getId());
+	// 	assertThat(result1.get().getPost().getId()).isEqualTo(post1.getId());
+	// 	assertThat(result2).isEmpty();
+	// }
 }

@@ -35,11 +35,12 @@ class PostsRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        testUser = Users.builder()
-                .username("testuser")
-                .email("test@example.com")
-                .password("password")
-                .build();
+        testUser = UserEntity.builder()
+            .name("testuser")
+            .email("test111@example.com")
+            .password("testpassword")
+            .profileBio("test bio")
+            .profileImgUrl("test_url").build();
         userRepository.save(testUser);
 
         Posts deletedPost = Posts.builder()
