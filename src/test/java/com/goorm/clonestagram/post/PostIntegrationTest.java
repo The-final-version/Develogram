@@ -1,20 +1,25 @@
 package com.goorm.clonestagram.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goorm.clonestagram.common.exception.GlobalExceptionHandler;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.mock.web.MockMultipartFile;
 import java.util.Map;
@@ -67,7 +72,7 @@ class PostIntegrationTest {
     private PostsRepository postsRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private JpaUserExternalWriteRepository userRepository;
 
     @Autowired
     private com.goorm.clonestagram.hashtag.repository.PostHashTagRepository postHashTagsRepository;
@@ -81,9 +86,9 @@ class PostIntegrationTest {
     @Autowired
     private ImageService imageService;
 
-    private Users testUser;
-    private Users otherUser;
-    private Posts testPost;
+	private UserEntity testUser;
+	private UserEntity otherUser;
+	private Posts testPost;
 
     @BeforeEach
     void setUp() {
@@ -91,21 +96,13 @@ class PostIntegrationTest {
         postsRepository.deleteAllInBatch();
         userRepository.deleteAllInBatch();
 
-        testUser = Users.builder()
-                .username("integrationUser")
-                .password("password")
-                .email("integration@example.com")
-                .build();
-        testUser = userRepository.save(testUser);
+		testUser = new UserEntity(User.testMockUser("integrationUser"));
+		testUser = userRepository.save(testUser);
 
-        otherUser = Users.builder()
-                .username("otherUser")
-                .password("password")
-                .email("other@example.com")
-                .build();
-        otherUser = userRepository.save(otherUser);
+		otherUser = new UserEntity(User.testMockUser("otherUser"));
+		otherUser = userRepository.save(otherUser);
 
-        testPost = Posts.builder()
+		testPost = Posts.builder()
                 .user(testUser)
                 .content("통합 테스트 게시물 내용")
                 .mediaName("integration_test.jpg")
@@ -163,7 +160,7 @@ class PostIntegrationTest {
                 .andExpect(jsonPath("$.id").value(postId))
                 .andExpect(jsonPath("$.content").value("통합 테스트 게시물 내용"))
                 .andExpect(jsonPath("$.mediaName").value("integration_test.jpg"))
-                .andExpect(jsonPath("$.username").value(testUser.getUsername()))
+                .andExpect(jsonPath("$.name").value(testUser.getName()))
                 .andExpect(jsonPath("$.userId").value(testUser.getId()));
     }
 
@@ -245,7 +242,8 @@ class PostIntegrationTest {
 
         ResultActions resultActions = mockMvc.perform(delete(url)
                 .with(user(new CustomUserDetails(testUser)))
-                .accept(MediaType.APPLICATION_JSON));
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultHandlers.print()); // 디버깅용
 
         resultActions
                 .andExpect(status().isOk());
@@ -465,39 +463,38 @@ class PostIntegrationTest {
 
         // when: 첫 번째 요청
         ResultActions firstResultActions = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
-                .with(user(new CustomUserDetails(testUser)))
-                .accept(MediaType.APPLICATION_JSON));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody)
+            .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
+            .with(user(new CustomUserDetails(testUser)))
+            .accept(MediaType.APPLICATION_JSON));
 
         // then: 첫 번째 응답 검증
         String firstResponseContent = firstResultActions
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value(content))
-                .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
-                .andExpect(jsonPath("$.postId").exists())
-                .andReturn().getResponse().getContentAsString();
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").value(content))
+            .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
+            .andExpect(jsonPath("$.postId").exists())
+            .andReturn().getResponse().getContentAsString();
 
         long initialCount = postsRepository.count();
 
         // when: 두 번째 요청 (동일한 내용, 동일한 키)
         ResultActions secondResultActions = mockMvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)
-                .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
-                .with(user(new CustomUserDetails(testUser)))
-                .accept(MediaType.APPLICATION_JSON));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody)
+            .header("Idempotency-Key", idempotencyKey) // 헤더 이름 수정
+            .with(user(new CustomUserDetails(testUser)))
+            .accept(MediaType.APPLICATION_JSON));
 
         // then: 두 번째 응답 검증
         secondResultActions
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.postId").exists())
-                .andExpect(content().json(firstResponseContent));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.postId").exists())
+            .andExpect(content().json(firstResponseContent));
 
         // DB 카운트 확인
         long finalCount = postsRepository.count();
         assertThat(finalCount).isEqualTo(initialCount);
     }
-
 } 

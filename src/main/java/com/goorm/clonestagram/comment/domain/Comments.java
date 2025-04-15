@@ -1,7 +1,7 @@
 package com.goorm.clonestagram.comment.domain;
 
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class Comments {
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
-	private Users users;
+	private UserEntity users;		// 유저 도메인 수정
 
 	@ManyToOne
 	@JoinColumn(name = "post_id")

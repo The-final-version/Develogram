@@ -11,10 +11,10 @@ import com.goorm.clonestagram.follow.repository.FollowRepository;
 import com.goorm.clonestagram.post.dto.PostInfoDto;
 import com.goorm.clonestagram.post.dto.PostResDto;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -31,12 +31,12 @@ public class FeedService {
 
     private final FeedRepository feedRepository;
     private final FollowService followService;
-    private final UserService userService;
+    private final UserExternalQueryService userService;     // 유저 도메인 수정
     private final FollowRepository followRepository;
 
     @Transactional(readOnly = true)
     public Page<FeedResponseDto> getUserFeed(Long userId, Pageable pageable) {
-        Users user = userService.findByIdAndDeletedIsFalse(userId);
+        User user = userService.findByIdAndDeletedIsFalse(userId);  // 유저 도메인 수정
 
         try {
             Page<Feeds> feeds = feedRepository.findByUserIdWithPostAndUser(userId, pageable);
@@ -66,7 +66,7 @@ public class FeedService {
 
     @Transactional(readOnly = true)
     public Page<FeedResponseDto> getFollowFeed(Long userId, Pageable pageable) {
-        Users user = userService.findByIdAndDeletedIsFalse(userId);
+        User user = userService.findByIdAndDeletedIsFalse(userId);
 
         try {
             log.info("🚀 getFollowFeed 진입 - userId: {}", userId);
@@ -139,7 +139,7 @@ public class FeedService {
         List<Feeds> feeds = followerIds.stream()
                 .map(followerId -> {
                     Feeds f = Feeds.builder()
-                            .user(Users.builder().id(followerId).build())  // ✅ 피드를 보는 유저
+                            .user(UserEntity.from(User.withId(followerId)))  // ✅ 피드를 보는 유저   + 유저 도메인 수정
                             .post(post)
                             .build();
                     log.info("📥 피드 생성 대상 유저ID={}, postID={}", followerId, post.getId());

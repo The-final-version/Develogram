@@ -3,8 +3,10 @@ package com.goorm.clonestagram.follow.service;
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.dto.FollowDto;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -27,19 +29,19 @@ class FollowServiceTest {
     private FollowRepository followRepository;
 
     @Mock
-    private UserService userService;
+    private UserExternalQueryService userService;
 
     @Test
     void F01_팔로우_추가_또는_삭제_성공() {
         // given
         Long followerId = 1L;
         Long followedId = 2L;
-        Users follower = Users.builder().id(followerId).build();
-        Users followed = Users.builder().id(followedId).build();
+        User follower = User.testMockUser(followerId, "팔로워");
+        User followed = User.testMockUser(followedId, "팔로우");
 
         given(userService.findByIdAndDeletedIsFalse(followerId)).willReturn(follower);
         given(userService.findByIdAndDeletedIsFalse(followedId)).willReturn(followed);
-        given(followRepository.findByFollowerAndFollowedWithLock(follower, followed)).willReturn(Optional.empty());
+        given(followRepository.findByFollowerAndFollowedWithLock(new UserEntity(follower), new UserEntity(followed))).willReturn(Optional.empty());
 
         // when
         followService.toggleFollow(followerId, followedId);
@@ -60,13 +62,13 @@ class FollowServiceTest {
     @Test
     void F03_팔로잉_목록_조회_성공() {
         Long userId = 1L;
-        Users user = Users.builder().id(userId).build();
-        Users other = Users.builder().id(2L).username("상대유저").build();
+        User user = User.testMockUser(userId, "유저A");
+        User other = User.testMockUser(2L, "상대유저");
 
         Follows follow = new Follows(user, other);
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowedAllByFollower(user)).willReturn(List.of(follow));
+        given(followRepository.findFollowedAllByFollower(UserEntity.from(user))).willReturn(List.of(follow));
 
         List<FollowDto> result = followService.getFollowingList(userId);
 
@@ -78,13 +80,13 @@ class FollowServiceTest {
     @Test
     void F04_팔로워_목록_조회_성공() {
         Long userId = 1L;
-        Users user = Users.builder().id(userId).build();
-        Users follower = Users.builder().id(2L).username("팔로워").build();
+        User user = User.testMockUser(userId, "팔로우대상");
+        User follower = User.testMockUser(2L, "팔로워");
 
         Follows follow = new Follows(follower, user);
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowerAllByFollowed(user)).willReturn(List.of(follow));
+        given(followRepository.findFollowerAllByFollowed(UserEntity.from(user))).willReturn(List.of(follow));
 
         List<FollowDto> result = followService.getFollowerList(userId);
 
@@ -158,10 +160,10 @@ class FollowServiceTest {
     void F10_팔로잉_목록_조회_빈리스트_반환() {
         // given
         Long userId = 1L;
-        Users user = Users.builder().id(userId).build();
+        User user = User.testMockUser(userId, "테스터");
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowedAllByFollower(user)).willReturn(List.of());
+        given(followRepository.findFollowedAllByFollower(UserEntity.from(user))).willReturn(List.of());
 
         // when
         List<FollowDto> result = followService.getFollowingList(userId);
@@ -175,10 +177,10 @@ class FollowServiceTest {
     void F11_팔로워_목록_조회_빈리스트_반환() {
         // given
         Long userId = 1L;
-        Users user = Users.builder().id(userId).build();
+        User user = User.testMockUser(userId, "팔로우테스트");
 
         given(userService.findByIdAndDeletedIsFalse(userId)).willReturn(user);
-        given(followRepository.findFollowerAllByFollowed(user)).willReturn(List.of());
+        given(followRepository.findFollowerAllByFollowed(UserEntity.from(user))).willReturn(List.of());
 
         // when
         List<FollowDto> result = followService.getFollowerList(userId);
@@ -186,6 +188,4 @@ class FollowServiceTest {
         // then
         assertThat(result).isEmpty();
     }
-
-
 }

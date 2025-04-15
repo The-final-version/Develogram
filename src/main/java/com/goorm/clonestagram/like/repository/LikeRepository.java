@@ -1,5 +1,4 @@
 package com.goorm.clonestagram.like.repository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +24,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT l FROM Like l WHERE l.user.id = :userId AND l.post.id = :postsId")
-	Optional<Like> findByUser_IdAndPost_Id(Long userId, Long postsId);
+	Optional<Like> findByUser_IdAndPost_Id(@Param("userId") Long userId, @Param("postsId") Long postsId);
 
 	@Query("SELECT lc.likeCount FROM LikeCount lc WHERE lc.postId = :postId")
 	Optional<Long> findLikeCount(@Param("postId") Long postId);

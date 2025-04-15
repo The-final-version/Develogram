@@ -60,6 +60,11 @@ dependencies {
     //batch
     implementation 'org.springframework.batch:spring-batch-core'
 
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
     // Spring Data Redis (추가)
@@ -83,7 +88,9 @@ dependencies {
 jacoco {
     toolVersion = "0.8.10"
 }
-
+tasks.withType(JavaCompile) {
+    options.compilerArgs += ['-parameters']
+}
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport

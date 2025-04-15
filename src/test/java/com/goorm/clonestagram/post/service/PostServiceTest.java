@@ -3,8 +3,10 @@ package com.goorm.clonestagram.post.service;
 import com.goorm.clonestagram.post.ContentType;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,23 +36,20 @@ public class PostServiceTest {
     private PostsRepository postsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private JpaUserExternalWriteRepository userRepository;
 
     @Mock
-    private com.goorm.clonestagram.user.service.UserService userService;
+    private UserExternalQueryService userService;
 
     @InjectMocks
     private PostService postService;
 
-    private Users testUser;
+    private UserEntity testUser;
     private Posts testPost;
 
     @BeforeEach
     void setUp() {
-        testUser = Users.builder()
-                .id(1L)
-                .username("testuser")
-                .build();
+        testUser = new UserEntity(User.testMockUser(1L, "testUser"));
 
         testPost = Posts.builder()
                 .id(1L)
@@ -122,7 +121,7 @@ public class PostServiceTest {
     void 게시물_조회_실패_from포함_게시물없음() {
         // given
         String from = "testSource";
-        when(postsRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(postsRepository.findByIdWithPessimisticLock(1L)).thenReturn(Optional.empty()); // 수정
 
         // when & then
         PostNotFoundException exception = assertThrows(PostNotFoundException.class,
@@ -196,7 +195,7 @@ public class PostServiceTest {
         List<Posts> postList = Arrays.asList(testPost);
         Page<Posts> postPage = new PageImpl<>(postList, pageable, postList.size());
 
-        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(testUser);
+        when(userService.findByIdAndDeletedIsFalse(userId)).thenReturn(testUser.toDomain());
         when(postsRepository.findAllByUserIdAndDeletedIsFalse(userId, pageable)).thenReturn(postPage);
 
         // when
@@ -205,7 +204,7 @@ public class PostServiceTest {
         // then
         assertNotNull(result);
         assertNotNull(result.getUser());
-        assertEquals(testUser.getUsername(), result.getUser().getUsername());
+        assertEquals(testUser.getName(), result.getUser().getName());
         assertNotNull(result.getFeed());
         assertEquals(1, result.getFeed().getTotalElements());
         assertEquals(testPost.getContent(), result.getFeed().getContent().get(0).getContent());
@@ -243,4 +242,4 @@ public class PostServiceTest {
         assertEquals(testPost.getId(), result.getId());
         verify(postsRepository).saveAndFlush(testPost);
     }
-} 
+}

@@ -28,7 +28,7 @@ public class CommentController {
 	private final IdempotencyService idempotencyService;
 
 	@GetMapping("/{id}")
-	public CommentResponse getCommentById(@PathVariable Long id) {
+	public CommentResponse getCommentById(@PathVariable("id") Long id) {
 		Comments entity = commentService.getCommentById(id);
 
 		// if (entity == null) {
@@ -45,7 +45,7 @@ public class CommentController {
 	}
 
 	@GetMapping("/post/{postId}")
-	public List<CommentResponse> getCommentsByPostId(@PathVariable Long postId) {
+	public List<CommentResponse> getCommentsByPostId(@PathVariable("postId") Long postId) {
 		List<Comments> entities = Optional.ofNullable(commentService.getCommentsByPostId(postId))
 			.orElse(Collections.emptyList());
 
@@ -78,7 +78,7 @@ public class CommentController {
 		CommentResponse response = CommentResponse.builder()
 			.id(entity.getId())
 			.userId(entity.getUsers().getId())
-			.username(entity.getUsers().getUsername())
+			.name(entity.getUsers().getName()) 	// 유저 도메인 수정
 			.postId(entity.getPosts().getId())
 			.content(entity.getContent())
 			.createdAt(entity.getCreatedAt())
@@ -95,7 +95,7 @@ public class CommentController {
 	// 리팩터링 해야함. 지금은 메모만 해둠
 	// Todo
 	@DeleteMapping("/{commentId}")
-	public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, @RequestParam Long requesterId) {
+	public ResponseEntity<Void> deleteComment(@PathVariable("commentId") Long commentId, @RequestParam("requesterId") Long requesterId) {
 		commentService.removeComment(commentId, requesterId);
 
 		return ResponseEntity.noContent().build();

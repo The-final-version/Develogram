@@ -2,7 +2,7 @@ package com.goorm.clonestagram.feed.repository;
 
 import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 import com.goorm.clonestagram.util.TestEntityFactory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +29,7 @@ class FeedRepositoryTest {
     @DisplayName("유저 ID로 피드를 페이징 조회한다")
     void findByUserIdWithPostAndUser() {
         // given
-        Users user = TestEntityFactory.createUser("testuser");
+        UserEntity user = TestEntityFactory.createUser("testuser");
         Posts post = TestEntityFactory.createPost(user, "Hello");
 
         em.persist(user);
@@ -54,7 +54,7 @@ class FeedRepositoryTest {
     @DisplayName("삭제되지 않은 모든 피드를 조회한다")
     void findAllByDeletedIsFalse() {
         // given
-        Users user = TestEntityFactory.createUser("testuser");
+        UserEntity user = TestEntityFactory.createUser("testuser");
         Posts post = TestEntityFactory.createPost(user, "Hello");
         Feeds feed = TestEntityFactory.createFeed(user, post);
 
@@ -77,8 +77,8 @@ class FeedRepositoryTest {
     @DisplayName("팔로우 유저들의 피드를 조회한다")
     void findAllByUserIdInAndDeletedIsFalse() {
         // given
-        Users user1 = TestEntityFactory.createUser("user1");
-        Users user2 = TestEntityFactory.createUser("user2");
+        UserEntity user1 = TestEntityFactory.createUser("user1");
+        UserEntity user2 = TestEntityFactory.createUser("user2");
 
         Posts post1 = TestEntityFactory.createPost(user1, "hello");
         Posts post2 = TestEntityFactory.createPost(user2, "world");
@@ -109,7 +109,7 @@ class FeedRepositoryTest {
     @DisplayName("유저 ID와 postIds로 피드를 삭제한다")
     void deleteByUserIdAndPostIdIn() {
         // given
-        Users user = TestEntityFactory.createUser("user1");
+        UserEntity user = TestEntityFactory.createUser("user1");
         Posts p1 = TestEntityFactory.createPost(user, "A");
         Posts p2 = TestEntityFactory.createPost(user, "B");
 

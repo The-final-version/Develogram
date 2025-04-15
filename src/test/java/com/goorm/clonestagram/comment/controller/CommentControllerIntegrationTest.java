@@ -18,11 +18,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,16 +35,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goorm.clonestagram.comment.domain.Comments;
 import com.goorm.clonestagram.comment.dto.CommentRequest;
 import com.goorm.clonestagram.comment.repository.CommentRepository;
+import com.goorm.clonestagram.common.exception.GlobalExceptionHandler;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
+@Import(GlobalExceptionHandler.class)
 @DisplayName("CommentController 통합 테스트")
 public class CommentControllerIntegrationTest {
 	@Autowired
@@ -48,34 +56,34 @@ public class CommentControllerIntegrationTest {
 	@Autowired
 	ObjectMapper objectMapper;
 	@Autowired
-	UserRepository userRepository;
+	JpaUserExternalWriteRepository userExternalWriteRepository;
 	@Autowired
 	PostsRepository postsRepository;
 	@Autowired
-	UserService userService;
+	UserExternalQueryService userService;
 
 	public static final String BASE = "/comments";
 	public static final String BY_ID = BASE + "/{commentsId}";
 	public static final String BY_POST_ID = BASE + "/post/{postId}";
 
-	Users userA, userB, userC, userD;
+	UserEntity userA, userB, userC, userD;
 	Posts postX;
 	@Autowired
 	private CommentRepository commentRepository;
 
 	@BeforeEach
 	void setUp() {
-		userA = Users.builder().username("userA").password("password").email("userA@domain")
-			.build();
-		userB = Users.builder().username("userB").password("password").email("userB@domain")
-			.build();
-		userC = Users.builder().username("userC").password("password").email("userC@domain")
-			.build();
-		userD = Users.builder().username("userD").password("password").email("userD@domain")
-			.build();
+		userExternalWriteRepository.deleteAll();
+		userA = UserEntity.from(User.testMockUser("userA"));
+		userB = UserEntity.from(User.testMockUser("userB"));
+		userC = UserEntity.from(User.testMockUser("userC"));
+		userD = UserEntity.from(User.testMockUser("userD"));
 		postX = Posts.builder().user(userA).content("postX").mediaName("postX.jpg").build();
-
-		userRepository.saveAll(List.of(userA, userB, userC, userD));
+		System.out.println("userA = " + userA);
+		System.out.println("userB = " + userB);
+		System.out.println("userC = " + userC);
+		System.out.println("userD = " + userD);
+		userExternalWriteRepository.saveAll(List.of(userA, userB, userC, userD));
 		postsRepository.save(postX);
 	}
 
@@ -100,7 +108,14 @@ public class CommentControllerIntegrationTest {
 			);
 
 			// 	201을 보내줌.
-			createResult.andExpect(status().isCreated());
+			createResult.andExpect(status().isCreated())
+				.andDo(
+					result -> {
+						String location = result.getResponse().getHeader("Location");
+						assertThat(location).isNotNull();
+						assertThat(location).contains("/comments/");
+					}
+				).andDo(MockMvcResultHandlers.print());
 
 			// ID 추출
 			MvcResult resultOfPost = createResult.andReturn();
@@ -126,9 +141,9 @@ public class CommentControllerIntegrationTest {
 				.andExpect(jsonPath("$.id").value(commentBId))
 				.andExpect(jsonPath("$.content").value("comment written by userB"));
 			// 작성자가 일치하는지 검증
-			Users foundUser = userService.findByIdAndDeletedIsFalse(userId);
-			assertThat(foundUser.getUsername()).isEqualTo("userB");
-			assertThat(foundUser.getEmail()).isEqualTo("userB@domain");
+			User foundUser = userService.findByIdAndDeletedIsFalse(userId);
+			assertThat(foundUser.getName()).isEqualTo("userB");
+			assertThat(foundUser.getEmail()).isEqualTo("userB@example.com");
 
 		}
 
@@ -313,8 +328,8 @@ public class CommentControllerIntegrationTest {
 			ResultActions deleteResult = mockMvc.perform(
 				MockMvcRequestBuilders.delete(BY_ID, commentB.getId())
 					.param("requesterId", userB.getId().toString())
-					.contentType(MediaType.APPLICATION_JSON)
 					.with(user(userB.getEmail()).roles("USER"))
+					.contentType(MediaType.APPLICATION_JSON)
 			);
 			// 204를 보내줌.
 			deleteResult

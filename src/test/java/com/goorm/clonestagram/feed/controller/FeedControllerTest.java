@@ -65,7 +65,7 @@ class FeedControllerTest {
     @Test
     void F02C_전체피드_조회_성공() throws Exception {
         // given
-        FeedResponseDto dto = new FeedResponseDto(1L, 10L, 1L, "username", "작성자", null, null);
+        FeedResponseDto dto = new FeedResponseDto(1L, 10L, 1L, "name", "작성자", null, null);
         Page<FeedResponseDto> page = new PageImpl<>(List.of(dto));
         given(feedService.getAllFeed(any(Pageable.class))).willReturn(page);
 

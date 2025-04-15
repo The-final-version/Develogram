@@ -29,7 +29,7 @@ import com.goorm.clonestagram.exception.PermissionDeniedException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentControllerTest {
@@ -51,7 +51,7 @@ public class CommentControllerTest {
 		@DisplayName("댓글 조회에 성공하면 정상적으로 객체가 반환된다.")
 		void success() {
 			// given
-			Users user = Users.builder().id(100L).build();
+			UserEntity user = new UserEntity(100L);
 
 			Posts post = Posts.builder().id(200L).user(user).build();
 
@@ -97,8 +97,7 @@ public class CommentControllerTest {
 		void success() {
 			// given
 			Long postId = 10L;
-
-			Users user = Users.builder().id(100L).build();
+			UserEntity user = new UserEntity(100L);
 
 			Posts post = Posts.builder().id(postId).user(user).build();
 
@@ -155,10 +154,11 @@ public class CommentControllerTest {
 		@DisplayName("댓글 저장에 성공하면 정상적으로 객체가 반환된다.")
 		void success() throws Exception {
 			// given
+			// given
 			String testIdempotencyKey = "test-key-create-success";
 			CommentRequest request = new CommentRequest(1L, 2L, "댓글");
 
-			Users user = Users.builder().id(1L).build();
+			UserEntity user = new UserEntity(1L);
 
 			Posts post = Posts.builder().id(2L).user(user).build();
 
@@ -186,6 +186,7 @@ public class CommentControllerTest {
 			assertEquals("댓글", response.getContent());
 			assertEquals(1L, response.getUserId());
 			assertEquals(2L, response.getPostId());
+
 		}
 
 		@Test
