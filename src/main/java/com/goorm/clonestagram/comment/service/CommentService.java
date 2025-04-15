@@ -6,12 +6,10 @@ import com.goorm.clonestagram.comment.mapper.CommentMapper;
 import com.goorm.clonestagram.exception.CommentNotFoundException;
 import com.goorm.clonestagram.exception.PostNotFoundException;
 import com.goorm.clonestagram.exception.UnauthorizedCommentAccessException;
-import com.goorm.clonestagram.exception.UserNotFoundException;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.comment.repository.CommentRepository;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;	// 유저 도메인 수정
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +25,7 @@ import java.util.List;
 public class CommentService {
 
 	private final CommentRepository commentRepository;
-
-	private final UserService userService;
+	private final UserExternalQueryService userService;	// 유저 도메인 수정
 	private final PostService postService;
 
 	@Transactional

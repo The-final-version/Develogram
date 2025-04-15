@@ -2,9 +2,11 @@ package com.goorm.clonestagram.search.service;
 
 import com.goorm.clonestagram.search.dto.SearchUserResDto;
 import com.goorm.clonestagram.search.dto.UserSuggestionDto;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.dto.UserProfileDto;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.application.adapter.UserAdapter;
+import com.goorm.clonestagram.user.application.dto.profile.UserProfileDto;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserSearchService {
 
-    private final UserRepository userRepository;
+    private final UserExternalQueryService userExternalQueryService;    // 유저 도메인 수정
 
     /**
      * 유저 검색
@@ -37,18 +39,18 @@ public class UserSearchService {
             .map(s -> "+" + s + "*")
             .collect(Collectors.joining(" "));
 
-        Page<Users> users = userRepository.searchUserByFullText(keyword, pageable);
+        Page<User> users = userExternalQueryService.searchUserByKeyword(keyword, pageable);
 
-        Page<UserProfileDto> userProfiles = users.map(UserProfileDto::fromEntity);
+        Page<UserProfileDto> userProfiles = users.map(UserAdapter::toUserProfileDto);
 
         return SearchUserResDto.of(users.getTotalElements(), userProfiles);
     }
 
     @Transactional(readOnly = true)
     public List<UserSuggestionDto> findUsersByKeyword(String keyword) {
-        List<Users> users = userRepository.findByUsernameContainingIgnoreCase(keyword);
+        List<User> users = userExternalQueryService.findByNameContainingIgnoreCase(keyword);
         return users.stream()
-            .map(user -> new UserSuggestionDto(user.getId(), user.getUsername(), user.getProfileimg()))
+            .map(user -> new UserSuggestionDto(user.getId(), user.getName(), user.getProfile().getImgUrl()))    // 유저 도메인 수정
             .collect(Collectors.toList());
     }
 

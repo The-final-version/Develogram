@@ -27,8 +27,9 @@ import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.like.service.LikeService;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.repository.PostsRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
 
 @SpringBootTest
 @Rollback(false) // 실제 insert 결과를 검증해야 하므로 롤백 방지
@@ -48,7 +49,7 @@ public class CommentConcurrencyTest {
 	@MockitoSpyBean
 	LikeRepository likeRepository;
 	@Autowired
-	UserRepository userRepository;
+	JpaUserExternalWriteRepository userRepository;
 	@Autowired
 	PostsRepository postsRepository;
 
@@ -58,7 +59,7 @@ public class CommentConcurrencyTest {
 
 	@BeforeAll
 	void setUp() {
-		Users postWriter = Users.builder().username("postWriter").password("1234").email("post@writer").build();
+		UserEntity postWriter = UserEntity.from(User.testMockUser("postWriter"));
 		userRepository.save(postWriter);
 		Posts post = Posts.builder().user(postWriter).content("test post").mediaName("test.jpg").deleted(false).build();
 		postsRepository.save(post);
@@ -66,18 +67,12 @@ public class CommentConcurrencyTest {
 
 		userIds = new ArrayList<>();
 		for (int i = 0; i < THREAD_COUNT; i++) {
-			Users user = Users.builder()
-				.username("user" + i)
-				.email("user" + i + "@test.com")
-				.password("1234")
-				.deleted(false)
-				.build();
+			UserEntity user = UserEntity.from(User.testMockUser("user" + i));
 			userRepository.save(user);
 			userIds.add(user.getId());
 		}
 
-		Users likeTester = Users.builder().username("likeTester").password("1234").email("likeTester@domain").build();
-		userRepository.save(likeTester);
+		UserEntity likeTester = UserEntity.from(User.testMockUser("likeTester"));		userRepository.save(likeTester);
 		likeUserId = likeTester.getId();
 	}
 

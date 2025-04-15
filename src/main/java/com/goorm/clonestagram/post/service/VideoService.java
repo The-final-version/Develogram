@@ -16,8 +16,17 @@ import com.goorm.clonestagram.post.dto.upload.VideoUploadReqDto;
 import com.goorm.clonestagram.post.dto.upload.VideoUploadResDto;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.hashtag.entity.HashTags;
+import com.goorm.clonestagram.hashtag.entity.PostHashTags;
+import com.goorm.clonestagram.hashtag.repository.PostHashTagRepository;
+import com.goorm.clonestagram.hashtag.repository.HashTagRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
@@ -36,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class VideoService {
 
     private final PostsRepository postsRepository;
-    private final UserRepository userRepository;
+    private final UserExternalQueryService userService;      // 유저 도메인 수정
     private final HashTagRepository hashTagRepository;
     private final PostHashTagRepository postHashTagRepository;
     private final SoftDeleteRepository softDeleteRepository;
@@ -54,9 +63,7 @@ public class VideoService {
      * @throws Exception - 파일 저장시 IOException 발생
      */
     public VideoUploadResDto videoUpload(VideoUploadReqDto videoUploadReqDto, Long userId) {
-
-        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
+        User users = userService.findByIdAndDeletedIsFalse(userId);
 
         String fileUrl = videoUploadReqDto.getFile();
 
@@ -201,9 +208,7 @@ public class VideoService {
     }
 
     private VideoUploadResDto performVideoUpload(VideoUploadReqDto videoUploadReqDto, Long userId) {
-        Users users = userRepository.findByIdAndDeletedIsFalse(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다."));
-
+        User users = userService.findByIdAndDeletedIsFalse(userId);
         String fileUrl = videoUploadReqDto.getFile();
 
         if (fileUrl == null || fileUrl.isBlank()) {

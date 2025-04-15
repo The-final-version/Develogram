@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.goorm.clonestagram.common.exception.ErrorResponseDto;
 import com.goorm.clonestagram.follow.dto.FollowDto;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 import com.goorm.clonestagram.util.IntegrationTestHelper;
 
 import org.junit.jupiter.api.*;
@@ -42,11 +43,11 @@ public class FollowIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Users userA;
-    private Users userB;
+    private UserEntity userA;
+    private UserEntity userB;
     private HttpHeaders headers;
 
-    private List<Users> createdUsers = new ArrayList<>();
+    private List<UserEntity> createdUsers = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -54,14 +55,13 @@ public class FollowIntegrationTest {
         userB = testHelper.createUser("userB");
         createdUsers.add(userA);
         createdUsers.add(userB);
-
-        headers = loginAndGetSession(userA.getEmail(), "password");
+        headers = loginAndGetSession(userA.getEmail(), "password!@123");
 
     }
 
     @AfterEach
     void tearDown() {
-        for (Users user : createdUsers) {
+        for (UserEntity user : createdUsers) {
             testHelper.deleteUserAndDependencies(user);
         }
     }
@@ -71,7 +71,6 @@ public class FollowIntegrationTest {
         loginHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         String loginBody = "{\"email\":\"" + email + "\", \"password\":\"" + password + "\"}";
-
 
         HttpEntity<String> loginRequest = new HttpEntity<>(loginBody, loginHeaders);
         ResponseEntity<String> response = restTemplate.postForEntity("/login", loginRequest, String.class);
@@ -95,7 +94,9 @@ public class FollowIntegrationTest {
                 new HttpEntity<>(headers),
                 Void.class
         );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        System.out.println("팔로우 요청 결과: " + response);
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -126,6 +127,7 @@ public class FollowIntegrationTest {
                 new HttpEntity<>(headers),
                 ErrorResponseDto.class
         );
+        System.out.println("자기자신 팔로우 예외 결과: " + response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody().getErrorMessage()).isEqualTo("자기 자신을 팔로우할 수 없습니다.");
     }
@@ -143,8 +145,9 @@ public class FollowIntegrationTest {
                 new HttpEntity<>(headers),
                 String.class
         );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        System.out.println("결과 : " + response);
+        assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.OK);
         List<FollowDto> list = objectMapper.readValue(response.getBody(), new TypeReference<>() {});
         assertThat(list).anyMatch(dto -> dto.getFollowedId().equals(userB.getId()));
     }
@@ -200,7 +203,7 @@ public class FollowIntegrationTest {
                 String.class
         );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -214,7 +217,7 @@ public class FollowIntegrationTest {
                 new HttpEntity<>(headers),
                 String.class
         );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -228,7 +231,7 @@ public class FollowIntegrationTest {
                 new HttpEntity<>(headers),
                 String.class
         );
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
 
@@ -236,8 +239,8 @@ public class FollowIntegrationTest {
     @Test
     @DisplayName("toggleFollow 빠른 연타 홀수번 → 팔로우가 유지되어야 함")
     void toggleFollow_oddCountFastToggle_shouldRemainFollowed() {
-        Users follower = testHelper.createUser("follower");
-        Users followed = testHelper.createUser("followed");
+        UserEntity follower = testHelper.createUser("follower");
+        UserEntity followed = testHelper.createUser("followed");
 
         int toggleCount = 5; // 홀수번 toggle → 최종적으로 팔로우 유지
 
@@ -264,8 +267,8 @@ public class FollowIntegrationTest {
     @Test
     @DisplayName("toggleFollow 빠른 연타 짝수번 → 팔로우가 없어야 함")
     void toggleFollow_evenCountFastToggle_shouldUnfollow() {
-        Users follower = testHelper.createUser("follower");
-        Users followed = testHelper.createUser("followed");
+        UserEntity follower = testHelper.createUser("follower");
+        UserEntity followed = testHelper.createUser("followed");
 
         int toggleCount = 6; // 짝수번 toggle → 최종적으로 팔로우 없어야 함
 

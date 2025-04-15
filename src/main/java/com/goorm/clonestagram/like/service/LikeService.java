@@ -11,44 +11,40 @@ import com.goorm.clonestagram.like.domain.Like;
 import com.goorm.clonestagram.like.repository.LikeRepository;
 import com.goorm.clonestagram.post.domain.Posts;
 import com.goorm.clonestagram.post.service.PostService;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.service.UserService;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LikeService {
 	private final LikeRepository likeRepository;
-	private final UserService userService;
+	private final UserExternalQueryService userService;
 	private final PostService postService;
 
 	// 좋아요 토글
 	@Transactional
-	public void toggleLike(Long userId, Long postId) {
-		Users user = userService.findByIdAndDeletedIsFalse(userId);
-		// 🔒 여기서 비관적 락 (SELECT FOR UPDATE) → 이 시점부터 직렬 처리
-		Posts post = postService.findByIdWithPessimisticLock(postId);
+	public synchronized void toggleLike(Long userId, Long postId) {
+		User user = userService.findByIdAndDeletedIsFalse(userId);
+		Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
 		// userId와 postId를 사용해 좋아요 여부 확인
-		// 락 걸고 조회
 		Optional<Like> existingLike = likeRepository.findByUser_IdAndPost_Id(userId, postId);
 
-		if (existingLike.isEmpty()) {
+		if (existingLike.isPresent()) {
+			likeRepository.delete(existingLike.get()); // 좋아요 취소
+		} else {
 			try {
 				likeRepository.save(new Like(user, post)); // 좋아요 추가
 			} catch (DataIntegrityViolationException e) {
 				// 동시에 두 요청이 온 경우 하나는 성공하고 하나는 이곳으로 옴.
 				if (likeRepository.existsByUser_IdAndPost_Id(userId, postId)) {
-					log.warn("중복 좋아요 요청 감지: userId={}, postId={}", userId, postId);
-				} else
 					throw e;
+				}
 			}
+		}
 
-		} else
-			likeRepository.delete(existingLike.get());
 		syncLikeCount(postId);
 	}
 
@@ -74,10 +70,10 @@ public class LikeService {
 	}
 
 	public boolean isPostLikedByLoginUser(Long postId, Long userId) {
-		userService.findByIdAndDeletedIsFalse(userId);
-		postService.findByIdAndDeletedIsFalse(postId);
+		User user = userService.findByIdAndDeletedIsFalse(userId);
+		Posts post = postService.findByIdAndDeletedIsFalse(postId);
 
-		return likeRepository.existsByUser_IdAndPost_Id(userId, postId);
+		return likeRepository.existsByUser_IdAndPost_Id(user.getId(), post.getId());
 	}
 
 }

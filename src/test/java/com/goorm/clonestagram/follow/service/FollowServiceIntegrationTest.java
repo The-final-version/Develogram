@@ -2,14 +2,17 @@ package com.goorm.clonestagram.follow.service;
 
 import com.goorm.clonestagram.follow.domain.Follows;
 import com.goorm.clonestagram.follow.repository.FollowRepository;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.domain.Users;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.entity.User;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
+import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWriteRepository;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,30 +30,32 @@ public class FollowServiceIntegrationTest {
     private FollowService followService;
 
     @Autowired
-    private UserRepository userRepository;
+    private JpaUserExternalWriteRepository userRepository;
 
     @Autowired
     private FollowRepository followRepository;
+    UserEntity user1, user2;
+    @BeforeEach
+    public void setUp() {
+        // 테스트 환경에서 DB 초기화
+        followRepository.deleteAll();
+        userRepository.deleteAll();
+        user1 = new UserEntity(User.testMockUser("user1"));
+        user2 = new UserEntity(User.testMockUser("user2"));
+        user1 = userRepository.save(user1);
+        user2 = userRepository.save(user2);
+    }
 
     @Test
     public void testToggleFollowIntegration() {
         // Given: 실제 DB에 유저 저장
-        Users user1 = new Users();
-        user1.setUsername("user1");
-        user1.setEmail("user1@example.com");  // email은 nullable=false이므로 반드시 설정
-        user1.setPassword("password1");       // password도 nullable=false
-        user1.setProfileimg("profile1");
-        user1 = userRepository.save(user1);
-
-        Users user2 = new Users();
-        user2.setUsername("user2");
-        user2.setEmail("user2@example.com");
-        user2.setPassword("password2");
-        user2.setProfileimg("profile2");
-        user2 = userRepository.save(user2);
 
         // When: 팔로우 토글
         followService.toggleFollow(user1.getId(), user2.getId());
+
+        // Then: 최신 엔티티를 다시 로드하여 검사
+        user1 = userRepository.findById(user1.getId()).orElseThrow();
+        user2 = userRepository.findById(user2.getId()).orElseThrow();
 
         // Then: 실제 DB에서 확인
         Optional<Follows> follow = followRepository.findByFollowerAndFollowedWithLock(user1, user2);

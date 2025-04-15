@@ -102,13 +102,10 @@ public class ImageController {
      * @return ResponseEntity
      */
     @DeleteMapping("/{postSeq}")
-    public ResponseEntity<?> imageDelete(@PathVariable Long postSeq,
-                                       @AuthenticationPrincipal CustomUserDetails userDetails){
-
+    public ResponseEntity<?> imageDelete(@PathVariable("postSeq") Long postSeq,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getId();
-
         imageService.imageDelete(postSeq, userId);
-
         return ResponseEntity.ok("삭제 완료");
     }
 }

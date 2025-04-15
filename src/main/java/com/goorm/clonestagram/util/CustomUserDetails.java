@@ -1,35 +1,39 @@
 package com.goorm.clonestagram.util;
 
-import com.goorm.clonestagram.user.domain.Users;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+
+@Getter
 public class CustomUserDetails implements UserDetails {
+    @NotBlank(message = "사용자 정보가 없습니다.")
+    private final UserEntity user;
 
-    private final Users users;
-
-    public CustomUserDetails(Users users) {
-        this.users = users;
+    public CustomUserDetails(UserEntity user) {
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 사용자의 권한을 반환. 예시로 하나의 권한만 반환
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getPassword() {
-        return users.getPassword();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return users.getEmail();
+        return user.getEmail();
     }
 
     @Override
@@ -53,11 +57,8 @@ public class CustomUserDetails implements UserDetails {
     }
 
     public Long getId() {
-        return users.getId(); // 실제 사용자 ID 반환
+        return user.getId(); // 실제 사용자 ID 반환
     }
 
-    public Users getUser() {
-        return users;
-    }
 }
 

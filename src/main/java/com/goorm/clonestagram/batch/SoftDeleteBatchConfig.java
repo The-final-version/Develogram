@@ -4,7 +4,7 @@ import com.goorm.clonestagram.post.EntityType;
 import com.goorm.clonestagram.post.domain.SoftDelete;
 import com.goorm.clonestagram.post.repository.PostsRepository;
 import com.goorm.clonestagram.post.repository.SoftDeleteRepository;
-import com.goorm.clonestagram.user.repository.UserRepository;
+import com.goorm.clonestagram.user.domain.service.UserInternalQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -28,7 +28,7 @@ public class SoftDeleteBatchConfig {
     private final PlatformTransactionManager transactionManager;
     private final SoftDeleteRepository softDeleteRepository;
     private final PostsRepository postsRepository;
-    private final UserRepository userRepository;
+    private final UserInternalQueryService userQueryService;
 
     @Bean
     public Job cleanUpJob() {
@@ -51,7 +51,7 @@ public class SoftDeleteBatchConfig {
                         if (softDelete.getEntityType() == EntityType.POST) {
                             postsRepository.deleteById(softDelete.getEntityId());
                         } else if (softDelete.getEntityType() == EntityType.USER) {
-                            userRepository.deleteById(softDelete.getEntityId());
+                            userQueryService.deleteUserId(softDelete.getEntityId());    // 유저 도메인 수정
                         }
                         softDeleteRepository.delete(softDelete);
                     }

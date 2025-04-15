@@ -2,21 +2,21 @@ package com.goorm.clonestagram.util;
 
 import com.goorm.clonestagram.feed.domain.Feeds;
 import com.goorm.clonestagram.post.domain.Posts;
-import com.goorm.clonestagram.user.domain.Users;
+import com.goorm.clonestagram.user.infrastructure.entity.UserEntity;
 
 import java.time.LocalDateTime;
 
 public class TestEntityFactory {
 
-    public static Users createUser(String username) {
-        return Users.builder()
-                .username(username)
-                .email(username + "@test.com")
+    public static UserEntity createUser(String name) {
+        return UserEntity.builder()
+                .name(name)
+                .email(name + "@test.com")
                 .password("1234")
                 .build();
     }
 
-    public static Posts createPost(Users user, String content) {
+    public static Posts createPost(UserEntity user, String content) {
         return Posts.builder()
                 .user(user)
                 .content(content)
@@ -24,7 +24,7 @@ public class TestEntityFactory {
                 .build();
     }
 
-    public static Feeds createFeed(Users user, Posts post) {
+    public static Feeds createFeed(UserEntity user, Posts post) {
         return Feeds.builder()
                 .user(user)
                 .post(post)

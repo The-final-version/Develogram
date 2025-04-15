@@ -10,8 +10,8 @@ public class FollowMapper {
         return FollowDto.builder()
                 .id(f.getId())
                 .followedId(f.getFollowed().getId())
-                .followedName(f.getFollowed().getUsername())
-                .followedProfileImg(f.getFollowed().getProfileimg())
+                .followedName(f.getFollowed().getName())
+                .followedProfileImg(f.getFollowed().getProfileEntity().getImgUrl())
                 .createdAt(f.getCreatedAt())
                 .build();
     }
@@ -21,8 +21,8 @@ public class FollowMapper {
         return FollowDto.builder()
                 .id(f.getId())
                 .followerId(f.getFollower().getId())
-                .followerName(f.getFollower().getUsername())
-                .followerProfileimg(f.getFollower().getProfileimg())
+                .followerName(f.getFollower().getName())
+                .followerProfileimg(f.getFollower().getProfileEntity().getImgUrl())
                 .createdAt(f.getCreatedAt())
                 .build();
     }
