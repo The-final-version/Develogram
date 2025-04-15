@@ -42,4 +42,5 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 	@Transactional
 	@Query("INSERT INTO LikeCount(postId, likeCount) VALUES (:postId, :likeCount)")
 	void saveLikeCount(@Param("postId") Long postId, @Param("likeCount") Long likeCount);
+
 }
