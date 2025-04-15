@@ -85,6 +85,7 @@ public class ImageService {
             .content(post.getContent())
             .type(post.getContentType())
             .createdAt(post.getCreatedAt())
+            .postId(post.getId())
             .hashTagList(imageUploadReqDto.getHashTagList().stream().toList())
             .mediaName(post.getMediaName()) // URL 그대로
             .build();
@@ -254,6 +255,7 @@ public class ImageService {
             .content(post.getContent())
             .type(post.getContentType())
             .createdAt(post.getCreatedAt())
+            .postId(post.getId())
             .hashTagList(imageUploadReqDto.getHashTagList().stream().toList())
             .mediaName(post.getMediaName())
             .build();

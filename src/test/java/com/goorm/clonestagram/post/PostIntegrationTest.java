@@ -143,6 +143,7 @@ class PostIntegrationTest {
                 .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.IMAGE.toString()))
                 .andExpect(jsonPath("$.hashTagList").isArray())
                 .andExpect(jsonPath("$.hashTagList", hasSize(2)))
+                .andExpect(jsonPath("$.postId").exists())
                 .andExpect(jsonPath("$.hashTagList[*]", containsInAnyOrder("테스트", "이미지")));
     }
 
@@ -279,9 +280,10 @@ class PostIntegrationTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value(content))
-                .andExpect(jsonPath("$.type").value("VIDEO"))
+                .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
                 .andExpect(jsonPath("$.hashTagList").isArray())
                 .andExpect(jsonPath("$.hashTagList", hasSize(2)))
+                .andExpect(jsonPath("$.postId").exists())
                 .andExpect(jsonPath("$.hashTagList[*]", containsInAnyOrder("테스트", "비디오")));
     }
 
@@ -425,6 +427,7 @@ class PostIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value(content))
                 .andExpect(jsonPath("$.mediaName").value(imageUrl))
+                .andExpect(jsonPath("$.postId").exists())
                 .andReturn().getResponse().getContentAsString();
 
         long initialCount = postsRepository.count();
@@ -438,6 +441,7 @@ class PostIntegrationTest {
 
         secondResultActions
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postId").exists())
                 .andExpect(content().json(firstResponseContent));
 
         long finalCount = postsRepository.count();
@@ -471,7 +475,8 @@ class PostIntegrationTest {
         String firstResponseContent = firstResultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").value(content))
-                .andExpect(jsonPath("$.type").value("VIDEO"))
+                .andExpect(jsonPath("$.type").value(com.goorm.clonestagram.post.ContentType.VIDEO.toString()))
+                .andExpect(jsonPath("$.postId").exists())
                 .andReturn().getResponse().getContentAsString();
 
         long initialCount = postsRepository.count();
@@ -487,6 +492,7 @@ class PostIntegrationTest {
         // then: 두 번째 응답 검증
         secondResultActions
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postId").exists())
                 .andExpect(content().json(firstResponseContent));
 
         // DB 카운트 확인

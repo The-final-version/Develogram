@@ -124,6 +124,7 @@ class ImageServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEqualTo(testPost.getContent());
         assertThat(result.getMediaName()).isEqualTo(testPost.getMediaName());
+        assertThat(result.getPostId()).isNotNull();
         assertThat(result.getHashTagList()).containsExactlyInAnyOrderElementsOf(imageUploadReqDto.getHashTagList());
         verify(idempotencyService).executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(ImageUploadResDto.class));
         verify(userService).findByIdAndDeletedIsFalse(eq(1L));
@@ -145,6 +146,7 @@ class ImageServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEqualTo(testPost.getContent());
         assertThat(result.getMediaName()).isEqualTo(testPost.getMediaName());
+        assertThat(result.getPostId()).isNotNull();
         assertThat(result.getHashTagList()).isEqualTo(new ArrayList<>(imageUploadReqDto.getHashTagList()));
 
         verify(userService).findByIdAndDeletedIsFalse(1L);

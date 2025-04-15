@@ -118,9 +118,12 @@ public class VideoServiceTest {
 
         VideoUploadResDto result = videoService.videoUploadWithIdempotency(uploadReqDto, testUserDetails.getId(), idempotencyKey);
 
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).isEqualTo(testPost.getContent());
-        assertThat(result.getHashTagList()).isEqualTo(new ArrayList<>(uploadReqDto.getHashTagList()));
+        assertNotNull(result);
+        assertEquals(uploadReqDto.getContent(), result.getContent());
+        assertEquals(ContentType.VIDEO, result.getType());
+        assertNotNull(result.getCreatedAt());
+        assertNotNull(result.getPostId());
+        assertEquals(uploadReqDto.getHashTagList().stream().toList(), result.getHashTagList());
         verify(idempotencyService).executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(VideoUploadResDto.class));
         verify(userRepository).findByIdAndDeletedIsFalse(eq(1L));
         verify(postsRepository).save(any(Posts.class));
@@ -132,7 +135,12 @@ public class VideoServiceTest {
     @DisplayName("비디오 업로드 멱등성 보장 - 동일 키로 재요청 시 동일 결과 반환")
     void 비디오업로드_멱등성_보장() {
         VideoUploadResDto firstResultDto = VideoUploadResDto.builder()
-                .content(testPost.getContent()).type(ContentType.VIDEO).createdAt(testPost.getCreatedAt()).hashTagList(new ArrayList<>(uploadReqDto.getHashTagList())).build();
+                .postId(testPost.getId())
+                .content(testPost.getContent())
+                .type(ContentType.VIDEO)
+                .createdAt(testPost.getCreatedAt())
+                .hashTagList(new ArrayList<>(uploadReqDto.getHashTagList()))
+                .build();
 
         when(idempotencyService.executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(VideoUploadResDto.class)))
             .thenAnswer(invocation -> {
@@ -142,27 +150,31 @@ public class VideoServiceTest {
                 doNothing().when(hashtagService).saveHashtags(any(Posts.class), anySet());
                 doNothing().when(feedService).createFeedForFollowers(any(Posts.class));
                 return operation.get();
-            });
+            }).thenReturn(firstResultDto);
 
         VideoUploadResDto firstResult = videoService.videoUploadWithIdempotency(uploadReqDto, testUserDetails.getId(), idempotencyKey);
-        assertThat(firstResult.getHashTagList()).containsExactlyInAnyOrderElementsOf(firstResultDto.getHashTagList());
+        assertNotNull(firstResult);
+        assertEquals(testPost.getId(), firstResult.getPostId());
+        assertEquals(ContentType.VIDEO, firstResult.getType());
+        assertNotNull(firstResult.getCreatedAt());
+        assertEquals(firstResultDto.getHashTagList().stream().toList(), firstResult.getHashTagList());
         verify(idempotencyService, times(1)).executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(VideoUploadResDto.class));
-        verify(userRepository, atLeastOnce()).findByIdAndDeletedIsFalse(eq(1L));
-        verify(postsRepository, atLeastOnce()).save(any(Posts.class));
-        verify(hashtagService, atLeastOnce()).saveHashtags(any(Posts.class), anySet());
-        verify(feedService, atLeastOnce()).createFeedForFollowers(any(Posts.class));
-
-        reset(idempotencyService, userRepository, postsRepository, hashtagService, feedService);
-        when(idempotencyService.executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(VideoUploadResDto.class)))
-                .thenReturn(firstResultDto);
+        verify(userRepository, times(1)).findByIdAndDeletedIsFalse(eq(1L));
+        verify(postsRepository, times(1)).save(any(Posts.class));
+        verify(hashtagService, times(1)).saveHashtags(any(Posts.class), anySet());
+        verify(feedService, times(1)).createFeedForFollowers(any(Posts.class));
 
         VideoUploadResDto secondResult = videoService.videoUploadWithIdempotency(uploadReqDto, testUserDetails.getId(), idempotencyKey);
-        assertThat(secondResult).isEqualTo(firstResultDto);
-        verify(idempotencyService).executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(VideoUploadResDto.class));
-        verify(userRepository, never()).findByIdAndDeletedIsFalse(anyLong());
-        verify(postsRepository, never()).save(any(Posts.class));
-        verify(hashtagService, never()).saveHashtags(any(Posts.class), anySet());
-        verify(feedService, never()).createFeedForFollowers(any(Posts.class));
+        assertNotNull(secondResult);
+        assertEquals(testPost.getId(), secondResult.getPostId());
+        assertEquals(ContentType.VIDEO, secondResult.getType());
+        assertNotNull(secondResult.getCreatedAt());
+        assertEquals(firstResultDto.getHashTagList().stream().toList(), secondResult.getHashTagList());
+        verify(idempotencyService, times(2)).executeWithIdempotency(eq(idempotencyKey), any(Supplier.class), eq(VideoUploadResDto.class));
+        verify(userRepository, times(1)).findByIdAndDeletedIsFalse(anyLong());
+        verify(postsRepository, times(1)).save(any(Posts.class));
+        verify(hashtagService, times(1)).saveHashtags(any(Posts.class), anySet());
+        verify(feedService, times(1)).createFeedForFollowers(any(Posts.class));
     }
 
     @Test
