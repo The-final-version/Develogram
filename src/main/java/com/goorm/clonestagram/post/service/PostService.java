@@ -47,7 +47,7 @@ public class PostService {
 	public Posts findByIdAndDeletedIsFalse(Long postId, String from) {
 		return postsRepository.findByIdAndDeletedIsFalse(postId)
 			.orElseThrow(
-				() -> new IllegalArgumentException("댓글이 속한 게시글이 존재하지 않습니다. postId: " + postId + ", from: " + from));
+				() -> new PostNotFoundException("댓글이 속한 게시글이 존재하지 않습니다. postId: " + postId + ", from: " + from));
 	}
 
 
