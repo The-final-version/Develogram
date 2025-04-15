@@ -1,6 +1,5 @@
-package com.goorm.clonestagram.comment.concurrency;
+package com.goorm.clonestagram.like.concurrency;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
@@ -19,8 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
-import com.goorm.clonestagram.comment.domain.Comments;
-import com.goorm.clonestagram.comment.dto.CommentRequest;
 import com.goorm.clonestagram.comment.repository.CommentRepository;
 import com.goorm.clonestagram.comment.service.CommentService;
 import com.goorm.clonestagram.like.repository.LikeRepository;
@@ -34,7 +31,7 @@ import com.goorm.clonestagram.user.infrastructure.repository.JpaUserExternalWrit
 @SpringBootTest
 @Rollback(false) // 실제 insert 결과를 검증해야 하므로 롤백 방지
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class CommentConcurrencyTest {
+public class LikeConcurrencyTest {
 
 	private static final int THREAD_COUNT = 100; // 테스트 횟수
 
@@ -78,17 +75,15 @@ public class CommentConcurrencyTest {
 	}
 
 	@Test
-	@DisplayName("동시에 여러 댓글 생성")
-	void concurrentComments() throws InterruptedException {
+	@DisplayName("한 사람이 동일한 좋아요를 여러번 토글")
+	void concurrentLikeToggle() throws InterruptedException {
 		ExecutorService executor = Executors.newFixedThreadPool(20);
 		CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
 
 		for (int i = 0; i < THREAD_COUNT; i++) {
-			final int index = i;
 			executor.submit(() -> {
 				try {
-					CommentRequest req = new CommentRequest(userIds.get(index), postId, "댓글 " + index);
-					commentService.createComment(req);
+					likeService.toggleLike(likeUserId, postId);
 				} finally {
 					latch.countDown();
 				}
@@ -96,8 +91,40 @@ public class CommentConcurrencyTest {
 		}
 
 		latch.await();
-		List<Comments> comments = commentRepository.findByPosts_Id(postId);
-		assertThat(comments).hasSize(THREAD_COUNT);
+
+		verify(likeService, times(THREAD_COUNT)).toggleLike(likeUserId, postId);
+
+		boolean liked = likeService.isPostLikedByLoginUser(postId, likeUserId);
+		Assertions.assertEquals(THREAD_COUNT % 2 != 0, liked);
+		verify(likeRepository, times((THREAD_COUNT + 1) / 2)).save(any());
+		verify(likeRepository, times(THREAD_COUNT / 2)).delete(any());
+
+		long likeCount = likeRepository.countByPost_Id(postId);
+		Assertions.assertEquals(THREAD_COUNT % 2 != 0 ? 1L : 0L, likeCount);
+	}
+
+	@Test
+	@DisplayName("동시에 여러 사용자가 좋아요")
+	void concurrentLikeFromMultipleUsers() throws InterruptedException {
+		ExecutorService executor = Executors.newFixedThreadPool(20);
+		CountDownLatch latch = new CountDownLatch(THREAD_COUNT);
+
+		for (int i = 0; i < THREAD_COUNT; i++) {
+			final int index = i;
+			executor.submit(() -> {
+				try {
+					likeService.toggleLike(userIds.get(index), postId);
+				} finally {
+					latch.countDown();
+				}
+			});
+		}
+
+		latch.await();
+
+		// long likeCount = likeRepository.countByPost_Id(postId); // 좋아요 테이블에서 직접 카운트 - 느림
+		long likeCount = likeService.getLikeCount(postId); // 좋아요-카운트 테이블에서 간접 카운트 - 빠름
+		Assertions.assertEquals(THREAD_COUNT, likeCount);
 	}
 
 }
