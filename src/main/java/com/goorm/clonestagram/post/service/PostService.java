@@ -14,6 +14,7 @@ import com.goorm.clonestagram.user.domain.service.UserExternalQueryService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ import com.goorm.clonestagram.exception.PostNotFoundException;
 @RequiredArgsConstructor
 public class PostService {
 
-    private final UserExternalQueryService userService; // 유저 도메인 수정
+	private final UserExternalQueryService userService; // 유저 도메인 수정
 
 	private final PostsRepository postsRepository;
 
@@ -46,14 +47,14 @@ public class PostService {
 
 	public Posts findByIdAndDeletedIsFalse(Long postId, String from) {
 		return postsRepository.findByIdAndDeletedIsFalse(postId)
+			//return postsRepository.findByIdWithPessimisticLock(postId)
 			.orElseThrow(
 				() -> new PostNotFoundException("댓글이 속한 게시글이 존재하지 않습니다. postId: " + postId + ", from: " + from));
 	}
 
-
-    public PostResDto getMyPosts(Long userId, Pageable pageable) {
-        //1. userId를 활용해 유저 객체 조회
-        User users = userService.findByIdAndDeletedIsFalse(userId);
+	public PostResDto getMyPosts(Long userId, Pageable pageable) {
+		//1. userId를 활용해 유저 객체 조회
+		User users = userService.findByIdAndDeletedIsFalse(userId);
 
 		//2. 해당 유저가 작성한 모든 피드 조회, 페이징 처리
 		Page<Posts> myFeed = postsRepository.findAllByUserIdAndDeletedIsFalse(users.getId(), pageable);
@@ -64,7 +65,6 @@ public class PostService {
 			.feed(myFeed.map(PostInfoDto::fromEntity))
 			.build();
 	}
-
 
 	public List<Posts> findAllByUserIdAndDeletedIsFalse(Long userId) {
 		return postsRepository.findAllByUserIdAndDeletedIsFalse(userId);
@@ -78,17 +78,18 @@ public class PostService {
 		return postsRepository.findByIdWithPessimisticLock(id)
 			.orElseThrow(() -> new PostNotFoundException(id));
 	}
-    public Posts saveAndFlush(Posts postEntity) {
-        return postsRepository.saveAndFlush(postEntity);
-    }
 
-    // 유저 도메인 수정
-    public void deleteAllUserPosts(Long userId) {
-        List<Posts> posts = findAllByUserIdAndDeletedIsFalse(userId);
-        for (Posts post : posts) {
-            post.setDeleted(true);
-            post.setDeletedAt(LocalDateTime.now());
-        }
-        postsRepository.saveAll(posts);
-    }
+	public Posts saveAndFlush(Posts postEntity) {
+		return postsRepository.saveAndFlush(postEntity);
+	}
+
+	// 유저 도메인 수정
+	public void deleteAllUserPosts(Long userId) {
+		List<Posts> posts = findAllByUserIdAndDeletedIsFalse(userId);
+		for (Posts post : posts) {
+			post.setDeleted(true);
+			post.setDeletedAt(LocalDateTime.now());
+		}
+		postsRepository.saveAll(posts);
+	}
 }
